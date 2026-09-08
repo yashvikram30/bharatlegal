@@ -3,10 +3,15 @@ import OpenAI from "openai";
 
 const openai = new OpenAI({
   apiKey: process.env.GROQ_API_KEY,
-  baseURL: "https://api.groq.com/openai/v1",  // Required for Groq or your OpenAI alternative
+  baseURL: "https://api.groq.com/openai/v1", // Required for Groq
 });
 
-export async function addMessage(chatId: string, content: string, role: "user" | "assistant", model: string) {
+export async function addMessage(
+  chatId: string,
+  content: string,
+  role: "user" | "assistant",
+  model: string
+) {
   const supabase = createServerClient();
   const {
     data: { session },
@@ -50,18 +55,19 @@ export async function addMessage(chatId: string, content: string, role: "user" |
       .eq("chat_id", chatId)
       .order("timestamp", { ascending: true });
 
-    const formattedMessages = previousMessages?.map((msg) => ({
-      role: msg.role,
-      content: msg.content,
-    })) ?? [];
+    const formattedMessages =
+      previousMessages?.map((msg: { role: string; content: string }) => ({
+        role: msg.role as "user" | "assistant" | "system",
+        content: msg.content,
+      })) ?? [];
 
-    // Get AI response (using OpenAI or another service)
+    // Get AI response (using Groq / OpenAI compatible endpoint)
     const chatResponse = await openai.chat.completions.create({
       model,
       messages: formattedMessages,
     });
 
-    const aiMessage = chatResponse.choices[0].message.content;
+    const aiMessage = chatResponse.choices[0]?.message?.content || "";
 
     // Store the assistant reply
     await supabase.from("messages").insert({
@@ -72,7 +78,8 @@ export async function addMessage(chatId: string, content: string, role: "user" |
   }
 
   // Update conversation timestamp
-  await supabase.from("chats")
+  await supabase
+    .from("chats")
     .update({ updated_at: new Date().toISOString() })
     .eq("id", chatId);
 

@@ -1,4 +1,4 @@
-import type { Config } from "tailwindcss"
+import type { Config } from "tailwindcss";
 
 const config = {
   darkMode: ["class"],
@@ -19,31 +19,11 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["var(--font-sans)", "Inter", "sans-serif"],
+        heading: ["var(--font-heading)", "Outfit", "sans-serif"],
+      },
       colors: {
-        navy: {
-          50: "#f0f2f5",
-          100: "#d0d7e1",
-          200: "#b1bccd",
-          300: "#91a1b9",
-          400: "#7286a5",
-          500: "#5c6d8c",
-          600: "#48556d",
-          700: "#343e4e",
-          800: "#20262f",
-          900: "#0c0e10",
-        },
-        teal: {
-          50: "#edfafa",
-          100: "#d5f5f6",
-          200: "#afecef",
-          300: "#7edce2",
-          400: "#16bdca",
-          500: "#0694a2",
-          600: "#047481",
-          700: "#036672",
-          800: "#05505c",
-          900: "#014451",
-        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -85,6 +65,13 @@ const config = {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        legal: {
+          navy: "#0B132B",
+          dark: "#060A17",
+          surface: "#0D1527",
+          gold: "#F59E0B",
+          amber: "#B45309",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -108,6 +95,6 @@ const config = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config
+} satisfies Config;
 
-export default config
+export default config;

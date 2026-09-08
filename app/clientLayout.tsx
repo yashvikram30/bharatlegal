@@ -1,51 +1,74 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
+import { Inter, Outfit } from "next/font/google";
+import { motion, AnimatePresence } from "framer-motion";
 
-import { Inter } from "next/font/google"
-import { motion, AnimatePresence } from "framer-motion"
+import { ThemeProvider } from "@/components/theme-provider";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
+import { Toaster } from "react-hot-toast";
+import AuthProvider from "../context/AuthProvider";
 
-import { ThemeProvider } from "@/components/theme-provider"
-import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
-import {Toaster} from "react-hot-toast"
-import AuthProvider from '../context/AuthProvider';
+import "./globals.css";
 
-import "./globals.css"
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
-const inter = Inter({ subsets: ["latin"] })
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-heading",
+  display: "swap",
+});
 
 export default function ClientLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} ${outfit.variable}`}
+    >
       <AuthProvider>
-      <body className={`${inter.className} min-h-screen bg-background`}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
-          <div className="flex min-h-screen flex-col">
-            <Navbar />
-            <main className="flex-1">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {children}
-                </motion.div>
-              </AnimatePresence>
-            </main>
-            <Footer />
-          </div>
-        
-          <Toaster/>
-        </ThemeProvider>
-      </body>
+        <body className="min-h-screen bg-background font-sans text-foreground antialiased selection:bg-amber-500/20 selection:text-amber-900 dark:selection:text-amber-200">
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem={false}
+            disableTransitionOnChange
+          >
+            <div className="flex min-h-screen flex-col">
+              <Navbar />
+              <main className="flex-1">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {children}
+                  </motion.div>
+                </AnimatePresence>
+              </main>
+              <Footer />
+            </div>
+
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                className: "border border-border bg-card text-card-foreground shadow-lg text-sm rounded-lg",
+              }}
+            />
+          </ThemeProvider>
+        </body>
       </AuthProvider>
     </html>
-  )
+  );
 }

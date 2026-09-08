@@ -1,9 +1,9 @@
-import { NextAuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import GoogleProvider from 'next-auth/providers/google';
-import bcrypt from 'bcryptjs';
-import dbConnect from '@/lib/dbConnect';
-import UserModel from '@/model/User';
+import { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+import bcrypt from "bcryptjs";
+import dbConnect from "@/lib/dbConnect";
+import UserModel from "@/model/User";
 
 interface CustomUser {
   _id?: string;
@@ -12,35 +12,37 @@ interface CustomUser {
   password?: string;
 }
 
-
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      id: 'credentials',
-      name: 'Credentials',
+      id: "credentials",
+      name: "Credentials",
       credentials: {
-        identifier: { label: 'Email', type: 'text' },
-        password: { label: 'Password', type: 'password' },
+        identifier: { label: "Email or Username", type: "text" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.identifier || !credentials?.password) {
-          return null;
+          throw new Error("Please provide both identifier and password");
         }
         await dbConnect();
         try {
           const user = await UserModel.findOne({
             $or: [
-              { email: credentials.identifier },
-              { username: credentials.identifier },
+              { email: credentials.identifier.toLowerCase().trim() },
+              { username: credentials.identifier.trim() },
             ],
           });
+
           if (!user) {
-            throw new Error('No user found with this email');
+            throw new Error("No user found with this email or username");
           }
+
           const isPasswordCorrect = await bcrypt.compare(
             credentials.password,
             user.password
           );
+
           if (isPasswordCorrect) {
             const userId = (user._id as { toString: () => string }).toString();
             return {
@@ -49,22 +51,27 @@ export const authOptions: NextAuthOptions = {
               email: user.email,
             };
           } else {
-            throw new Error('Incorrect password');
+            throw new Error("Incorrect password");
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+          const errorMessage =
+            error instanceof Error ? error.message : "Authentication error occurred";
           throw new Error(errorMessage);
         }
       },
     }),
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!
-    })
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? [
+          GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          }),
+        ]
+      : []),
   ],
   callbacks: {
     async jwt({ token, user, account }) {
-      if (account?.provider === 'google') {
+      if (account?.provider === "google") {
         await dbConnect();
 
         let dbUser = await UserModel.findOne({ email: user.email });
@@ -72,8 +79,10 @@ export const authOptions: NextAuthOptions = {
         if (!dbUser) {
           dbUser = await UserModel.create({
             email: user?.email,
-            username: user?.name || (user.email ? user.email.split('@')[0] : ''),
-            password: 'GOOGLE_OAUTH',
+            username:
+              user?.name?.replace(/\s+/g, "").toLowerCase() ||
+              (user.email ? user.email.split("@")[0] : `user_${Date.now()}`),
+            password: `GOOGLE_OAUTH_${Math.random().toString(36).slice(2)}`,
           });
         }
 
@@ -81,8 +90,8 @@ export const authOptions: NextAuthOptions = {
         token.username = dbUser.username;
       } else if (user) {
         const customUser = user as CustomUser;
-        token._id = customUser._id?.toString?.();
-        token.username = customUser.username;
+        token._id = customUser._id?.toString?.() || user.id;
+        token.username = customUser.username || user.name || "";
       }
 
       return token;
@@ -91,22 +100,23 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token) {
         session.user._id = token._id as string | undefined;
-        session.user.username = typeof token.username === 'string' ? token.username : undefined;
+        session.user.username =
+          typeof token.username === "string" ? token.username : undefined;
       }
       return session;
     },
     redirect({ url, baseUrl }) {
-      // Always redirect to dashboard after login
-       return `${baseUrl}/dashboard`
-    }
-
+      // Allows relative callback URLs or default to /dashboard
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      else if (new URL(url).origin === baseUrl) return url;
+      return `${baseUrl}/dashboard`;
+    },
   },
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
-    signIn: '/sign-in',
+    signIn: "/auth",
   },
-
 };

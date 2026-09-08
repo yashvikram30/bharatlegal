@@ -16,7 +16,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { getSupabaseBrowserClient } from "@/lib/supabase"; // Use the singleton client
+import { getSupabaseBrowserClient } from "@/lib/supabase";
 
 type ChatHistory = {
   id: string;
@@ -29,7 +29,7 @@ export function ChatSidebar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
 
-  const supabase = getSupabaseBrowserClient(); // Get the client from the singleton
+  const supabase = getSupabaseBrowserClient();
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -50,8 +50,7 @@ export function ChatSidebar() {
         if (chatError) throw new Error(chatError.message);
 
         const formattedChats = await Promise.all(
-          chats?.map(async (chat) => {
-            // Fetch the last message from the 'messages' table to show as preview
+          (chats || []).map(async (chat: { id: string; title: string; created_at: string }) => {
             const { data: lastMessage, error: messageError } = await supabase
               .from("messages")
               .select("content")
@@ -70,7 +69,7 @@ export function ChatSidebar() {
               preview: lastMessage?.content || "No messages yet",
               date: new Date(chat.created_at),
             };
-          }) ?? []
+          })
         );
 
         setChatHistory(formattedChats);
@@ -80,9 +79,8 @@ export function ChatSidebar() {
     };
 
     fetchChats();
-  }, [supabase]); // Add supabase as a dependency
+  }, [supabase]);
 
-  // Filter chat history based on search query
   const filteredHistory = chatHistory.filter(
     (chat) =>
       chat.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

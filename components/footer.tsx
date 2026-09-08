@@ -1,65 +1,70 @@
-import Link from "next/link"
-import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react"
+import Link from "next/link";
+import { Scale, Github, Twitter, Linkedin, Mail } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-white dark:bg-slate-900 border-t dark:border-slate-800">
+    <footer className="bg-card border-t border-border mt-auto">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Brand Col */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-navy-900 dark:text-white">
-              Legal<span className="text-teal-600 dark:text-teal-400">Ease</span>
-            </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              Simplifying legal access for all Indians through AI-powered tools and plain language explanations.
+            <Link href="/" className="flex items-center gap-2 font-heading font-extrabold text-xl text-foreground">
+              <span className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold border border-amber-500/40">
+                ⚖
+              </span>
+              <span>
+                Legal<span className="text-amber-600 dark:text-amber-400">Ease</span>
+              </span>
+            </Link>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Demystifying the Indian justice system through AI-powered plain language assistance, statutory grounding, and case management.
             </p>
-            <div className="flex space-x-4">
+            <div className="flex items-center space-x-3 pt-1">
               <Link
-                href="#"
-                className="text-slate-500 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
+                href="https://github.com/yashvikram30/legalease"
+                target="_blank"
+                rel="noreferrer"
+                className="w-8 h-8 rounded-md bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                aria-label="GitHub Repository"
               >
-                <Facebook className="h-5 w-5" />
-                <span className="sr-only">Facebook</span>
+                <Github className="h-4 w-4" />
               </Link>
               <Link
-                href="#"
-                className="text-slate-500 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
+                href="/contact"
+                className="w-8 h-8 rounded-md bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                aria-label="Email Contact"
               >
-                <Twitter className="h-5 w-5" />
-                <span className="sr-only">Twitter</span>
-              </Link>
-              <Link
-                href="#"
-                className="text-slate-500 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
-              >
-                <Instagram className="h-5 w-5" />
-                <span className="sr-only">Instagram</span>
-              </Link>
-              <Link
-                href="#"
-                className="text-slate-500 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
-              >
-                <Linkedin className="h-5 w-5" />
-                <span className="sr-only">LinkedIn</span>
+                <Mail className="h-4 w-4" />
               </Link>
             </div>
           </div>
 
+          {/* Features Col */}
           <div>
-            <h3 className="text-sm font-semibold text-navy-900 dark:text-white mb-4">Features</h3>
-            <ul className="space-y-2">
+            <h3 className="text-sm font-semibold text-foreground font-heading mb-4">
+              Core Platform
+            </h3>
+            <ul className="space-y-2.5">
               <li>
                 <Link
                   href="/chat"
-                  className="text-sm text-slate-600 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
+                  className="text-sm text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                 >
-                  AI Legal Chatbot
+                  AI Legal Assistant
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/simplify"
+                  className="text-sm text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                >
+                  Document Simplifier
                 </Link>
               </li>
               <li>
                 <Link
                   href="/dashboard"
-                  className="text-sm text-slate-600 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
+                  className="text-sm text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                 >
                   Case Tracker
                 </Link>
@@ -67,117 +72,123 @@ export function Footer() {
               <li>
                 <Link
                   href="/rights"
-                  className="text-sm text-slate-600 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
+                  className="text-sm text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                 >
                   Rights Visualizer
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/simplify"
-                  className="text-sm text-slate-600 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
-                >
-                  Document Simplifier
-                </Link>
-              </li>
-              <li>
-                <Link
                   href="/help"
-                  className="text-sm text-slate-600 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
+                  className="text-sm text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                 >
-                  Find Legal Help
+                  Find Legal Aid (DLSA)
                 </Link>
               </li>
             </ul>
           </div>
 
+          {/* Legal Resources Col */}
           <div>
-            <h3 className="text-sm font-semibold text-navy-900 dark:text-white mb-4">Resources</h3>
-            <ul className="space-y-2">
+            <h3 className="text-sm font-semibold text-foreground font-heading mb-4">
+              Indian Legal Resources
+            </h3>
+            <ul className="space-y-2.5">
               <li>
                 <Link
-                  href="#"
-                  className="text-sm text-slate-600 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
+                  href="https://nalsa.gov.in"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                 >
-                  Legal Guides
+                  NALSA Free Legal Aid ↗
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#"
-                  className="text-sm text-slate-600 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
+                  href="https://consumerhelpline.gov.in"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                 >
-                  Document Templates
+                  National Consumer Helpline ↗
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#"
-                  className="text-sm text-slate-600 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
+                  href="https://ecourts.gov.in"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                 >
-                  FAQs
+                  eCourts India Portal ↗
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#"
-                  className="text-sm text-slate-600 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
+                  href="https://rtionline.gov.in"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                 >
-                  Blog
+                  RTI Online Portal ↗
                 </Link>
               </li>
             </ul>
           </div>
 
+          {/* Company & Legal Col */}
           <div>
-            <h3 className="text-sm font-semibold text-navy-900 dark:text-white mb-4">Company</h3>
-            <ul className="space-y-2">
+            <h3 className="text-sm font-semibold text-foreground font-heading mb-4">
+              LegalEase
+            </h3>
+            <ul className="space-y-2.5">
               <li>
                 <Link
-                  href="#"
-                  className="text-sm text-slate-600 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
+                  href="/about"
+                  className="text-sm text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                 >
-                  About Us
+                  About Our Mission
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#"
-                  className="text-sm text-slate-600 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
+                  href="/contact"
+                  className="text-sm text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                 >
-                  Contact
+                  Contact & Feedback
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#"
-                  className="text-sm text-slate-600 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
+                  href="/privacy"
+                  className="text-sm text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                 >
                   Privacy Policy
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#"
-                  className="text-sm text-slate-600 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400"
+                  href="/terms"
+                  className="text-sm text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                 >
-                  Terms of Service
+                  Terms & Disclaimer
                 </Link>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t dark:border-slate-800 text-center">
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            © {new Date().getFullYear()} LegalEase. All rights reserved.
+        {/* Bottom Bar */}
+        <div className="mt-12 pt-8 border-t border-border text-center space-y-2">
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} LegalEase. Built for Indian Legal Empowerment.
           </p>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
-            Disclaimer: The information provided on this platform is for general informational purposes only and does
-            not constitute legal advice.
+          <p className="text-xs text-muted-foreground/80 max-w-3xl mx-auto leading-relaxed">
+            Good-Faith Disclaimer: LegalEase is an educational and informational platform powered by AI. It does not provide formal legal advice, attorney representation, or create an advocate-client relationship under the Advocates Act, 1961.
           </p>
         </div>
       </div>
     </footer>
-  )
+  );
 }

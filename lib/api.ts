@@ -6,11 +6,10 @@ type ChatHistoryItem = {
   id: string;
   title: string;
   preview: string;
-  created_at: string;  // Assuming created_at is a string or a valid date format
+  created_at: string;
 };
 
 async function getChatHistory(userId: string): Promise<ChatHistoryItem[]> {
-  // Fetch basic chat info from 'chats' table
   const { data, error } = await supabase
     .from("chats")
     .select("id, title, created_at")
@@ -21,24 +20,21 @@ async function getChatHistory(userId: string): Promise<ChatHistoryItem[]> {
     return [];
   }
 
-  // Fetch the latest message (preview) for each chat
   const chatsWithPreview = await Promise.all(
-    data.map(async (chat) => {
+    (data || []).map(async (chat: { id: string; title: string; created_at: string }) => {
       const { data: messages, error: messageError } = await supabase
         .from("messages")
         .select("content")
         .eq("chat_id", chat.id)
         .order("timestamp", { ascending: false })
-        .limit(1); // Only get the most recent message
+        .limit(1);
 
       if (messageError) {
         console.error("Error fetching messages:", messageError);
-        return { ...chat, preview: "" };  // Return the chat with empty preview if error occurs
+        return { ...chat, preview: "" };
       }
 
       const preview = messages && messages.length > 0 ? messages[0].content : "";
-      
-      // Return the chat with preview
       return { ...chat, preview };
     })
   );
