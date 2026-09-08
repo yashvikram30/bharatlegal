@@ -218,24 +218,30 @@ export function LegalResourcesSidebar() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-9 px-3 bg-forest-100 dark:bg-forest-800/80 border-forest-500/30 text-forest-800 dark:text-forest-100 hover:bg-forest-800 hover:text-white dark:hover:bg-gold-500 dark:hover:text-forest-950 text-xs font-semibold flex items-center gap-1.5 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-gold-700 shadow-rest-card"
+        <button
+          type="button"
+          className="flex items-center gap-2 font-heading font-extrabold text-xl text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-700 rounded-md p-1 -m-1 hover:opacity-90 transition-opacity cursor-pointer group text-left"
+          aria-label="Open LegalEase Resources Menu"
         >
-          <span className="w-4 h-4 rounded bg-forest-800 dark:bg-gold-500 text-white dark:text-forest-950 flex items-center justify-center text-[10px] font-bold">
+          <span className="w-8 h-8 rounded-lg bg-forest-800 dark:bg-forest-950 text-white flex items-center justify-center text-sm font-bold border border-gold-500/50 shadow-sm group-hover:scale-105 transition-transform">
             ⚖
           </span>
-          <span className="font-heading">LegalEase</span>
-          <span className="text-[10px] font-mono opacity-60">Menu</span>
-        </Button>
+          <span className="flex items-center gap-1.5">
+            <span>
+              Legal<span className="text-gold-700 dark:text-gold-500">Ease</span>
+            </span>
+            <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 font-semibold border border-forest-500/20">
+              Menu
+            </span>
+          </span>
+        </button>
       </SheetTrigger>
 
       <SheetContent
-        side="right"
-        className="w-full sm:max-w-md md:max-w-lg p-0 flex flex-col bg-background border-l border-border shadow-hover-card"
+        side="left"
+        className="w-full sm:max-w-md md:max-w-lg p-0 flex flex-col bg-background border-r border-border shadow-hover-card"
       >
-        <SheetHeader className="p-5 pb-3 border-b border-border bg-card/60">
+        <SheetHeader className="p-5 pb-3 border-b border-border bg-card/60 flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="w-7 h-7 rounded-lg bg-forest-800 text-white flex items-center justify-center text-xs font-bold border border-gold-500/50">
               ⚖
@@ -244,6 +250,13 @@ export function LegalResourcesSidebar() {
               Legal<span className="text-gold-700 dark:text-gold-500">Ease</span> Hub
             </SheetTitle>
           </div>
+          <Link
+            href="/"
+            onClick={() => setOpen(false)}
+            className="text-xs text-muted-foreground hover:text-foreground font-medium px-2.5 py-1 rounded-md border border-border bg-background hover:bg-forest-100 dark:hover:bg-forest-800 transition-colors mr-6"
+          >
+            Landing Page
+          </Link>
         </SheetHeader>
 
         {/* Multi-Tab Navigation in Drawer */}

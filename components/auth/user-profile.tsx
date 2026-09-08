@@ -35,7 +35,11 @@ export function UserProfile() {
 
   if (!session || !session.user) {
     return (
-      <Button asChild size="sm" className="bg-teal-600 hover:bg-teal-700 dark:bg-teal-700 dark:hover:bg-teal-800">
+      <Button
+        asChild
+        size="sm"
+        className="bg-forest-800 text-white hover:bg-forest-900 dark:bg-forest-800 dark:text-forest-50 dark:hover:bg-forest-700 font-semibold text-xs sm:text-sm shadow-none"
+      >
         <a href="/auth">Sign In</a>
       </Button>
     )
@@ -48,9 +52,9 @@ export function UserProfile() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="flex items-center gap-2">
-          <Avatar className="h-6 w-6 bg-teal-600">
+          <Avatar className="h-7 w-7 bg-forest-800">
             <AvatarImage src={image!} alt={email || ''} />
-            <AvatarFallback className='bg-teal-600 text-white'>{initials}</AvatarFallback>
+            <AvatarFallback className='bg-forest-800 text-forest-50 text-xs font-semibold'>{initials}</AvatarFallback>
           </Avatar>
           <span className="text-sm hidden md:inline-block">{email}</span>
         </Button>

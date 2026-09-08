@@ -1,73 +1,51 @@
 import Link from "next/link";
-import { Github, Mail } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 
 export function Footer() {
   return (
     <footer className="bg-forest-950 text-forest-50 border-t border-forest-900 mt-auto">
-      <div className="container mx-auto px-4 sm:px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand Col */}
-          <div className="space-y-4">
+      <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-12">
+        {/* Exactly 4 Columns */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* 1. Brand Column */}
+          <div className="space-y-3">
             <Link
               href="/"
-              className="flex items-center gap-2 font-heading font-extrabold text-xl text-forest-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 rounded"
+              className="inline-flex items-center gap-2.5 font-heading font-extrabold text-xl text-forest-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 rounded"
             >
-              <span className="w-8 h-8 rounded-lg bg-forest-800 text-white flex items-center justify-center text-sm font-bold border border-gold-500/60">
+              <span className="w-8 h-8 rounded-lg bg-forest-800 text-white flex items-center justify-center text-sm font-bold border border-gold-500/60 shadow-sm">
                 ⚖
               </span>
-              <span>
+              <span className="tracking-tight">
                 Legal<span className="text-gold-500">Ease</span>
               </span>
             </Link>
-            <p className="text-sm text-forest-100/70 leading-relaxed">
-              Demystifying the Indian justice system through AI-powered plain language assistance, statutory grounding, and case tracking.
+            <p className="text-xs sm:text-sm text-forest-100/75 leading-relaxed">
+              Demystifying Indian law with plain-language AI, verified statutory citations, and court timeline tracking.
             </p>
-            <div className="flex items-center space-x-3 pt-1">
-              <Link
-                href="https://github.com/yashvikram30/legalease"
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-md bg-forest-800/80 hover:bg-forest-800 flex items-center justify-center text-forest-100 hover:text-gold-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
-                aria-label="GitHub Repository"
-              >
-                <Github className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/contact"
-                className="w-8 h-8 rounded-md bg-forest-800/80 hover:bg-forest-800 flex items-center justify-center text-forest-100 hover:text-gold-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
-                aria-label="Email Contact"
-              >
-                <Mail className="h-4 w-4" />
-              </Link>
-            </div>
+            <p className="text-[11px] text-forest-100/60 leading-normal pt-1 border-t border-forest-900/80">
+              Educational legal resource only; not formal legal counsel under the Advocates Act, 1961.
+            </p>
           </div>
 
-          {/* Features Col */}
+          {/* 2. Product Column (5 core features) */}
           <div>
-            <h3 className="text-sm font-semibold text-forest-50 font-heading mb-4 tracking-wider uppercase">
-              Core Platform
+            <h3 className="text-xs font-bold text-forest-50 font-heading mb-3 tracking-wider uppercase">
+              Product
             </h3>
-            <ul className="space-y-2.5">
+            <ul className="space-y-2 text-xs sm:text-sm">
               <li>
                 <Link
                   href="/chat"
-                  className="text-sm text-forest-100/75 hover:text-gold-500 transition-colors"
+                  className="text-forest-100/75 hover:text-gold-500 transition-colors"
                 >
-                  AI Legal Assistant
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/simplify"
-                  className="text-sm text-forest-100/75 hover:text-gold-500 transition-colors"
-                >
-                  Document Simplifier
+                  AI Legal Chatbot
                 </Link>
               </li>
               <li>
                 <Link
                   href="/dashboard"
-                  className="text-sm text-forest-100/75 hover:text-gold-500 transition-colors"
+                  className="text-forest-100/75 hover:text-gold-500 transition-colors"
                 >
                   Case Tracker
                 </Link>
@@ -75,120 +53,138 @@ export function Footer() {
               <li>
                 <Link
                   href="/rights"
-                  className="text-sm text-forest-100/75 hover:text-gold-500 transition-colors"
+                  className="text-forest-100/75 hover:text-gold-500 transition-colors"
                 >
                   Rights Visualizer
                 </Link>
               </li>
               <li>
                 <Link
+                  href="/simplify"
+                  className="text-forest-100/75 hover:text-gold-500 transition-colors"
+                >
+                  Document Simplifier
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/help"
-                  className="text-sm text-forest-100/75 hover:text-gold-500 transition-colors"
+                  className="text-forest-100/75 hover:text-gold-500 transition-colors"
                 >
-                  Find Legal Aid (DLSA)
+                  Find Legal Help
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Legal Resources Col */}
+          {/* 3. Company Column */}
           <div>
-            <h3 className="text-sm font-semibold text-forest-50 font-heading mb-4 tracking-wider uppercase">
-              Indian Legal Portals
+            <h3 className="text-xs font-bold text-forest-50 font-heading mb-3 tracking-wider uppercase">
+              Company
             </h3>
-            <ul className="space-y-2.5">
-              <li>
-                <Link
-                  href="https://nalsa.gov.in"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-sm text-forest-100/75 hover:text-gold-500 transition-colors"
-                >
-                  NALSA Free Legal Aid ↗
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="https://consumerhelpline.gov.in"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-sm text-forest-100/75 hover:text-gold-500 transition-colors"
-                >
-                  National Consumer Helpline ↗
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="https://ecourts.gov.in"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-sm text-forest-100/75 hover:text-gold-500 transition-colors"
-                >
-                  eCourts India Portal ↗
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="https://rtionline.gov.in"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-sm text-forest-100/75 hover:text-gold-500 transition-colors"
-                >
-                  RTI Online Portal ↗
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Company & Legal Col */}
-          <div>
-            <h3 className="text-sm font-semibold text-forest-50 font-heading mb-4 tracking-wider uppercase">
-              LegalEase
-            </h3>
-            <ul className="space-y-2.5">
+            <ul className="space-y-2 text-xs sm:text-sm">
               <li>
                 <Link
                   href="/about"
-                  className="text-sm text-forest-100/75 hover:text-gold-500 transition-colors"
+                  className="text-forest-100/75 hover:text-gold-500 transition-colors"
                 >
-                  About Our Mission
+                  About
                 </Link>
               </li>
               <li>
                 <Link
                   href="/contact"
-                  className="text-sm text-forest-100/75 hover:text-gold-500 transition-colors"
+                  className="text-forest-100/75 hover:text-gold-500 transition-colors"
                 >
-                  Contact & Feedback
+                  Contact
                 </Link>
               </li>
               <li>
                 <Link
                   href="/privacy"
-                  className="text-sm text-forest-100/75 hover:text-gold-500 transition-colors"
+                  className="text-forest-100/75 hover:text-gold-500 transition-colors"
                 >
-                  Privacy Policy
+                  Privacy
                 </Link>
               </li>
               <li>
                 <Link
                   href="/terms"
-                  className="text-sm text-forest-100/75 hover:text-gold-500 transition-colors"
+                  className="text-forest-100/75 hover:text-gold-500 transition-colors"
                 >
-                  Terms & Disclaimer
+                  Terms
                 </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* 4. Resources Column (Government portals + GitHub) */}
+          <div>
+            <h3 className="text-xs font-bold text-forest-50 font-heading mb-3 tracking-wider uppercase">
+              Resources
+            </h3>
+            <ul className="space-y-2 text-xs sm:text-sm">
+              <li>
+                <a
+                  href="https://nalsa.gov.in"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-forest-100/75 hover:text-gold-500 transition-colors inline-flex items-center gap-1"
+                >
+                  NALSA <ExternalLink className="w-3 h-3 opacity-70" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://ecourts.gov.in"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-forest-100/75 hover:text-gold-500 transition-colors inline-flex items-center gap-1"
+                >
+                  eCourts <ExternalLink className="w-3 h-3 opacity-70" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://rtionline.gov.in"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-forest-100/75 hover:text-gold-500 transition-colors inline-flex items-center gap-1"
+                >
+                  RTI Online <ExternalLink className="w-3 h-3 opacity-70" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://consumerhelpline.gov.in"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-forest-100/75 hover:text-gold-500 transition-colors inline-flex items-center gap-1"
+                >
+                  Consumer Helpline <ExternalLink className="w-3 h-3 opacity-70" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/yashvikram30/legalease"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-forest-100/75 hover:text-gold-500 transition-colors inline-flex items-center gap-1"
+                >
+                  GitHub Repository <ExternalLink className="w-3 h-3 opacity-70" />
+                </a>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-forest-900 text-center space-y-2">
-          <p className="text-xs sm:text-sm text-forest-100/70">
+        {/* 5. Bottom Bar */}
+        <div className="mt-8 pt-6 border-t border-forest-900 space-y-2 text-center sm:text-left">
+          <p className="text-xs text-forest-100/70">
             © {new Date().getFullYear()} LegalEase. Built for Indian Legal Literacy & Empowerment.
           </p>
-          <p className="text-xs text-forest-100/50 max-w-3xl mx-auto leading-relaxed">
-            Good-Faith Disclaimer: LegalEase is an educational and informational platform powered by AI. It does not provide formal legal advice or create an advocate-client relationship under the Advocates Act, 1961.
+          <p className="text-[11px] text-forest-100/50 leading-relaxed max-w-4xl">
+            LegalEase is an independent educational initiative and does not provide formal legal counsel or create an advocate-client relationship under the Advocates Act, 1961. Consult an enrolled advocate or your District Legal Services Authority (DLSA) for actionable legal representation.
           </p>
         </div>
       </div>
