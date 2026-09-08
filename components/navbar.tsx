@@ -81,7 +81,7 @@ export function Navbar() {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden text-forest-950 dark:text-forest-50 hover:bg-forest-100 dark:hover:bg-forest-800 h-9 w-9"
+              className="lg:hidden text-forest-950 dark:text-forest-50 hover:bg-forest-100 hover:text-forest-950 dark:hover:bg-forest-800 dark:hover:text-forest-50 h-9 w-9 transition-colors"
               onClick={() => setIsOpen(!isOpen)}
               aria-label="Toggle navigation drawer"
               aria-expanded={isOpen}

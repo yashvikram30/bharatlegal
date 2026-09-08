@@ -105,7 +105,7 @@ export default function LandingPage() {
             <Button
               asChild
               size="lg"
-              className="bg-forest-800 text-white hover:bg-forest-900 dark:bg-forest-800 dark:text-forest-50 dark:hover:bg-forest-700 font-semibold px-6 focus-visible:ring-2 focus-visible:ring-forest-800"
+              className="bg-forest-800 text-white hover:bg-forest-900 hover:text-white dark:bg-forest-800 dark:text-forest-50 dark:hover:bg-forest-700 dark:hover:text-forest-50 font-semibold px-6 focus-visible:ring-2 focus-visible:ring-forest-800 shadow-sm"
             >
               <Link href="/chat" className="flex items-center gap-2">
                 Ask Legal Assistant <ArrowRight className="w-4 h-4" />
@@ -115,7 +115,7 @@ export default function LandingPage() {
               asChild
               variant="outline"
               size="lg"
-              className="border-forest-800 text-forest-800 hover:bg-forest-100 dark:border-forest-700 dark:text-forest-100 dark:hover:bg-forest-800 focus-visible:ring-2 focus-visible:ring-forest-800 font-medium"
+              className="border border-forest-800 text-forest-800 bg-transparent hover:bg-forest-100 hover:text-forest-950 dark:border-forest-700 dark:text-forest-100 dark:hover:bg-forest-800 dark:hover:text-forest-50 focus-visible:ring-2 focus-visible:ring-forest-800 font-semibold px-6"
             >
               <Link href="/simplify">Simplify a Contract</Link>
             </Button>
@@ -193,7 +193,7 @@ export default function LandingPage() {
                     <Button
                       asChild
                       variant="ghost"
-                      className="w-full justify-between px-2 text-sm font-semibold text-forest-800 dark:text-forest-100 hover:bg-forest-100/60 dark:hover:bg-forest-700/50"
+                      className="w-full justify-between px-3 py-2 text-sm font-semibold text-forest-800 hover:bg-forest-100 hover:text-forest-950 dark:text-forest-100 dark:hover:bg-forest-900 dark:hover:text-forest-50 rounded-lg transition-colors"
                     >
                       <Link href={feature.link}>
                         <span>{feature.cta}</span>
@@ -230,7 +230,7 @@ export default function LandingPage() {
                 <Button
                   asChild
                   variant="outline"
-                  className="border-forest-500 text-white hover:bg-forest-950 focus-visible:ring-2 focus-visible:ring-forest-500"
+                  className="border border-forest-500/80 bg-transparent text-white hover:bg-forest-950 hover:text-white hover:border-forest-400 focus-visible:ring-2 focus-visible:ring-forest-500 font-medium"
                 >
                   <Link href="/about" className="flex items-center gap-2">
                     Read Our Full Story <ArrowRight className="w-4 h-4" />
@@ -304,7 +304,7 @@ export default function LandingPage() {
               <Button
                 asChild
                 size="lg"
-                className="bg-gold-500 text-forest-950 font-bold hover:bg-gold-500/90 shadow-sm focus-visible:ring-2 focus-visible:ring-gold-700"
+                className="bg-gold-500 text-forest-950 font-bold hover:bg-gold-500/90 hover:text-forest-950 shadow-sm focus-visible:ring-2 focus-visible:ring-gold-700 px-6"
               >
                 <Link href="/chat">Start Free Consultation</Link>
               </Button>
@@ -312,7 +312,7 @@ export default function LandingPage() {
                 asChild
                 variant="outline"
                 size="lg"
-                className="border-forest-800 text-forest-800 hover:bg-forest-100 dark:border-forest-700 dark:text-forest-100 dark:hover:bg-forest-800 font-medium"
+                className="border border-forest-800 text-forest-800 bg-transparent hover:bg-forest-100 hover:text-forest-950 dark:border-forest-700 dark:text-forest-100 dark:hover:bg-forest-800 dark:hover:text-forest-50 font-semibold px-6"
               >
                 <Link href="/help">Find Free Legal Aid</Link>
               </Button>

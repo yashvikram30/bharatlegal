@@ -28,7 +28,13 @@ export function ModeToggle() {
   }
 
   return (
-    <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggleTheme}
+      aria-label="Toggle theme"
+      className="text-forest-950 dark:text-forest-50 hover:bg-forest-100 hover:text-forest-950 dark:hover:bg-forest-800 dark:hover:text-forest-50 h-9 w-9 rounded-md transition-colors"
+    >
       {theme === "dark" ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
       <span className="sr-only">Toggle theme</span>
     </Button>

@@ -38,7 +38,7 @@ export function UserProfile() {
       <Button
         asChild
         size="sm"
-        className="bg-forest-800 text-white hover:bg-forest-900 dark:bg-forest-800 dark:text-forest-50 dark:hover:bg-forest-700 font-semibold text-xs sm:text-sm shadow-none"
+        className="bg-forest-800 text-white hover:bg-forest-900 hover:text-white dark:bg-forest-800 dark:text-forest-50 dark:hover:bg-forest-700 dark:hover:text-forest-50 font-semibold text-xs sm:text-sm shadow-none"
       >
         <a href="/auth">Sign In</a>
       </Button>
@@ -51,7 +51,11 @@ export function UserProfile() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex items-center gap-2 text-forest-950 dark:text-forest-50 hover:bg-forest-100 hover:text-forest-950 dark:hover:bg-forest-800 dark:hover:text-forest-50 transition-colors"
+        >
           <Avatar className="h-7 w-7 bg-forest-800">
             <AvatarImage src={image!} alt={email || ''} />
             <AvatarFallback className='bg-forest-800 text-forest-50 text-xs font-semibold'>{initials}</AvatarFallback>
