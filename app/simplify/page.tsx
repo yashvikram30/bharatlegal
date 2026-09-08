@@ -1,8 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { FileText, Upload, X, Copy, Download, Check } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  FileText,
+  Upload,
+  X,
+  Copy,
+  Download,
+  Check,
+  AlertTriangle,
+  ShieldCheck,
+  CheckCircle2,
+  FileCheck2,
+  Sparkles,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,50 +25,34 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "@/components/ui/use-toast";
 import { Progress } from "@/components/ui/progress";
-
+import { toast } from "react-hot-toast";
 import { simplifyTextLocally } from "@/lib/simplify";
-import {
-  DocumentSimplifierSkeleton,
-  DocumentUploadSkeleton,
-} from "@/components/ui/doc-skeleton";
 
-// Updated to use API route instead of client-side PDF.js
-const extractTextFromPDF = async (file: File): Promise<string> => {
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
+const sampleRentAgreement = `RESIDENTIAL LEASE AGREEMENT
+This Agreement is entered into on 1st day of January 2024 between Mr. Rajesh Sharma (Lessor/Landlord) and Ms. Ananya Sen (Lessee/Tenant).
+1. PREMISES & TERM: The Landlord leases Flat No. 402, Greenview Apartments, Bengaluru for a term of 11 months commencing 01/01/2024.
+2. RENT & DEPOSIT: Monthly rent shall be ₹28,000 payable on or before the 5th of every month. The Tenant has deposited an interest-free security deposit of ₹1,50,000.
+3. LOCK-IN PERIOD & TERMINATION: Either party may terminate with 1 month notice. If Tenant vacates within the first 6 months lock-in period, the entire security deposit shall be forfeited unconditionally.
+4. LANDLORD ACCESS: Landlord reserves the unrestricted right to enter and inspect the premises at any time without prior notice.
+5. MAINTENANCE & REPAIRS: All structural, plumbing, and electrical repairs exceeding ₹500 shall be borne solely by the Tenant.
+6. DISPUTE RESOLUTION: All disputes shall be subject to exclusive jurisdiction of Bengaluru courts.`;
 
-    const response = await fetch("/api/extract-pdf", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to extract text from PDF");
-    }
-
-    const data = await response.json();
-    return data.text;
-  } catch (error) {
-    console.error("Error extracting text from PDF:", error);
-    throw error;
-  }
-};
+const sampleEmploymentAgreement = `EMPLOYMENT CONTRACT & NON-DISCLOSURE
+1. APPOINTMENT: The Company appoints the Employee as Senior Analyst with effect from 15th February 2024.
+2. PROBATION & NOTICE: The Employee shall be on 6 months probation. During probation, notice period is 15 days; thereafter, 3 months written notice or salary in lieu thereof.
+3. NON-COMPETE RESTRICTION: The Employee expressly covenants that for a period of 2 years post-termination, they shall not directly or indirectly work for, consult, or establish any business competing with the Company anywhere in India.
+4. INTELLECTUAL PROPERTY: All works, inventions, designs, and developments authored during employment vest exclusively in the Company.
+5. LIQUIDATED DAMAGES: Breach of confidentiality or early departure without serving full notice incurs liquidated damages equal to 6 months gross CTC.`;
 
 export default function SimplifyPage() {
   const [file, setFile] = useState<File | null>(null);
   const [originalContent, setOriginalContent] = useState<string>("");
-  const [simplifiedContent, setSimplifiedContent] = useState<string | null>(
-    null
-  );
+  const [simplifiedContent, setSimplifiedContent] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [activeTab, setActiveTab] = useState<string>("simplified");
-  const [loading, setLoading] = useState(true);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -87,125 +83,83 @@ export default function SimplifyPage() {
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
 
-    if (!validTypes.includes(selectedFile.type)) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload a PDF, Word, or text file.",
-        variant: "destructive",
-      });
+    if (!validTypes.includes(selectedFile.type) && !selectedFile.name.endsWith(".txt")) {
+      toast.error("Please upload a PDF, Word, or plain text file.");
       return;
     }
 
     if (selectedFile.size > 10 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Please upload a file smaller than 10MB.",
-        variant: "destructive",
-      });
+      toast.error("File exceeds 10MB size limit.");
       return;
     }
 
     setFile(selectedFile);
     setSimplifiedContent(null);
     setIsProcessing(true);
-    setProgress(10);
+    setProgress(25);
 
     try {
-      if (selectedFile.type === "text/plain") {
+      if (selectedFile.type === "text/plain" || selectedFile.name.endsWith(".txt")) {
         const text = await selectedFile.text();
         setOriginalContent(text);
-      } else if (selectedFile.type === "application/pdf") {
-        const text = await extractTextFromPDF(selectedFile);
-        setOriginalContent(text);
-      } else if (
-        selectedFile.type ===
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-        selectedFile.type === "application/msword"
-      ) {
+      } else {
         const formData = new FormData();
         formData.append("file", selectedFile);
 
-        const response = await fetch("/api/extract-word", {
+        const response = await fetch("/api/extract-pdf", {
           method: "POST",
           body: formData,
         });
 
-        if (!response.ok) {
-          throw new Error("Failed to extract text from Word document");
+        if (response.ok) {
+          const data = await response.json();
+          setOriginalContent(data.text || "");
+        } else {
+          // Fallback text reading
+          const text = await selectedFile.text();
+          setOriginalContent(text);
         }
-
-        const data = await response.json();
-        setOriginalContent(data.text);
-      } else {
-        toast({
-          title: "Unsupported format",
-          description: "This file format is not supported yet.",
-          variant: "destructive",
-        });
-        setOriginalContent("");
       }
-
-      setProgress(50);
+      setProgress(100);
+      toast.success("Document loaded. Click 'Simplify Document' to analyze.");
     } catch (error) {
-      toast({
-        title: "Error reading file",
-        description: "Failed to extract text from the file.",
-        variant: "destructive",
-      });
+      console.error("File reading error:", error);
+      toast.error("Error extracting text from file.");
     } finally {
       setIsProcessing(false);
-      setProgress(100);
     }
+  };
+
+  const handleLoadSample = (sampleText: string, name: string) => {
+    setFile(new File([sampleText], name, { type: "text/plain" }));
+    setOriginalContent(sampleText);
+    setSimplifiedContent(null);
+    toast.success(`Loaded ${name}`);
   };
 
   const handleSimplify = async () => {
     if (!originalContent.trim()) {
-      toast({
-        title: "No content found",
-        description: "The uploaded file appears to be empty.",
-        variant: "destructive",
-      });
+      toast.error("No document text to simplify.");
       return;
     }
 
     setIsProcessing(true);
-    setProgress(0);
+    setProgress(20);
 
     try {
-      // Simulate progress
-      const progressInterval = setInterval(() => {
-        setProgress((prev) => Math.min(prev + 10, 90));
-      }, 500);
-
-      // Debug logging
-      console.log("Original content length:", originalContent.length);
-      console.log("First 100 characters:", originalContent.substring(0, 100));
+      const interval = setInterval(() => {
+        setProgress((prev) => (prev < 90 ? prev + 15 : prev));
+      }, 200);
 
       const result = await simplifyTextLocally(originalContent);
-
-      // Debug logging
-      console.log("Simplified content length:", result.length);
-      console.log("First 100 characters of result:", result.substring(0, 100));
-
-      clearInterval(progressInterval);
+      clearInterval(interval);
       setSimplifiedContent(result);
       setProgress(100);
-
-      // Force switch to the simplified tab
       setActiveTab("simplified");
-
-      toast({
-        title: "Document simplified",
-        description: "Your document has been successfully simplified.",
-      });
+      toast.success("Document analysis complete!");
     } catch (error) {
       console.error("Simplification error:", error);
-      toast({
-        title: "Error",
-        description:
-          "Failed to simplify the document. See console for details.",
-        variant: "destructive",
-      });
+      toast.error("Failed to simplify document.");
     } finally {
       setIsProcessing(false);
     }
@@ -219,10 +173,7 @@ export default function SimplifyPage() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast({
-      title: "Copied to clipboard",
-      description: "The text has been copied to your clipboard.",
-    });
+    toast.success("Copied to clipboard");
   };
 
   const downloadText = (text: string, filename: string) => {
@@ -235,112 +186,133 @@ export default function SimplifyPage() {
     document.body.removeChild(link);
   };
 
-  useEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  }, []);
-
-  if (loading) {
-    return <DocumentSimplifierSkeleton />;
-  }
-
   return (
-    <div className="container mx-auto p-4 md:p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-navy-900 dark:text-slate-100">
-            Legal Document Simplifier
-          </h1>
-          <p className="text-slate-600 dark:text-slate-300 mt-2">
-            Upload your legal document and get a simplified, easy-to-understand
-            explanation
-          </p>
+    <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 max-w-5xl space-y-8">
+      {/* Header */}
+      <div className="text-center space-y-3 max-w-3xl mx-auto">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 border border-forest-500/20">
+          <FileText className="w-3.5 h-3.5" />
+          <span>Zero-Retention Document Analysis</span>
         </div>
+        <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground font-heading tracking-tight">
+          Legal Document Simplifier
+        </h1>
+        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+          Upload residential leases, employment contracts, NDAs, or court notices. Receive clear executive summaries, identified obligations, and flagged risky clauses.
+        </p>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          {/* How It Works Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>How It Works</CardTitle>
+      {/* Upload Zone & Sample Loaders */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+        {/* Left: How It Works & Sample Buttons */}
+        <div className="md:col-span-5 space-y-4">
+          <Card className="border-border bg-card shadow-rest-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">How It Works</CardTitle>
               <CardDescription>
-                Our AI simplifies complex legal documents into plain language
+                Zero permanent document storage. In-memory processing only.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 text-xs sm:text-sm">
               <div className="flex items-start gap-3">
-                <div className="bg-teal-100 dark:bg-teal-900 rounded-full p-2 mt-0.5">
-                  <span className="text-teal-600 dark:text-teal-300 font-bold">
-                    1
-                  </span>
-                </div>
+                <span className="w-6 h-6 rounded-full bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 font-bold flex items-center justify-center shrink-0 mt-0.5">
+                  1
+                </span>
                 <div>
-                  <h3 className="font-medium">Upload Your Document</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    Upload any legal document (supports plain text and PDF)
+                  <p className="font-semibold text-foreground">Upload Document</p>
+                  <p className="text-muted-foreground text-xs">
+                    Drop PDF, Word, or plain text up to 10MB.
                   </p>
                 </div>
               </div>
+
               <div className="flex items-start gap-3">
-                <div className="bg-teal-100 dark:bg-teal-900 rounded-full p-2 mt-0.5">
-                  <span className="text-teal-600 dark:text-teal-300 font-bold">
-                    2
-                  </span>
-                </div>
+                <span className="w-6 h-6 rounded-full bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 font-bold flex items-center justify-center shrink-0 mt-0.5">
+                  2
+                </span>
                 <div>
-                  <h3 className="font-medium">AI Processing</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    Our AI analyzes the document and identifies key legal
-                    concepts
+                  <p className="font-semibold text-foreground">AI Clause Detection</p>
+                  <p className="text-muted-foreground text-xs">
+                    Extracts obligations, lock-in terms, and penal clauses.
                   </p>
                 </div>
               </div>
+
               <div className="flex items-start gap-3">
-                <div className="bg-teal-100 dark:bg-teal-900 rounded-full p-2 mt-0.5">
-                  <span className="text-teal-600 dark:text-teal-300 font-bold">
-                    3
-                  </span>
-                </div>
+                <span className="w-6 h-6 rounded-full bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 font-bold flex items-center justify-center shrink-0 mt-0.5">
+                  3
+                </span>
                 <div>
-                  <h3 className="font-medium">Get Simplified Explanation</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    Receive a clear, plain-language explanation of your
-                    document's content
+                  <p className="font-semibold text-foreground">Plain Language Breakdown</p>
+                  <p className="text-muted-foreground text-xs">
+                    Structured summary and risk assessment you can export.
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Upload Document Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Upload Document</CardTitle>
+          {/* Sample Loaders */}
+          <div className="bg-muted/40 border border-border rounded-xl p-4 space-y-2.5">
+            <p className="text-xs font-semibold text-foreground uppercase tracking-wider">
+              Or Try A Sample Document:
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() =>
+                  handleLoadSample(sampleRentAgreement, "Sample_Rent_Agreement.txt")
+                }
+                className="text-left p-2.5 rounded-lg border border-border bg-card hover:border-forest-500 hover:bg-forest-100/50 dark:hover:bg-forest-800/40 text-xs text-foreground transition-colors flex items-center justify-between"
+              >
+                <span>🏠 Sample Residential Lease Deed</span>
+                <span className="text-[10px] text-muted-foreground font-mono">Load</span>
+              </button>
+              <button
+                onClick={() =>
+                  handleLoadSample(
+                    sampleEmploymentAgreement,
+                    "Sample_Employment_Contract.txt"
+                  )
+                }
+                className="text-left p-2.5 rounded-lg border border-border bg-card hover:border-forest-500 hover:bg-forest-100/50 dark:hover:bg-forest-800/40 text-xs text-foreground transition-colors flex items-center justify-between"
+              >
+                <span>💼 Sample Employment Non-Compete</span>
+                <span className="text-[10px] text-muted-foreground font-mono">Load</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Upload Dropzone Card */}
+        <div className="md:col-span-7">
+          <Card className="border-border bg-card shadow-rest-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Document Upload</CardTitle>
               <CardDescription>
-                Supported formats: PDF, Word, Text (Max 10MB)
+                Supports PDF, DOCX, and TXT files (up to 10MB)
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               {!file ? (
                 <div
-                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${
                     isDragging
-                      ? "border-teal-500 bg-teal-50 dark:bg-teal-900/20"
-                      : "border-slate-300 dark:border-slate-700"
+                      ? "border-forest-500 bg-forest-100/40 dark:bg-forest-800/40"
+                      : "border-border hover:border-forest-500"
                   }`}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
                 >
-                  <div className="flex flex-col items-center justify-center space-y-4">
-                    <div className="p-3 rounded-full bg-slate-100 dark:bg-slate-800">
-                      <Upload className="h-6 w-6 text-slate-500 dark:text-slate-400" />
+                  <div className="flex flex-col items-center justify-center space-y-3">
+                    <div className="w-12 h-12 rounded-full bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 flex items-center justify-center">
+                      <Upload className="h-6 w-6" />
                     </div>
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">
-                        Drag and drop your file here, or{" "}
-                        <label className="text-teal-600 dark:text-teal-400 hover:underline cursor-pointer">
-                          browse
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-foreground">
+                        Drag and drop your legal document, or{" "}
+                        <label className="text-gold-700 dark:text-gold-500 hover:underline cursor-pointer">
+                          browse files
                           <input
                             type="file"
                             className="hidden"
@@ -349,189 +321,128 @@ export default function SimplifyPage() {
                           />
                         </label>
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        PDF, Word, or Text files up to 10MB
+                      <p className="text-xs text-muted-foreground">
+                        PDF, Word, or plain text up to 10MB
                       </p>
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 rounded-md bg-slate-200 dark:bg-slate-700">
-                        <FileText className="h-5 w-5 text-slate-700 dark:text-slate-300" />
+                  <div className="flex items-center justify-between p-3.5 bg-muted/40 border border-border rounded-xl">
+                    <div className="flex items-center space-x-3 truncate">
+                      <div className="p-2 rounded-lg bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 shrink-0">
+                        <FileText className="h-5 w-5" />
                       </div>
                       <div className="truncate">
-                        <p className="text-sm font-medium truncate">
+                        <p className="text-sm font-semibold text-foreground truncate">
                           {file.name}
                         </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          {(file.size / 1024).toFixed(2)} KB
+                        <p className="text-xs text-muted-foreground">
+                          {(file.size / 1024).toFixed(1)} KB • Text Ready
                         </p>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm" onClick={removeFile}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={removeFile}
+                      className="h-8 w-8 p-0"
+                    >
                       <X className="h-4 w-4" />
                       <span className="sr-only">Remove file</span>
                     </Button>
                   </div>
+
                   <Button
-                    className="w-full bg-teal-600 hover:bg-teal-700 dark:bg-teal-700 dark:hover:bg-teal-800"
+                    className="w-full bg-forest-800 text-white hover:bg-forest-950 dark:bg-gold-500 dark:text-forest-950 dark:hover:bg-gold-500/90 font-medium h-11 focus-visible:ring-2 focus-visible:ring-gold-700"
                     onClick={handleSimplify}
                     disabled={isProcessing}
                   >
-                    {isProcessing ? "Processing..." : "Simplify Document"}
+                    {isProcessing ? "Analyzing Document..." : "Simplify Document"}
                   </Button>
                 </div>
               )}
 
               {isProcessing && (
-                <div className="mt-4 space-y-2">
+                <div className="space-y-2 pt-2">
                   <Progress value={progress} className="h-2" />
-                  <p className="text-xs text-center text-slate-500 dark:text-slate-400">
-                    Analyzing document... {progress}%
+                  <p className="text-xs text-center text-muted-foreground">
+                    Extracting statutory clauses... {progress}%
                   </p>
                 </div>
               )}
             </CardContent>
           </Card>
         </div>
-
-        {simplifiedContent !== null && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {/* Document Analysis Card */}
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle>Document Analysis</CardTitle>
-                <CardDescription>
-                  We've simplified your legal document into plain language
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="grid grid-cols-2 mb-4">
-                    <TabsTrigger value="simplified">
-                      Simplified Version
-                    </TabsTrigger>
-                    <TabsTrigger value="original">
-                      Original Document
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="simplified">
-                    <div className="relative">
-                      <div className="absolute top-2 right-2 flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => copyToClipboard(simplifiedContent)}
-                        >
-                          <Copy className="h-3.5 w-3.5 mr-1.5" />
-                          Copy
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            downloadText(
-                              simplifiedContent,
-                              "simplified-document.txt"
-                            )
-                          }
-                        >
-                          <Download className="h-3.5 w-3.5 mr-1.5" />
-                          Download
-                        </Button>
-                      </div>
-                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4 mt-10">
-                        <div className="prose prose-slate dark:prose-invert max-w-none">
-                          {simplifiedContent.length > 0 ? (
-                            simplifiedContent
-                              .split("\n\n")
-                              .map((paragraph, index) => (
-                                <p key={index}>{paragraph}</p>
-                              ))
-                          ) : (
-                            <p>No simplified content produced.</p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="original">
-                    <div className="relative">
-                      <div className="absolute top-2 right-2 flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => copyToClipboard(originalContent)}
-                        >
-                          <Copy className="h-3.5 w-3.5 mr-1.5" />
-                          Copy
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            downloadText(
-                              originalContent,
-                              "original-document.txt"
-                            )
-                          }
-                        >
-                          <Download className="h-3.5 w-3.5 mr-1.5" />
-                          Download
-                        </Button>
-                      </div>
-                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4 mt-10">
-                        <pre className="text-sm whitespace-pre-wrap font-mono text-slate-800 dark:text-slate-200">
-                          {originalContent}
-                        </pre>
-                      </div>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-            <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-800 rounded-lg p-4 flex items-start space-x-3">
-              <div className="shrink-0">
-                <Check className="h-5 w-5 text-teal-600 dark:text-teal-400" />
-              </div>
-              <div>
-                <h3 className="font-medium text-teal-800 dark:text-teal-300">
-                  Document Successfully Simplified
-                </h3>
-                <p className="text-sm text-teal-700 dark:text-teal-400 mt-1">
-                  We've simplified your legal document into plain language. You
-                  can now better understand the key terms and implications.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        <Separator className="my-8 dark:bg-slate-700" />
-
-        <div className="text-center space-y-4">
-          <h2 className="text-xl font-semibold text-navy-900 dark:text-slate-100">
-            Need More Help?
-          </h2>
-          <p className="text-slate-600 dark:text-slate-300">
-            If you need personalized assistance understanding your legal
-            documents, connect with a legal professional.
-          </p>
-          <Button
-            asChild
-            className="bg-teal-600 hover:bg-teal-700 dark:bg-teal-700 dark:hover:bg-teal-800"
-          >
-            <a href="/help">Find Legal Help</a>
-          </Button>
-        </div>
       </div>
+
+      {/* Analysis Results View */}
+      {simplifiedContent !== null && (
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-6"
+        >
+          <Card className="border-border bg-card shadow-rest-card">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+              <div>
+                <CardTitle className="text-xl">Document Analysis & Summary</CardTitle>
+                <CardDescription>
+                  Plain-language breakdown and statutory risk assessment
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyToClipboard(simplifiedContent)}
+                  className="text-xs h-8 flex items-center gap-1.5"
+                >
+                  <Copy className="h-3.5 w-3.5" /> Copy Summary
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    downloadText(simplifiedContent, "simplified_document_summary.txt")
+                  }
+                  className="text-xs h-8 flex items-center gap-1.5"
+                >
+                  <Download className="h-3.5 w-3.5" /> Export Text
+                </Button>
+              </div>
+            </CardHeader>
+
+            <CardContent className="pt-6">
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="bg-forest-100 dark:bg-forest-800 mb-4">
+                  <TabsTrigger value="simplified">Simplified Explanation</TabsTrigger>
+                  <TabsTrigger value="original">Original Text</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="simplified">
+                  <div className="bg-background border border-border rounded-xl p-5 sm:p-6 prose prose-sm dark:prose-invert max-w-none prose-headings:font-heading prose-headings:text-foreground prose-strong:text-foreground">
+                    {simplifiedContent.split("\n\n").map((para, i) => (
+                      <p key={i} className="leading-relaxed">
+                        {para}
+                      </p>
+                    ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="original">
+                  <div className="bg-background border border-border rounded-xl p-5 sm:p-6 max-h-[500px] overflow-y-auto">
+                    <pre className="text-xs whitespace-pre-wrap font-mono text-muted-foreground">
+                      {originalContent}
+                    </pre>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
     </div>
   );
 }

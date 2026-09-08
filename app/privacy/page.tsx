@@ -42,36 +42,36 @@ export default function PrivacyPage() {
   ];
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-      <div className="space-y-4 mb-12">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto space-y-10">
+      <div className="space-y-3">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 border border-forest-500/20">
           <ShieldCheck className="w-3.5 h-3.5" />
           <span>Your Privacy Matters</span>
         </div>
         <h1 className="text-4xl font-extrabold tracking-tight text-foreground font-heading">
           Privacy Policy
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Last Updated: September 2026 • Effective Immediately
         </p>
-        <p className="text-base text-muted-foreground leading-relaxed">
+        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
           At LegalEase, we understand that legal matters and documents involve sensitive personal and commercial information. We are committed to maintaining the highest standards of data security, transparency, and user privacy.
         </p>
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-6">
         {sections.map((section) => {
           const Icon = section.icon;
           return (
             <div
               key={section.title}
-              className="bg-card border border-border rounded-xl p-6 sm:p-8 shadow-sm space-y-3"
+              className="bg-card border border-border rounded-xl p-6 sm:p-7 shadow-rest-card space-y-2.5"
             >
-              <h2 className="text-xl font-bold text-foreground font-heading flex items-center gap-3">
-                <Icon className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
+              <h2 className="text-lg font-bold text-foreground font-heading flex items-center gap-3">
+                <Icon className="w-5 h-5 text-forest-800 dark:text-gold-500 shrink-0" />
                 {section.title}
               </h2>
-              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 {section.content}
               </p>
             </div>
@@ -79,7 +79,7 @@ export default function PrivacyPage() {
         })}
       </div>
 
-      <div className="mt-12 p-6 bg-muted/40 border border-border rounded-xl text-xs text-muted-foreground space-y-2">
+      <div className="p-6 bg-forest-100 dark:bg-forest-900/60 border border-forest-500/20 rounded-xl text-xs text-muted-foreground space-y-1.5">
         <p className="font-semibold text-foreground">Questions or Concerns?</p>
         <p>
           If you have any questions regarding this Privacy Policy or how your data is handled, please reach out via our contact page.

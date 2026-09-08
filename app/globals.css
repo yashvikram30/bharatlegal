@@ -10,86 +10,86 @@
 
 @layer base {
   :root {
-    /* Authoritative Light Mode Palette (WCAG AA Compliant) */
-    --background: 220 33% 98%;        /* #F8FAFC */
-    --foreground: 225 59% 11%;        /* #0B132B Deep Regal Navy */
-    
-    --card: 0 0% 100%;                /* Pure White Card */
-    --card-foreground: 225 59% 11%;
-    
-    --popover: 0 0% 100%;
-    --popover-foreground: 225 59% 11%;
-    
-    --primary: 224 59% 16%;           /* #101B3D Regal Navy */
-    --primary-foreground: 0 0% 100%;
-    
-    --secondary: 220 20% 94%;
-    --secondary-foreground: 225 59% 16%;
-    
-    --muted: 220 20% 94%;
-    --muted-foreground: 220 15% 42%;  /* > 4.8:1 contrast on #F8FAFC */
-    
-    --accent: 32 95% 38%;             /* #B45309 Amber-700: 5.8:1 contrast on white */
+    /* Design System v2 - Light Mode (Forest & Gold on Cream) */
+    --background: 45 29% 95%;          /* forest-50:  #F7F5EF */
+    --foreground: 156 48% 12%;         /* forest-950: #0F2B20 (13.9:1 AAA) */
+
+    --card: 45 29% 98%;                /* #FAF8F3 */
+    --card-foreground: 156 48% 12%;    /* #0F2B20 */
+
+    --popover: 45 29% 98%;
+    --popover-foreground: 156 48% 12%;
+
+    --primary: 155 45% 16%;            /* forest-800: #173D2E (12.1:1 AAA with white) */
+    --primary-foreground: 0 0% 100%;   /* #FFFFFF */
+
+    --secondary: 133 17% 92%;          /* forest-100: #E7EFE9 */
+    --secondary-foreground: 155 45% 16%;
+
+    --muted: 133 17% 92%;              /* forest-100: #E7EFE9 */
+    --muted-foreground: 150 26% 33%;   /* forest-500: #3F6B54 (5.6:1 AA) */
+
+    --accent: 43 89% 29%;              /* gold-700:   #8C6708 (4.75:1 AA for text) */
     --accent-foreground: 0 0% 100%;
-    
-    --destructive: 0 84% 60%;
+
+    --destructive: 0 72% 45%;
     --destructive-foreground: 0 0% 100%;
-    
-    --border: 220 20% 88%;
-    --input: 220 20% 88%;
-    --ring: 224 59% 25%;
-    --radius: 0.625rem;
+
+    --border: 133 17% 88%;             /* hairline border */
+    --input: 133 17% 88%;
+    --ring: 43 89% 29%;                /* gold-700 focus ring */
+    --radius: 0.5rem;
 
     /* Sidebar Variables */
-    --sidebar-background: 220 25% 97%;
-    --sidebar-foreground: 225 59% 14%;
-    --sidebar-primary: 224 59% 16%;
+    --sidebar-background: 45 25% 93%;
+    --sidebar-foreground: 156 48% 12%;
+    --sidebar-primary: 155 45% 16%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 20% 92%;
-    --sidebar-accent-foreground: 225 59% 14%;
-    --sidebar-border: 220 20% 88%;
-    --sidebar-ring: 224 59% 25%;
+    --sidebar-accent: 133 17% 90%;
+    --sidebar-accent-foreground: 155 45% 16%;
+    --sidebar-border: 133 17% 86%;
+    --sidebar-ring: 43 89% 29%;
   }
 
   .dark {
-    /* Authoritative Dark Mode Palette (Midnight Navy & Amber) */
-    --background: 225 59% 6%;         /* #060A17 Midnight Navy */
-    --foreground: 210 40% 98%;        /* Crisp Off-White */
-    
-    --card: 225 50% 10%;              /* #0D1527 Elevated Card Surface */
-    --card-foreground: 210 40% 98%;
-    
-    --popover: 225 50% 10%;
-    --popover-foreground: 210 40% 98%;
-    
-    --primary: 38 92% 50%;            /* #F59E0B Warm Amber Gold */
-    --primary-foreground: 225 59% 8%;
-    
-    --secondary: 224 35% 15%;
-    --secondary-foreground: 210 40% 98%;
-    
-    --muted: 224 35% 15%;
-    --muted-foreground: 215 20% 65%;
-    
-    --accent: 38 92% 50%;             /* #F59E0B: > 11:1 contrast on midnight navy */
-    --accent-foreground: 225 59% 8%;
-    
-    --destructive: 0 62% 45%;
-    --destructive-foreground: 210 40% 98%;
-    
-    --border: 224 35% 18%;
-    --input: 224 35% 18%;
-    --ring: 38 92% 50%;
+    /* Design System v2 - Dark Mode (Deep Forest & Direct Gold) */
+    --background: 156 48% 11%;         /* forest-950: #0F2B20 */
+    --foreground: 45 29% 95%;          /* forest-50:  #F7F5EF (13.9:1 AAA) */
+
+    --card: 156 48% 14%;               /* elevated dark surface: #123527 */
+    --card-foreground: 45 29% 95%;
+
+    --popover: 156 48% 14%;
+    --popover-foreground: 45 29% 95%;
+
+    --primary: 43 89% 38%;             /* gold-500:   #B8860B (4.65:1 AA on dark) */
+    --primary-foreground: 156 48% 11%; /* forest-950 */
+
+    --secondary: 155 45% 16%;          /* forest-800: #173D2E */
+    --secondary-foreground: 45 29% 95%;
+
+    --muted: 155 45% 16%;              /* forest-800 */
+    --muted-foreground: 145 20% 65%;   /* tinted text */
+
+    --accent: 43 89% 38%;              /* gold-500:   #B8860B */
+    --accent-foreground: 156 48% 11%;
+
+    --destructive: 0 62% 40%;
+    --destructive-foreground: 45 29% 95%;
+
+    --border: 155 35% 20%;
+    --input: 155 35% 20%;
+    --ring: 43 89% 38%;                /* gold-500 focus ring */
 
     /* Dark Mode Sidebar */
-    --sidebar-background: 225 55% 8%;
-    --sidebar-foreground: 210 40% 95%;
-    --sidebar-primary: 38 92% 50%;
-    --sidebar-primary-foreground: 225 59% 8%;
-    --sidebar-accent: 224 35% 14%;
-    --sidebar-accent-foreground: 210 40% 95%;
-    --sidebar-border: 224 35% 18%;
-    --sidebar-ring: 38 92% 50%;
+    --sidebar-background: 156 50% 9%;
+    --sidebar-foreground: 45 29% 92%;
+    --sidebar-primary: 43 89% 38%;
+    --sidebar-primary-foreground: 156 48% 11%;
+    --sidebar-accent: 155 45% 14%;
+    --sidebar-accent-foreground: 45 29% 92%;
+    --sidebar-border: 155 35% 18%;
+    --sidebar-ring: 43 89% 38%;
   }
 }
 
@@ -98,9 +98,9 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans antialiased;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading tracking-tight;
+    @apply font-heading tracking-tight text-foreground;
   }
 }

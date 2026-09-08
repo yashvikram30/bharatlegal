@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Share2 } from "lucide-react";
+import { Copy, Share2, Search, Scale, CheckCheck, BookOpen, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,8 +20,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { toast } from "@/components/ui/use-toast";
-import { RightsVisualizerSkeleton } from "@/components/ui/rights-skeleton";
+import { Input } from "@/components/ui/input";
+import { toast } from "react-hot-toast";
+
+type Right = {
+  id: string;
+  title: string;
+  statute: string;
+  content: string;
+};
 
 type RightCategory = {
   id: string;
@@ -29,366 +37,343 @@ type RightCategory = {
   rights: Right[];
 };
 
-type Right = {
-  id: string;
-  title: string;
-  content: string;
-};
-
 export default function RightsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("arrest");
-  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const categories: RightCategory[] = [
     {
       id: "arrest",
-      title: "Arrest Rights",
-      description:
-        "Your rights when interacting with law enforcement or during arrest",
+      title: "Arrest & Detention",
+      description: "Constitutional and procedural protections during police interactions and custody.",
       rights: [
         {
           id: "arrest-1",
-          title: "Right to know the grounds of arrest",
+          title: "Right to Know Grounds of Arrest & Offence Particulars",
+          statute: "Section 50(1) CrPC / Section 47 BNSS",
           content:
-            "Under Section 50(1) of the Code of Criminal Procedure (CrPC), the police officer arresting you must inform you of the full particulars of the offense and grounds for arrest. If arrested without a warrant, you must be told why you are being arrested.",
+            "A police officer making an arrest without a warrant must immediately communicate to you full particulars of the offence for which you are arrested and the exact grounds for arrest. If the offence is bailable, they must inform you of your entitlement to be released on bail.",
         },
         {
           id: "arrest-2",
-          title: "Right to legal representation",
+          title: "Right to Legal Representation & Advocate Access",
+          statute: "Article 22(1) Constitution & Section 41D CrPC / Sec 38 BNSS",
           content:
-            "Article 22(1) of the Indian Constitution gives you the right to consult and be defended by a legal practitioner of your choice. Section 41D of the CrPC allows you to meet an advocate of your choice during interrogation, though not throughout the interrogation.",
+            "You have a fundamental constitutional right to consult and be defended by a legal practitioner of your choice. Under Section 41D, you are entitled to meet an advocate of your choice during interrogation, though not throughout the entire examination.",
         },
         {
           id: "arrest-3",
-          title: "Right to be presented before a magistrate",
+          title: "Production Before Magistrate Within 24 Hours",
+          statute: "Article 22(2) Constitution & Section 57 CrPC / Sec 58 BNSS",
           content:
-            "Under Article 22(2) of the Constitution and Section 57 of the CrPC, you must be produced before the nearest magistrate within 24 hours of arrest, excluding the time necessary for the journey from the place of arrest to the magistrate's court.",
+            "No police officer can detain a person in custody for more than 24 hours without the express authorization of a Judicial Magistrate, excluding the time necessary for the journey from the place of arrest to the court.",
         },
         {
           id: "arrest-4",
-          title: "Right to inform a relative or friend",
+          title: "Right to Have a Nominated Relative or Friend Informed",
+          statute: "Section 41B(b) CrPC / Section 36 BNSS",
           content:
-            "Section 41B(b) of the CrPC gives you the right to have one friend, relative, or other person informed of your arrest and the location where you are being detained.",
+            "The arresting officer is statutorily required to inform one friend, relative, or nominated person of your arrest and the exact police station or detention facility where you are held.",
         },
         {
           id: "arrest-5",
-          title: "Right to medical examination",
+          title: "Mandatory Medical Examination by Registered Medical Practitioner",
+          statute: "Section 54 CrPC / Section 53 BNSS",
           content:
-            "Under Section 54 of the CrPC, you have the right to request a medical examination to document any injuries you may have sustained during the arrest. This can be important evidence if you allege police misconduct.",
+            "When arrested, you have the statutory right to be examined by a registered medical practitioner. The medical report documents your physical condition and any injuries, serving as vital contemporaneous evidence against custodial torture or police misconduct.",
         },
       ],
     },
     {
       id: "property",
-      title: "Property Rights",
-      description:
-        "Rights related to property ownership, transfer, and disputes",
+      title: "Property & Tenancy",
+      description: "Protections regarding residential leases, security deposit refunds, and property possession.",
       rights: [
         {
-          id: "property-1",
-          title: "Right to own property",
+          id: "prop-1",
+          title: "Right to Timely Security Deposit Refund",
+          statute: "Model Tenancy Act / State Rent Control Acts",
           content:
-            "Article 300A of the Indian Constitution states that no person shall be deprived of their property save by authority of law. This means the government cannot arbitrarily take away your property without following due process of law.",
+            "Landlords are required to refund the security deposit within 30 days of handing over vacant possession, after reasonable agreed deductions for verified damages. Arbitrary forfeiture is an actionable civil wrong.",
         },
         {
-          id: "property-2",
-          title: "Right to transfer property",
+          id: "prop-2",
+          title: "Protection Against Unlawful Eviction & Essential Services Cut-off",
+          statute: "Section 14 Model Tenancy Act & State Rent Laws",
           content:
-            "Under the Transfer of Property Act, 1882, you have the right to sell, gift, mortgage, or lease your property to others, subject to certain conditions and legal procedures.",
+            "A landlord cannot forcefully evict a tenant or cut off essential utilities (electricity, water) without a valid decree from the competent Rent Court or Rent Tribunal following due statutory notice.",
         },
         {
-          id: "property-3",
-          title: "Right to ancestral property",
+          id: "prop-3",
+          title: "Right to Prior Notice Before Landlord Premises Entry",
+          statute: "Model Tenancy Act / Transfer of Property Act, 1882",
           content:
-            "Under the Hindu Succession (Amendment) Act, 2005, daughters have equal rights to ancestral property as sons. This applies to Hindu, Buddhist, Jain, and Sikh families.",
+            "Except in cases of structural emergency, a landlord or property manager must provide at least 24 hours prior written or electronic notice before entering the leased premises for repairs or inspection.",
         },
         {
-          id: "property-4",
-          title: "Right to peaceful possession",
+          id: "prop-4",
+          title: "Equal Coparcenary & Ancestral Inheritance Rights for Daughters",
+          statute: "Hindu Succession (Amendment) Act, 2005 (Vineeta Sharma v. Rakesh Sharma)",
           content:
-            "You have the right to peaceful possession of your property. If someone disturbs your possession, you can file a suit for injunction or file a complaint for trespass under Section 441 of the Indian Penal Code.",
-        },
-        {
-          id: "property-5",
-          title: "Right to fair compensation",
-          content:
-            "Under the Right to Fair Compensation and Transparency in Land Acquisition, Rehabilitation and Resettlement Act, 2013, you are entitled to fair compensation if your land is acquired by the government for public purposes.",
+            "Daughters have equal coparcenary rights by birth in ancestral property with the same rights and liabilities as sons, irrespective of whether the father was alive when the 2005 amendment came into force.",
         },
       ],
     },
     {
       id: "consumer",
-      title: "Consumer Rights",
-      description:
-        "Your rights as a consumer when purchasing goods and services",
+      title: "Consumer Protection",
+      description: "Remedies against defective goods, deficient services, misleading ads, and unfair e-commerce trade.",
       rights: [
         {
-          id: "consumer-1",
-          title: "Right to safety",
+          id: "cons-1",
+          title: "Right to Redressal Against Unfair Trade Practices",
+          statute: "Section 2(47) & Section 35 Consumer Protection Act, 2019",
           content:
-            "Under the Consumer Protection Act, 2019, you have the right to be protected against marketing of goods and services that are hazardous to life and property.",
+            "Consumers can file statutory claims for defective goods, deficient service, or misleading claims before the District Consumer Commission (pecuniary jurisdiction up to ₹50 Lakhs) with simplified e-filing via e-Daakhil.",
         },
         {
-          id: "consumer-2",
-          title: "Right to information",
+          id: "cons-2",
+          title: "Product Liability Claims Against Manufacturers & Sellers",
+          statute: "Section 82 to 87 Consumer Protection Act, 2019",
           content:
-            "You have the right to be informed about the quality, quantity, potency, purity, standard and price of goods or services to protect yourself against unfair trade practices.",
+            "Manufacturers, service providers, and product sellers are strictly liable to compensate consumers for harm caused by defective products, manufacturing flaws, or lack of adequate warning instructions.",
         },
         {
-          id: "consumer-3",
-          title: "Right to choose",
+          id: "cons-3",
+          title: "Right to Free Delivery Returns & No Hidden Cancellation Penalties",
+          statute: "Consumer Protection (E-Commerce) Rules, 2020",
           content:
-            "You have the right to be assured, wherever possible, access to a variety of goods and services at competitive prices.",
-        },
-        {
-          id: "consumer-4",
-          title: "Right to be heard",
-          content:
-            "You have the right to be heard and to be assured that your interests will receive due consideration at appropriate forums.",
-        },
-        {
-          id: "consumer-5",
-          title: "Right to seek redressal",
-          content:
-            "You have the right to seek redressal against unfair trade practices or restrictive trade practices or unscrupulous exploitation. You can file complaints with the District, State, or National Consumer Disputes Redressal Commission.",
+            "E-commerce entities cannot arbitrarily impose cancellation charges unless similar charges are borne by the platform for cancellations, nor can they refuse refunds on genuine defective or non-compliant deliveries.",
         },
       ],
     },
     {
-      id: "employment",
-      title: "Employment Rights",
-      description: "Rights in the workplace and employment relationships",
+      id: "workplace",
+      title: "Workplace & Labour",
+      description: "Rights governing wages, notice periods, non-compete clauses, and prevention of harassment.",
       rights: [
         {
-          id: "employment-1",
-          title: "Right to equal remuneration",
+          id: "work-1",
+          title: "Right Against Unreasonable Post-Employment Non-Compete Clauses",
+          statute: "Section 27 Indian Contract Act, 1872",
           content:
-            "Under the Equal Remuneration Act, 1976, you have the right to equal pay for equal work, regardless of gender.",
+            "Every agreement by which anyone is restrained from exercising a lawful profession, trade, or business is void to that extent under Indian law. Employers cannot legally enforce blanket post-employment non-compete covenants against employees.",
         },
         {
-          id: "employment-2",
-          title: "Right to minimum wages",
+          id: "work-2",
+          title: "Protection Against Sexual Harassment (POSH Act)",
+          statute: "Sexual Harassment of Women at Workplace Act, 2013",
           content:
-            "The Minimum Wages Act, 1948, entitles you to receive minimum wages as fixed by the appropriate government. These rates vary by state, sector, and skill level.",
+            "Every organization with 10+ employees must constitute an Internal Complaints Committee (ICC). Female employees are entitled to a time-bound, confidential redressal inquiry with interim relief measures.",
         },
         {
-          id: "employment-3",
-          title: "Right to safe working conditions",
+          id: "work-3",
+          title: "Right to Gratuity Upon 5 Years of Continuous Service",
+          statute: "Payment of Gratuity Act, 1972",
           content:
-            "Under the Occupational Safety, Health and Working Conditions Code, 2020, employers must provide safe working conditions and take measures to prevent accidents and occupational diseases.",
-        },
-        {
-          id: "employment-4",
-          title: "Right against sexual harassment",
-          content:
-            "The Sexual Harassment of Women at Workplace (Prevention, Prohibition and Redressal) Act, 2013, protects women from sexual harassment at the workplace and provides a mechanism for redressal of complaints.",
-        },
-        {
-          id: "employment-5",
-          title: "Right to gratuity",
-          content:
-            "Under the Payment of Gratuity Act, 1972, employees who have worked for at least 5 years are entitled to gratuity payment when they leave the job, retire, or in case of death.",
+            "Employees completing 5 years of continuous service are legally entitled to gratuity payment calculated at 15 days' wages for every completed year of service, payable within 30 days of resignation, retirement, or termination.",
         },
       ],
     },
     {
       id: "family",
-      title: "Family Law Rights",
-      description: "Rights related to marriage, divorce, and family matters",
+      title: "Family & Succession",
+      description: "Statutory rights regarding maintenance, child custody, and domestic violence protection.",
       rights: [
         {
-          id: "family-1",
-          title: "Right to maintenance",
+          id: "fam-1",
+          title: "Right to Claim Monthly Maintenance & Interim Support",
+          statute: "Section 125 CrPC / Section 144 BNSS & Sec 24 HMA",
           content:
-            "Under Section 125 of the CrPC, you have the right to claim maintenance from your spouse if they neglect or refuse to maintain you despite having sufficient means. This applies to wives, children, and parents.",
+            "Wives, minor children, and aged or infirm parents who are unable to maintain themselves can claim maintenance from any person who has sufficient means but neglects or refuses to maintain them.",
         },
         {
-          id: "family-2",
-          title: "Right to divorce",
+          id: "fam-2",
+          title: "Protection from Domestic Violence & Right to Shared Household",
+          statute: "Protection of Women from Domestic Violence Act, 2005 (PWDVA)",
           content:
-            "Various personal laws and the Special Marriage Act provide grounds for divorce, including cruelty, desertion, conversion to another religion, mental disorder, and mutual consent.",
-        },
-        {
-          id: "family-3",
-          title: "Rights to child custody",
-          content:
-            "In matters of child custody, courts are guided by the principle of 'welfare of the child' rather than the rights of parents. However, both parents generally have the right to visitation and to participate in major decisions affecting the child.",
-        },
-        {
-          id: "family-4",
-          title: "Right to adopt",
-          content:
-            "Under the Juvenile Justice (Care and Protection of Children) Act, 2015, and the Hindu Adoption and Maintenance Act, 1956, eligible individuals and couples have the right to legally adopt children.",
-        },
-        {
-          id: "family-5",
-          title: "Right to inherit",
-          content:
-            "Various personal laws govern inheritance rights in India. For example, under the Hindu Succession Act (as amended in 2005), sons and daughters have equal inheritance rights to ancestral and self-acquired property.",
+            "An aggrieved woman has the statutory right to reside in the shared household regardless of whether she has any legal title, along with protection orders, monetary relief, and custody orders.",
         },
       ],
     },
   ];
 
-  const handleCopy = (text: string) => {
+  const handleCopy = (id: string, text: string) => {
     navigator.clipboard.writeText(text);
-    toast({
-      title: "Copied to clipboard",
-      description: "The legal information has been copied to your clipboard.",
-    });
+    setCopiedId(id);
+    toast.success("Legal provision copied to clipboard");
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleShare = (text: string) => {
-    if (navigator.share) {
+  const handleShare = (title: string, content: string) => {
+    const textToShare = `${title}\n\n${content}\n\nSource: LegalEase (https://legalease.in/rights)`;
+    if (typeof navigator !== "undefined" && navigator.share) {
       navigator
         .share({
-          title: "Legal Rights Information from LegalEase",
-          text: text,
-          url: window.location.href,
+          title: `Legal Right: ${title}`,
+          text: textToShare,
         })
-        .catch((error) => console.log("Error sharing", error));
+        .catch(() => {});
     } else {
-      handleCopy(text);
-      toast({
-        title: "Sharing not supported",
-        description:
-          "Your browser doesn't support direct sharing, but we've copied the text to your clipboard instead.",
-      });
+      navigator.clipboard.writeText(textToShare);
+      toast.success("Details copied to clipboard for sharing");
     }
   };
 
-  useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-  }, []);
+  // Filter rights by search query across all categories or current category
+  const currentCategoryData = categories.find((c) => c.id === selectedCategory);
 
-  if (isLoading) {
-    return <RightsVisualizerSkeleton />;
-  }
+  const filteredRights = (currentCategoryData?.rights || []).filter((r) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      r.title.toLowerCase().includes(query) ||
+      r.statute.toLowerCase().includes(query) ||
+      r.content.toLowerCase().includes(query)
+    );
+  });
 
   return (
-    <div className="container mx-auto p-4 md:p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-navy-900">
-            Legal Rights Visualizer
-          </h1>
-          <p className="text-slate-600 mt-2">
-            Explore your legal rights in simple, easy-to-understand language
-          </p>
+    <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 max-w-5xl space-y-8">
+      {/* Page Header */}
+      <div className="text-center space-y-3 max-w-3xl mx-auto">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 border border-forest-500/20">
+          <Scale className="w-3.5 h-3.5" />
+          <span>Statutory Citizen Rights</span>
         </div>
+        <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground font-heading tracking-tight">
+          Legal Rights Visualizer
+        </h1>
+        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+          Explore your constitutional protections and statutory remedies under Indian law in plain, understandable language.
+        </p>
+      </div>
 
-        <Tabs
-          value={selectedCategory}
-          onValueChange={setSelectedCategory}
-          className="w-full"
-        >
-          <TabsList className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 mb-8">
-            {categories.map((category) => (
-              <TabsTrigger
-                key={category.id}
-                value={category.id}
-                className="text-xs md:text-sm"
-              >
-                {category.title}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+      {/* Scenario Search Bar */}
+      <div className="max-w-2xl mx-auto relative">
+        <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search scenarios (e.g. 'security deposit', 'police custody', 'gratuity')..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10 h-11 bg-card border-border focus-visible:ring-2 focus-visible:ring-gold-700 rounded-xl shadow-rest-card"
+        />
+      </div>
 
+      {/* Category Tabs */}
+      <Tabs
+        value={selectedCategory}
+        onValueChange={setSelectedCategory}
+        className="w-full space-y-6"
+      >
+        <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 bg-forest-100 dark:bg-forest-800/80 p-1 rounded-xl h-auto gap-1">
           {categories.map((category) => (
-            <TabsContent key={category.id} value={category.id}>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{category.title}</CardTitle>
-                    <CardDescription>{category.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Accordion type="single" collapsible className="w-full">
-                      <AnimatePresence>
-                        {category.rights.map((right, index) => (
-                          <AccordionItem key={right.id} value={right.id}>
-                            <AccordionTrigger className="text-left">
-                              {right.title}
-                            </AccordionTrigger>
-                            <motion.div
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              transition={{ duration: 0.2 }}
-                            >
-                              <AccordionContent>
-                                <div className="space-y-4">
-                                  <p className="text-slate-700">
-                                    {right.content}
-                                  </p>
-                                  <div className="flex space-x-2">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => handleCopy(right.content)}
-                                    >
-                                      <Copy className="h-3.5 w-3.5 mr-1.5" />
-                                      Copy
-                                    </Button>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() =>
-                                        handleShare(
-                                          `${right.title}: ${right.content}`
-                                        )
-                                      }
-                                    >
-                                      <Share2 className="h-3.5 w-3.5 mr-1.5" />
-                                      Share
-                                    </Button>
-                                  </div>
-                                </div>
-                              </AccordionContent>
-                            </motion.div>
-                          </AccordionItem>
-                        ))}
-                      </AnimatePresence>
-                    </Accordion>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </TabsContent>
-          ))}
-        </Tabs>
-
-        <div className="mt-8 bg-slate-50 dark:bg-gray-900 rounded-2xl p-6">
-          <h2 className="text-xl font-semibold text-navy-900 dark:text-white mb-4">
-            Understanding Your Rights
-          </h2>
-          <p className="text-slate-700 dark:text-slate-300 mb-4">
-            Knowing your legal rights is the first step toward accessing
-            justice. The information provided here is simplified for better
-            understanding but is based on actual Indian laws and legal
-            provisions.
-          </p>
-          <p className="text-slate-700 dark:text-slate-300 mb-4">
-            Remember that laws can change, and specific circumstances may affect
-            how these rights apply to your situation. When facing a legal issue,
-            it's always advisable to consult with a qualified legal
-            professional.
-          </p>
-          <div className="flex justify-center mt-6">
-            <Button
-              asChild
-              className="bg-teal-600 hover:bg-teal-700 dark:bg-teal-500 dark:hover:bg-teal-600"
+            <TabsTrigger
+              key={category.id}
+              value={category.id}
+              className="text-xs font-semibold py-2 rounded-lg data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm"
             >
-              <a href="/help">Find Legal Help</a>
-            </Button>
-          </div>
+              {category.title}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        {categories.map((category) => (
+          <TabsContent key={category.id} value={category.id} className="space-y-4">
+            <div className="bg-card border border-border rounded-xl p-5 sm:p-6 space-y-1 shadow-rest-card">
+              <h2 className="text-xl font-bold text-foreground font-heading">
+                {category.title}
+              </h2>
+              <p className="text-sm text-muted-foreground">{category.description}</p>
+            </div>
+
+            {filteredRights.length > 0 ? (
+              <Accordion type="single" collapsible className="space-y-3">
+                {filteredRights.map((right) => (
+                  <AccordionItem
+                    key={right.id}
+                    value={right.id}
+                    className="bg-card border border-border rounded-xl px-5 sm:px-6 py-1 hover:border-forest-500 transition-colors shadow-rest-card"
+                  >
+                    <AccordionTrigger className="hover:no-underline py-4 text-left">
+                      <div className="space-y-1 pr-4">
+                        <div className="inline-block text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 border border-forest-500/20 mb-1">
+                          {right.statute}
+                        </div>
+                        <h3 className="text-base font-bold text-foreground font-heading">
+                          {right.title}
+                        </h3>
+                      </div>
+                    </AccordionTrigger>
+
+                    <AccordionContent className="pt-2 pb-5 border-t border-border/60">
+                      <div className="space-y-4">
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {right.content}
+                        </p>
+
+                        <div className="flex items-center gap-2 pt-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleCopy(right.id, right.content)}
+                            className="h-8 text-xs flex items-center gap-1.5 border-border"
+                          >
+                            {copiedId === right.id ? (
+                              <CheckCheck className="w-3.5 h-3.5 text-emerald-500" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                            <span>Copy Text</span>
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleShare(right.title, right.content)}
+                            className="h-8 text-xs flex items-center gap-1.5 border-border"
+                          >
+                            <Share2 className="w-3.5 h-3.5" />
+                            <span>Share</span>
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            ) : (
+              <div className="text-center py-12 bg-card border border-border rounded-xl space-y-2">
+                <p className="text-base font-semibold text-foreground">
+                  No rights matched "{searchQuery}"
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Try broader search terms or switch categories.
+                </p>
+              </div>
+            )}
+          </TabsContent>
+        ))}
+      </Tabs>
+
+      {/* Free Legal Aid Callout Banner */}
+      <div className="bg-forest-100 dark:bg-forest-800/60 border border-forest-500/20 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div className="space-y-1.5">
+          <h3 className="text-lg font-bold text-forest-800 dark:text-forest-50 font-heading flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-forest-800 dark:text-gold-500" />
+            Entitled to 100% Free Legal Aid?
+          </h3>
+          <p className="text-xs sm:text-sm text-forest-500 dark:text-forest-100/80 max-w-xl leading-relaxed">
+            Under Section 12 of the Legal Services Authorities Act, women, children, undertrials, and citizens earning under state thresholds receive free court representation.
+          </p>
         </div>
+
+        <Button
+          asChild
+          className="bg-forest-800 text-white hover:bg-forest-950 dark:bg-gold-500 dark:text-forest-950 dark:hover:bg-gold-500/90 shrink-0 font-medium text-xs sm:text-sm h-10 px-5 focus-visible:ring-2 focus-visible:ring-gold-700"
+        >
+          <Link href="/help">Find DLSA Clinics</Link>
+        </Button>
       </div>
     </div>
   );

@@ -4,12 +4,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Scale } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
 import { UserProfile } from "@/components/auth/user-profile";
+import { LegalResourcesSidebar } from "@/components/legal-resources-sidebar";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,14 +18,12 @@ export function Navbar() {
   const pathname = usePathname();
   const { data: session } = useSession();
 
+  // Primary focused navigation
   const navItems = [
     ...(!session?.user ? [{ name: "Home", href: "/" }] : []),
     { name: "Legal Assistant", href: "/chat" },
     { name: "Case Tracker", href: "/dashboard" },
-    { name: "Rights Visualizer", href: "/rights" },
     { name: "Doc Simplifier", href: "/simplify" },
-    { name: "Find Legal Aid", href: "/help" },
-    { name: "About", href: "/about" },
   ];
 
   useEffect(() => {
@@ -44,20 +43,23 @@ export function Navbar() {
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-200 border-b ${
         isScrolled
-          ? "bg-background/90 backdrop-blur-md border-border shadow-sm"
-          : "bg-background/50 backdrop-blur-sm border-transparent"
+          ? "bg-background/95 backdrop-blur-sm border-border shadow-rest-card"
+          : "bg-background/70 backdrop-blur-sm border-transparent"
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center gap-2 font-heading font-extrabold text-xl text-foreground">
-              <span className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold border border-amber-500/40">
+            <Link
+              href="/"
+              className="flex items-center gap-2 font-heading font-extrabold text-xl text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-700 rounded-md"
+            >
+              <span className="w-8 h-8 rounded-lg bg-forest-800 dark:bg-forest-950 text-white flex items-center justify-center text-sm font-bold border border-gold-500/50">
                 ⚖
               </span>
               <span>
-                Legal<span className="text-amber-600 dark:text-amber-400">Ease</span>
+                Legal<span className="text-gold-700 dark:text-gold-500">Ease</span>
               </span>
             </Link>
           </div>
@@ -71,18 +73,18 @@ export function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`relative px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  className={`relative px-3.5 py-1.5 text-sm font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-700 ${
                     isActive
-                      ? "text-foreground bg-accent/60 font-semibold"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent/40"
+                      ? "text-forest-950 dark:text-forest-50 bg-forest-100 dark:bg-forest-800 font-semibold"
+                      : "text-muted-foreground hover:text-foreground hover:bg-forest-100/60 dark:hover:bg-forest-800/40"
                   }`}
                 >
                   {item.name}
                   {isActive && (
                     <motion.div
-                      className="absolute bottom-0 left-2 right-2 h-0.5 bg-amber-500 rounded-full"
+                      className="absolute bottom-0 left-2 right-2 h-0.5 bg-forest-800 dark:bg-gold-500 rounded-full"
                       layoutId="navbar-indicator"
-                      transition={{ type: "spring", duration: 0.5 }}
+                      transition={{ type: "spring", duration: 0.4 }}
                     />
                   )}
                 </Link>
@@ -90,8 +92,11 @@ export function Navbar() {
             })}
           </nav>
 
-          {/* Right Actions */}
+          {/* Right Actions: Legal Resources Hub Drawer + Theme Toggle + Auth */}
           <div className="flex items-center space-x-2">
+            {/* Top-Right LegalEase Drawer Button */}
+            <LegalResourcesSidebar />
+
             <ModeToggle />
             <UserProfile />
 
@@ -99,7 +104,7 @@ export function Navbar() {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden text-foreground"
+              className="md:hidden text-foreground hover:bg-forest-100 dark:hover:bg-forest-800"
               onClick={() => setIsOpen(!isOpen)}
               aria-label="Toggle menu"
             >
@@ -109,15 +114,15 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Navigation Drawer */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="md:hidden border-b border-border bg-background px-4 py-4 space-y-2 shadow-lg"
+            transition={{ duration: 0.15 }}
+            className="md:hidden border-b border-border bg-background px-4 py-4 space-y-1.5 shadow-hover-card"
           >
             <nav className="flex flex-col space-y-1">
               {navItems.map((item) => {
@@ -129,8 +134,8 @@ export function Navbar() {
                     href={item.href}
                     className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                       isActive
-                        ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 font-semibold"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        ? "bg-forest-100 dark:bg-forest-800 text-forest-950 dark:text-forest-50 font-semibold"
+                        : "text-muted-foreground hover:bg-forest-100/50 hover:text-foreground"
                     }`}
                   >
                     {item.name}

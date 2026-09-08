@@ -24,6 +24,17 @@ const config = {
         heading: ["var(--font-heading)", "Outfit", "sans-serif"],
       },
       colors: {
+        forest: {
+          50: "#F7F5EF",
+          100: "#E7EFE9",
+          500: "#3F6B54",
+          800: "#173D2E",
+          950: "#0F2B20",
+        },
+        gold: {
+          500: "#B8860B",
+          700: "#8C6708",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -65,13 +76,10 @@ const config = {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        legal: {
-          navy: "#0B132B",
-          dark: "#060A17",
-          surface: "#0D1527",
-          gold: "#F59E0B",
-          amber: "#B45309",
-        },
+      },
+      boxShadow: {
+        "rest-card": "none",
+        "hover-card": "0 4px 12px rgba(15, 43, 32, 0.08)",
       },
       borderRadius: {
         lg: "var(--radius)",

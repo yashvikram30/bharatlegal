@@ -1,202 +1,166 @@
-import { CheckCircle2, Clock, FileText } from "lucide-react"
+import { CheckCircle2, Clock, FileText } from "lucide-react";
 
 type CaseData = {
-  id: string
-  caseNumber: string
-  court: string
-  type: string
-  stage: "Filed" | "Hearing" | "Evidence" | "Arguments" | "Judgment" | "Closed"
-  status: "Active" | "Pending" | "Delayed" | "Completed"
-  progress: number
-  lastUpdated: string
-  nextHearing?: string
-}
+  id: string;
+  caseNumber: string;
+  court: string;
+  type: string;
+  stage: "Filed" | "Hearing" | "Evidence" | "Arguments" | "Judgment" | "Closed";
+  status: "Active" | "Pending" | "Delayed" | "Completed";
+  progress: number;
+  lastUpdated: string;
+  nextHearing?: string;
+};
 
 type TimelineEvent = {
-  date: string
-  title: string
-  description: string
-  status: "completed" | "current" | "upcoming"
-}
+  date: string;
+  title: string;
+  description: string;
+  status: "completed" | "current" | "upcoming";
+};
 
 export function CaseTimeline({ caseData }: { caseData: CaseData }) {
-  // Generate mock timeline events based on case stage
-  const generateTimelineEvents = (caseData: CaseData): TimelineEvent[] => {
+  const generateTimelineEvents = (data: CaseData): TimelineEvent[] => {
     const events: TimelineEvent[] = [
       {
-        date: "2022-09-15",
-        title: "Case Filed",
-        description: "Initial petition filed with the court",
+        date: "2023-01-15",
+        title: "Petition Registered",
+        description: "Initial petition verified and CNR registered with the court registry.",
         status: "completed",
       },
       {
-        date: "2022-10-20",
-        title: "First Hearing",
-        description: "Preliminary hearing conducted",
+        date: "2023-03-20",
+        title: "Notice Issued & Service Complete",
+        description: "Summons and notice issued to the respondent party.",
         status: "completed",
       },
-    ]
+    ];
 
-    // Add events based on case stage
-    if (caseData.stage === "Filed") {
+    if (data.stage === "Filed") {
       events.push({
-        date: caseData.nextHearing || "Pending",
-        title: "Upcoming Hearing",
-        description: "Waiting for court to schedule first hearing",
-        status: "upcoming",
-      })
-    } else if (caseData.stage === "Hearing" || caseData.stage === "Evidence") {
-      events.push({
-        date: "2023-01-10",
-        title: "Evidence Submission",
-        description: "Parties submitted documentary evidence",
-        status: "completed",
-      })
-      events.push({
-        date: caseData.nextHearing || "2023-12-10",
-        title: "Next Hearing",
-        description: "Examination of witnesses scheduled",
+        date: data.nextHearing || "Pending",
+        title: "First Admission Hearing",
+        description: "Scheduled before the roster bench for preliminary hearing.",
         status: "current",
-      })
-    } else if (caseData.stage === "Arguments") {
+      });
+    } else if (data.stage === "Hearing" || data.stage === "Evidence") {
       events.push({
-        date: "2023-01-10",
-        title: "Evidence Submission",
-        description: "Parties submitted documentary evidence",
+        date: "2023-08-10",
+        title: "Pleadings & Affidavits Filed",
+        description: "Written statement and replication taken on judicial record.",
         status: "completed",
-      })
+      });
       events.push({
-        date: "2023-05-22",
-        title: "Witness Examination",
-        description: "Examination of witnesses completed",
+        date: data.nextHearing || "2024-03-10",
+        title: "Witness Examination & Evidence",
+        description: "Cross-examination of witnesses listed for current proceedings.",
+        status: "current",
+      });
+    } else if (data.stage === "Arguments") {
+      events.push({
+        date: "2023-08-10",
+        title: "Evidence Concluded",
+        description: "Affidavits in evidence and cross-examinations marked complete.",
         status: "completed",
-      })
+      });
       events.push({
-        date: caseData.nextHearing || "2023-11-25",
+        date: data.nextHearing || "2024-03-04",
         title: "Final Arguments",
-        description: "Final arguments to be presented",
+        description: "Senior advocates to present concluding oral and written submissions.",
         status: "current",
-      })
-    } else if (caseData.stage === "Judgment") {
+      });
+    } else if (data.stage === "Judgment") {
       events.push({
-        date: "2023-01-10",
-        title: "Evidence Submission",
-        description: "Parties submitted documentary evidence",
-        status: "completed",
-      })
-      events.push({
-        date: "2023-05-22",
-        title: "Witness Examination",
-        description: "Examination of witnesses completed",
-        status: "completed",
-      })
-      events.push({
-        date: "2023-09-15",
+        date: "2023-11-15",
         title: "Arguments Concluded",
-        description: "Final arguments presented by both parties",
+        description: "Final arguments concluded by both parties.",
         status: "completed",
-      })
+      });
       events.push({
-        date: caseData.nextHearing || "2023-12-20",
+        date: data.nextHearing || "2024-03-15",
         title: "Judgment Reserved",
-        description: "Court has reserved judgment",
+        description: "Court has reserved order for formal pronouncement.",
         status: "current",
-      })
-    } else if (caseData.stage === "Closed") {
+      });
+    } else if (data.stage === "Closed") {
       events.push({
-        date: "2023-01-10",
-        title: "Evidence Submission",
-        description: "Parties submitted documentary evidence",
-        status: "completed",
-      })
-      events.push({
-        date: "2023-05-22",
-        title: "Witness Examination",
-        description: "Examination of witnesses completed",
-        status: "completed",
-      })
-      events.push({
-        date: "2023-07-15",
+        date: "2023-10-15",
         title: "Arguments Concluded",
-        description: "Final arguments presented by both parties",
+        description: "Final arguments concluded.",
         status: "completed",
-      })
+      });
       events.push({
-        date: "2023-09-30",
-        title: "Judgment Delivered",
-        description: "Final judgment delivered by the court",
+        date: "2023-12-18",
+        title: "Final Judgment Delivered",
+        description: "Certified copy of decree and judgment prepared.",
         status: "completed",
-      })
+      });
     }
 
-    return events
-  }
+    return events;
+  };
 
-  const timelineEvents = generateTimelineEvents(caseData)
+  const timelineEvents = generateTimelineEvents(caseData);
 
   return (
-    <div className="relative">
+    <div className="relative pl-2">
       {/* Vertical line */}
-      <div className="absolute left-7 top-0 bottom-0 w-0.5 bg-slate-200" />
+      <div className="absolute left-[3.25rem] top-4 bottom-4 w-0.5 bg-border" />
 
-      <div className="space-y-8">
+      <div className="space-y-6">
         {timelineEvents.map((event, index) => (
           <div key={index} className="relative flex items-start gap-4">
-            <div className="absolute left-7 top-7 bottom-0 w-0.5 bg-slate-200" />
-
-            <div className="flex flex-col items-center">
-              <div className="w-14 text-xs text-slate-500 text-center">
+            <div className="w-16 text-right shrink-0 pt-0.5">
+              <span className="text-xs font-semibold text-muted-foreground block">
                 {event.date !== "Pending"
                   ? new Date(event.date).toLocaleDateString("en-IN", {
                       day: "numeric",
                       month: "short",
                     })
                   : "Pending"}
-              </div>
-              <div
-                className={`mt-1 flex h-7 w-7 items-center justify-center rounded-full border ${
-                  event.status === "completed"
-                    ? "bg-green-100 border-green-500"
-                    : event.status === "current"
-                      ? "bg-blue-100 border-blue-500"
-                      : "bg-slate-100 border-slate-300"
-                }`}
-              >
-                {event.status === "completed" ? (
-                  <CheckCircle2 className="h-5 w-5 text-green-500" />
-                ) : event.status === "current" ? (
-                  <Clock className="h-5 w-5 text-blue-500" />
-                ) : (
-                  <FileText className="h-5 w-5 text-slate-400" />
-                )}
-              </div>
+              </span>
+              <span className="text-[10px] text-muted-foreground/60 block">
+                {event.date !== "Pending" ? new Date(event.date).getFullYear() : ""}
+              </span>
             </div>
 
             <div
-              className={`flex-1 rounded-lg border p-4 ${
+              className={`relative z-10 flex h-7 w-7 items-center justify-center rounded-full border shrink-0 ${
                 event.status === "completed"
-                  ? "bg-green-50 border-green-100"
+                  ? "bg-forest-100 text-forest-800 dark:bg-forest-800 dark:text-forest-100 border-forest-500"
                   : event.status === "current"
-                    ? "bg-blue-50 border-blue-100"
-                    : "bg-slate-50 border-slate-100"
+                  ? "bg-gold-500/15 text-gold-700 dark:text-gold-500 border-gold-500"
+                  : "bg-muted text-muted-foreground border-border"
               }`}
             >
-              <h3
-                className={`font-medium ${
-                  event.status === "completed"
-                    ? "text-green-800"
-                    : event.status === "current"
-                      ? "text-blue-800"
-                      : "text-slate-800"
-                }`}
-              >
+              {event.status === "completed" ? (
+                <CheckCircle2 className="h-4 w-4 text-forest-800 dark:text-forest-100" />
+              ) : event.status === "current" ? (
+                <Clock className="h-4 w-4 text-gold-700 dark:text-gold-500" />
+              ) : (
+                <FileText className="h-4 w-4 text-muted-foreground" />
+              )}
+            </div>
+
+            <div
+              className={`flex-1 rounded-xl border p-4 transition-colors ${
+                event.status === "completed"
+                  ? "bg-card border-border"
+                  : event.status === "current"
+                  ? "bg-card border-forest-500 shadow-rest-card"
+                  : "bg-muted/40 border-border"
+              }`}
+            >
+              <h3 className="text-sm font-bold text-foreground font-heading">
                 {event.title}
               </h3>
-              <p className="text-sm text-slate-600 mt-1">{event.description}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1 leading-relaxed">
+                {event.description}
+              </p>
             </div>
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }
