@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useSession, signIn } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar,
-  Filter,
   Search,
   SortAsc,
   SortDesc,
@@ -15,431 +15,1054 @@ import {
   AlertCircle,
   FileText,
   Building,
+  ExternalLink,
+  Trash2,
+  Edit2,
+  LogIn,
+  Check,
+  X,
+  ChevronRight,
+  ShieldCheck,
+  RefreshCw,
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CaseTimeline } from "@/components/case-timeline";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { CaseTimeline, CaseData } from "@/components/case-timeline";
+import { parseCNR } from "@/lib/courts/cnr";
+import { CaseStage, CaseStatus, TrackedCaseDTO } from "@/lib/courts/types";
 
-type CaseItem = {
-  id: string;
-  caseNumber: string;
-  court: string;
-  type: string;
-  stage: "Filed" | "Hearing" | "Evidence" | "Arguments" | "Judgment" | "Closed";
-  status: "Active" | "Pending" | "Delayed" | "Completed";
-  progress: number;
-  lastUpdated: string;
-  nextHearing?: string;
-  judgeName?: string;
-  opponentName?: string;
-};
+// Curated demo cases for guest preview
+const DEMO_CASES: TrackedCaseDTO[] = [
+  {
+    id: "demo-1",
+    caseNumber: "DLHC01-004521-2023",
+    cnrNumber: "DLHC01-004521-2023",
+    title: "Civil Writ Petition (Injunction & Property)",
+    court: "Delhi High Court (Principal Bench)",
+    caseType: "Civil",
+    stage: "Hearing",
+    status: "Active",
+    progress: 45,
+    filingDate: "2023-04-10",
+    nextHearing: "2024-11-20",
+    judgeName: "Hon'ble Justice S. K. Kaul",
+    petitioner: "Yash Vikram (Authenticated Petitioner)",
+    opponentName: "Municipal Corporation of Delhi",
+    lastOrderUrl:
+      "https://indian-high-court-judgments.s3.ap-south-1.amazonaws.com/delhi/2023/004521.pdf",
+    notes: "Interim stay granted on demolition. Notice issued to respondent.",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "demo-2",
+    caseNumber: "MHCC02-009182-2023",
+    cnrNumber: "MHCC02-009182-2023",
+    title: "Commercial Contract Breach Suit",
+    court: "District & Sessions Court, Mumbai",
+    caseType: "Corporate",
+    stage: "Arguments",
+    status: "Active",
+    progress: 80,
+    filingDate: "2023-06-15",
+    nextHearing: "2024-12-05",
+    judgeName: "Additional District Judge P. Verma",
+    petitioner: "Applicant Commercial Entity",
+    opponentName: "Tech Logistics Pvt. Ltd.",
+    lastOrderUrl: null,
+    notes: "Affidavits in evidence completed. Final arguments listed.",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "demo-3",
+    caseNumber: "KA03FC-001290-2022",
+    cnrNumber: "KA03FC-001290-2022",
+    title: "Consumer Dispute (Deficiency in Banking Service)",
+    court: "District Consumer Commission, Bengaluru",
+    caseType: "Consumer",
+    stage: "Evidence",
+    status: "Active",
+    progress: 60,
+    filingDate: "2022-09-01",
+    nextHearing: "2024-11-28",
+    judgeName: "President, DCDRC Bench 1",
+    opponentName: "Nationalized Commercial Bank",
+    lastOrderUrl: null,
+    notes: "Bank submitted reply. Rejoinder to be filed on next hearing date.",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
 
 export default function DashboardPage() {
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCase, setSelectedCase] = useState<CaseItem | null>(null);
+  const { data: session, status: authStatus } = useSession();
 
-  // Mock curated cases for Indian courts
-  const cases: CaseItem[] = [
-    {
-      id: "1",
-      caseNumber: "CNR: DLHC01-004521-2023",
-      court: "Delhi High Court",
-      type: "Civil Writ Petition",
-      stage: "Hearing",
-      status: "Active",
-      progress: 45,
-      lastUpdated: "2024-02-15",
-      nextHearing: "2024-03-10",
-      judgeName: "Hon'ble Justice S. K. Kaul",
-      opponentName: "Municipal Corporation of Delhi",
-    },
-    {
-      id: "2",
-      caseNumber: "CNR: MHCC02-009182-2023",
-      court: "District & Sessions Court, Mumbai",
-      type: "Criminal Bail Application",
-      stage: "Arguments",
-      status: "Active",
-      progress: 60,
-      lastUpdated: "2024-02-20",
-      nextHearing: "2024-03-04",
-      judgeName: "Additional District Judge P. Verma",
-      opponentName: "State of Maharashtra",
-    },
-    {
-      id: "3",
-      caseNumber: "CNR: KA03-CC-0129-2022",
-      court: "District Consumer Disputes Redressal Commission, Bengaluru",
-      type: "Consumer Dispute (Deficiency in Service)",
-      stage: "Evidence",
-      status: "Active",
-      progress: 75,
-      lastUpdated: "2024-01-28",
-      nextHearing: "2024-03-18",
-      judgeName: "President, Consumer Forum",
-      opponentName: "Apex Electronics Pvt Ltd",
-    },
-    {
-      id: "4",
-      caseNumber: "CNR: NCLT-DEL-0891-2023",
-      court: "National Company Law Tribunal (NCLT), New Delhi",
-      type: "Insolvency & Bankruptcy (Sec 9 IBC)",
-      stage: "Filed",
-      status: "Pending",
-      progress: 20,
-      lastUpdated: "2024-02-05",
-      nextHearing: "2024-03-25",
-      judgeName: "Bench-II, NCLT",
-      opponentName: "Delta Logistics Corp",
-    },
-    {
-      id: "5",
-      caseNumber: "CNR: TNCH01-002319-2022",
-      court: "Family Court, Chennai",
-      type: "Mutual Consent Petitions",
-      stage: "Judgment",
-      status: "Completed",
-      progress: 100,
-      lastUpdated: "2023-12-18",
-      judgeName: "Principal Judge, Family Court",
-      opponentName: "Respondent",
-    },
-  ];
+  const [cases, setCases] = useState<TrackedCaseDTO[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedCase, setSelectedCase] = useState<TrackedCaseDTO | null>(null);
+
+  // Filters & sorting
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterStage, setFilterStage] = useState<string>("all");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  // Add Case Modal state
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cnrInput, setCnrInput] = useState("");
+  const [titleInput, setTitleInput] = useState("");
+  const [courtInput, setCourtInput] = useState("");
+  const [caseTypeInput, setCaseTypeInput] = useState("Civil");
+  const [stageInput, setStageInput] = useState<CaseStage>("Hearing");
+  const [nextHearingInput, setNextHearingInput] = useState("");
+  const [opponentInput, setOpponentInput] = useState("");
+  const [judgeInput, setJudgeInput] = useState("");
+  const [notesInput, setNotesInput] = useState("");
+
+  // Live CNR parsing when typing in modal
+  const cnrDetails = useMemo(() => parseCNR(cnrInput), [cnrInput]);
+
+  // Automatically prefill court name if valid CNR detected
+  useEffect(() => {
+    if (cnrDetails) {
+      if (!courtInput) {
+        setCourtInput(cnrDetails.courtName);
+      }
+      if (!titleInput) {
+        setTitleInput(
+          `${cnrDetails.courtType} Matter (${cnrDetails.filingNumber}/${cnrDetails.filingYear})`
+        );
+      }
+    }
+  }, [cnrDetails, courtInput, titleInput]);
+
+  // Fetch cases from live API
+  const fetchCases = useCallback(async (showToast = false) => {
+    try {
+      if (showToast) setIsRefreshing(true);
+      const res = await fetch("/api/cases");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.cases)) {
+          if (data.authenticated && data.cases.length > 0) {
+            setCases(data.cases);
+          } else if (data.authenticated && data.cases.length === 0) {
+            setCases([]);
+          } else {
+            // Unauthenticated guest preview
+            setCases(DEMO_CASES);
+          }
+        }
+      }
+      if (showToast) toast.success("Case diary refreshed");
+    } catch (err) {
+      console.error("[Fetch Cases Error]:", err);
+      // Fallback to demo cases on connection error
+      setCases(DEMO_CASES);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCases();
+  }, [fetchCases, authStatus]);
+
+  // Handle Add Case Form submission
+  const handleCreateCase = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!cnrInput.trim() && !titleInput.trim()) {
+      toast.error("Please provide either a CNR number or a Case Title");
+      return;
+    }
+
+    if (authStatus !== "authenticated") {
+      toast.error("Please sign in to save persistent cases to your litigation diary");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/cases", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          caseNumber: cnrInput.trim() || titleInput.trim(),
+          title: titleInput.trim() || cnrInput.trim(),
+          court: courtInput.trim() || "District Court",
+          caseType: caseTypeInput,
+          stage: stageInput,
+          status: "Active",
+          nextHearingDate: nextHearingInput || null,
+          opponentName: opponentInput.trim() || null,
+          judgeName: judgeInput.trim() || null,
+          notes: notesInput.trim() || "",
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success && data.case) {
+        setCases((prev) => [data.case, ...prev.filter((c) => !c.id.startsWith("demo-"))]);
+        toast.success("Case added to your litigation diary!");
+        setIsAddModalOpen(false);
+        // Reset inputs
+        setCnrInput("");
+        setTitleInput("");
+        setCourtInput("");
+        setNextHearingInput("");
+        setOpponentInput("");
+        setJudgeInput("");
+        setNotesInput("");
+      } else {
+        toast.error(data.error || "Failed to add case");
+      }
+    } catch (err) {
+      console.error("[Add Case Error]:", err);
+      toast.error("Failed to connect to database");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle case deletion
+  const handleDeleteCase = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (id.startsWith("demo-")) {
+      setCases((prev) => prev.filter((c) => c.id !== id));
+      if (selectedCase?.id === id) setSelectedCase(null);
+      toast.success("Demo case removed");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/cases/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setCases((prev) => prev.filter((c) => c.id !== id));
+        if (selectedCase?.id === id) setSelectedCase(null);
+        toast.success("Case removed from diary");
+      } else {
+        toast.error("Failed to delete case");
+      }
+    } catch (err) {
+      toast.error("Error deleting case");
+    }
+  };
+
+  // Quick Stage Update
+  const handleStageChange = async (id: string, newStage: CaseStage, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (id.startsWith("demo-")) {
+      setCases((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, stage: newStage } : c))
+      );
+      if (selectedCase?.id === id) {
+        setSelectedCase((prev) => (prev ? { ...prev, stage: newStage } : null));
+      }
+      toast.success(`Stage updated to ${newStage}`);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/cases/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stage: newStage }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.case) {
+          setCases((prev) => prev.map((c) => (c.id === id ? data.case : c)));
+          if (selectedCase?.id === id) setSelectedCase(data.case);
+          toast.success(`Stage transitioned to ${newStage}`);
+        }
+      }
+    } catch (err) {
+      toast.error("Failed to update case stage");
+    }
+  };
 
   // Filter and sort cases
-  const filteredCases = cases
-    .filter(
-      (c) =>
-        (filterStatus === "all" || c.status === filterStatus) &&
-        (searchQuery === "" ||
-          c.caseNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          c.court.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          c.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (c.opponentName && c.opponentName.toLowerCase().includes(searchQuery.toLowerCase())))
-    )
-    .sort((a, b) => {
-      const dateA = new Date(a.lastUpdated).getTime();
-      const dateB = new Date(b.lastUpdated).getTime();
-      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
-    });
+  const filteredCases = useMemo(() => {
+    return cases
+      .filter((c) => {
+        const matchesStatus = filterStatus === "all" || c.status.toLowerCase() === filterStatus.toLowerCase();
+        const matchesStage = filterStage === "all" || c.stage === filterStage;
+        const q = searchQuery.toLowerCase();
+        const matchesSearch =
+          !q ||
+          c.caseNumber.toLowerCase().includes(q) ||
+          c.title.toLowerCase().includes(q) ||
+          c.court.toLowerCase().includes(q) ||
+          c.caseType.toLowerCase().includes(q) ||
+          (c.opponentName && c.opponentName.toLowerCase().includes(q)) ||
+          (c.judgeName && c.judgeName.toLowerCase().includes(q));
+
+        return matchesStatus && matchesStage && matchesSearch;
+      })
+      .sort((a, b) => {
+        const dateA = new Date(a.nextHearing || a.updatedAt).getTime();
+        const dateB = new Date(b.nextHearing || b.updatedAt).getTime();
+        return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+      });
+  }, [cases, filterStatus, filterStage, searchQuery, sortOrder]);
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "Active":
+    switch (status.toLowerCase()) {
+      case "active":
         return "bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border-emerald-500/20";
-      case "Pending":
+      case "pending":
         return "bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-500/20";
-      case "Delayed":
+      case "delayed":
         return "bg-rose-500/10 text-rose-800 dark:text-rose-300 border-rose-500/20";
-      case "Completed":
+      case "completed":
         return "bg-forest-100 text-forest-800 dark:bg-forest-800 dark:text-forest-100 border-forest-500/20";
       default:
         return "bg-muted text-muted-foreground border-border";
     }
   };
 
-  // Dynamic metrics
-  const totalActive = cases.filter((c) => c.status === "Active").length;
-  const totalPending = cases.filter((c) => c.status === "Pending").length;
-  const totalCompleted = cases.filter((c) => c.status === "Completed").length;
-  const upcomingHearings = cases.filter((c) => c.nextHearing).length;
+  const getStageBadge = (stage: CaseStage) => {
+    switch (stage) {
+      case "Filed":
+        return "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/30";
+      case "Hearing":
+        return "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30";
+      case "Evidence":
+        return "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/30";
+      case "Arguments":
+        return "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30";
+      case "Judgment":
+        return "bg-gold-500/15 text-gold-800 dark:text-gold-300 border-gold-500/30 font-semibold";
+      case "Closed":
+        return "bg-muted text-muted-foreground border-border";
+    }
+  };
+
+  // Dynamic KPI Metrics
+  const totalActive = cases.filter((c) => c.status.toLowerCase() === "active").length;
+  const totalUpcoming = cases.filter((c) => c.nextHearing).length;
+  const inArgumentsOrJudgment = cases.filter(
+    (c) => c.stage === "Arguments" || c.stage === "Judgment"
+  ).length;
+  const totalCompleted = cases.filter((c) => c.stage === "Closed" || c.status.toLowerCase() === "completed").length;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-10 max-w-6xl space-y-8">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      {/* 1. Header & Primary CTA */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/60 pb-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 border border-forest-500/20 mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-forest-100 dark:bg-forest-900 text-forest-800 dark:text-gold-400 border border-gold-500/30 mb-2">
             <Scale className="w-3.5 h-3.5" />
-            <span>Litigation Management</span>
+            <span>eCourts CNR Intelligence & Case Diary</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-foreground font-heading">
-            Case Tracker Dashboard
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground font-heading">
+            Litigation Case Tracker
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Track CNR numbers, court stages, upcoming hearings, and procedural timelines.
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+            Track 16-character CNR numbers, procedural stages, AWS Open Data judgment orders, and upcoming hearings.
           </p>
         </div>
 
-        <Button className="bg-forest-800 text-white hover:bg-forest-950 dark:bg-gold-500 dark:text-forest-950 dark:hover:bg-gold-500/90 font-medium flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-gold-700">
-          <Plus className="w-4 h-4" /> Add Case
-        </Button>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fetchCases(true)}
+            disabled={isRefreshing}
+            className="h-9 px-3 rounded-xl border-border/70 hover:bg-muted text-xs flex items-center gap-1.5"
+            title="Refresh case diary"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+            <span className="hidden sm:inline">Refresh</span>
+          </Button>
+
+          <Button
+            onClick={() => setIsAddModalOpen(true)}
+            className="flex-1 sm:flex-initial h-9 bg-forest-800 hover:bg-forest-700 text-forest-50 dark:text-gold-300 font-heading font-semibold text-xs rounded-xl border border-gold-500/40 shadow-xs flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99]"
+          >
+            <Plus className="w-4 h-4 text-gold-500" />
+            <span>Add New Case</span>
+          </Button>
+        </div>
       </div>
 
-      {/* Metric Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-card border border-border rounded-xl p-4 sm:p-5 space-y-1">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Total Active Cases
+      {/* 2. Guest Mode Notice if unauthenticated */}
+      {authStatus !== "authenticated" && (
+        <div className="p-4 rounded-xl bg-forest-50/80 dark:bg-forest-900/40 border border-gold-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-gold-400 shrink-0">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm font-semibold text-foreground">
+                You are currently viewing demo court matters in Guest Mode
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Sign in to save persistent litigation matters, track CNR hearings, and attach official judgment copies.
+              </p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => signIn()}
+            className="h-8 bg-forest-800 hover:bg-forest-700 text-white dark:text-gold-300 text-xs rounded-lg px-3 shrink-0 flex items-center gap-1.5"
+          >
+            <LogIn className="w-3.5 h-3.5" />
+            <span>Sign In to Save</span>
+          </Button>
+        </div>
+      )}
+
+      {/* 3. Metric KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-card border border-border/80 rounded-2xl p-4 sm:p-5 space-y-1 shadow-2xs">
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+            Active Litigation
           </p>
-          <p className="text-2xl sm:text-3xl font-extrabold text-forest-800 dark:text-forest-50 font-heading">
+          <p className="text-2xl sm:text-3xl font-extrabold text-foreground font-heading">
             {totalActive}
           </p>
+          <p className="text-[11px] text-muted-foreground">Matters currently pending</p>
         </div>
-        <div className="bg-card border border-border rounded-xl p-4 sm:p-5 space-y-1">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+
+        <div className="bg-card border border-border/80 rounded-2xl p-4 sm:p-5 space-y-1 shadow-2xs">
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
             Upcoming Hearings
           </p>
-          <p className="text-2xl sm:text-3xl font-extrabold text-forest-800 dark:text-gold-500 font-heading">
-            {upcomingHearings}
+          <p className="text-2xl sm:text-3xl font-extrabold text-forest-800 dark:text-gold-400 font-heading">
+            {totalUpcoming}
           </p>
+          <p className="text-[11px] text-muted-foreground">Scheduled on roster</p>
         </div>
-        <div className="bg-card border border-border rounded-xl p-4 sm:p-5 space-y-1">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Pending Filings
+
+        <div className="bg-card border border-border/80 rounded-2xl p-4 sm:p-5 space-y-1 shadow-2xs">
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+            Arguments / Judgment
           </p>
-          <p className="text-2xl sm:text-3xl font-extrabold text-forest-800 dark:text-forest-50 font-heading">
-            {totalPending}
+          <p className="text-2xl sm:text-3xl font-extrabold text-foreground font-heading">
+            {inArgumentsOrJudgment}
           </p>
+          <p className="text-[11px] text-muted-foreground">Advanced procedural stage</p>
         </div>
-        <div className="bg-card border border-border rounded-xl p-4 sm:p-5 space-y-1">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Disposed / Completed
+
+        <div className="bg-card border border-border/80 rounded-2xl p-4 sm:p-5 space-y-1 shadow-2xs">
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+            Closed / Disposed
           </p>
-          <p className="text-2xl sm:text-3xl font-extrabold text-forest-800 dark:text-forest-50 font-heading">
+          <p className="text-2xl sm:text-3xl font-extrabold text-foreground font-heading">
             {totalCompleted}
           </p>
+          <p className="text-[11px] text-muted-foreground">Concluded matters</p>
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-        <div className="md:col-span-6 relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+      {/* 4. Filter, Search & Sorting Bar */}
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+        <div className="relative flex-1 max-w-md">
+          <Search className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
           <Input
-            placeholder="Search by CNR number, court, case type, or parties..."
-            className="pl-9 bg-card border-border focus-visible:ring-2 focus-visible:ring-gold-700"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by CNR, Title, Court, Opponent, or Judge..."
+            className="h-10 pl-9 pr-3 text-xs bg-card border-border/80 rounded-xl"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
-        <div className="md:col-span-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Stage filter */}
+          <Select value={filterStage} onValueChange={setFilterStage}>
+            <SelectTrigger className="h-9 text-xs w-[130px] rounded-xl bg-card border-border/80">
+              <SelectValue placeholder="All Stages" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Stages</SelectItem>
+              <SelectItem value="Filed">Filed</SelectItem>
+              <SelectItem value="Hearing">Hearing</SelectItem>
+              <SelectItem value="Evidence">Evidence</SelectItem>
+              <SelectItem value="Arguments">Arguments</SelectItem>
+              <SelectItem value="Judgment">Judgment</SelectItem>
+              <SelectItem value="Closed">Closed</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Status filter */}
           <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="bg-card border-border">
-              <SelectValue placeholder="Filter by status" />
+            <SelectTrigger className="h-9 text-xs w-[120px] rounded-xl bg-card border-border/80">
+              <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="Active">Active Hearing</SelectItem>
-              <SelectItem value="Pending">Pending Notice</SelectItem>
-              <SelectItem value="Delayed">Adjourned / Delayed</SelectItem>
-              <SelectItem value="Completed">Disposed</SelectItem>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="Active">Active</SelectItem>
+              <SelectItem value="Pending">Pending</SelectItem>
+              <SelectItem value="Delayed">Delayed</SelectItem>
+              <SelectItem value="Completed">Completed</SelectItem>
             </SelectContent>
           </Select>
-        </div>
 
-        <div className="md:col-span-3">
-          <Select
-            value={sortOrder}
-            onValueChange={(value) => setSortOrder(value as "asc" | "desc")}
+          {/* Sort order toggle */}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))}
+            className="h-9 w-9 rounded-xl border-border/80 hover:bg-muted shrink-0"
+            title={`Sort ${sortOrder === "asc" ? "Latest first" : "Earliest first"}`}
           >
-            <SelectTrigger className="bg-card border-border">
-              <SelectValue placeholder="Sort by date" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="desc">Updated: Newest First</SelectItem>
-              <SelectItem value="asc">Updated: Oldest First</SelectItem>
-            </SelectContent>
-          </Select>
+            {sortOrder === "asc" ? (
+              <SortAsc className="w-4 h-4 text-muted-foreground" />
+            ) : (
+              <SortDesc className="w-4 h-4 text-muted-foreground" />
+            )}
+          </Button>
         </div>
       </div>
 
-      {/* Case Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredCases.length > 0 ? (
-          filteredCases.map((caseItem) => (
+      {/* 5. Case Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, idx) => (
             <div
-              key={caseItem.id}
-              onClick={() => setSelectedCase(caseItem)}
-              className={`cursor-pointer rounded-xl p-5 border transition-all duration-200 bg-card ${
-                selectedCase?.id === caseItem.id
-                  ? "border-forest-500 shadow-hover-card ring-1 ring-forest-500"
-                  : "border-border hover:border-forest-500 hover:shadow-hover-card"
-              }`}
+              key={idx}
+              className="p-5 rounded-2xl border border-border bg-card space-y-3 animate-pulse"
             >
-              <div className="space-y-4">
-                <div className="flex justify-between items-start gap-2">
-                  <div className="space-y-0.5">
-                    <p className="text-xs font-mono font-semibold text-muted-foreground">
-                      {caseItem.caseNumber}
-                    </p>
-                    <h3 className="text-base font-bold text-foreground font-heading">
-                      {caseItem.type}
-                    </h3>
-                  </div>
-                  <span
-                    className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${getStatusBadge(
-                      caseItem.status
-                    )}`}
-                  >
-                    {caseItem.status}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Building className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate">{caseItem.court}</span>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-xs text-muted-foreground font-medium">
-                    <span>Stage: {caseItem.stage}</span>
-                    <span>{caseItem.progress}%</span>
-                  </div>
-                  <div className="w-full bg-forest-100 dark:bg-forest-800 rounded-full h-1.5 overflow-hidden">
-                    <div
-                      className="bg-forest-800 dark:bg-gold-500 h-full rounded-full transition-all duration-300"
-                      style={{ width: `${caseItem.progress}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Next Hearing Date */}
-                {caseItem.nextHearing && (
-                  <div className="flex items-center justify-between text-xs pt-3 border-t border-border">
-                    <span className="flex items-center gap-1.5 text-muted-foreground font-medium">
-                      <Calendar className="w-3.5 h-3.5 text-forest-800 dark:text-gold-500" />
-                      Next Hearing:
-                    </span>
-                    <span className="font-semibold text-foreground">
-                      {caseItem.nextHearing}
-                    </span>
-                  </div>
-                )}
-              </div>
+              <div className="h-4 bg-muted/80 rounded w-1/3" />
+              <div className="h-6 bg-muted/60 rounded w-3/4" />
+              <div className="h-4 bg-muted/40 rounded w-1/2" />
+              <div className="h-10 bg-muted/20 rounded mt-4" />
             </div>
           ))
-        ) : cases.length === 0 ? (
-          <div className="col-span-full text-center py-16 px-4 bg-card border border-dashed border-border rounded-2xl space-y-4">
-            <div className="w-12 h-12 rounded-xl bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-gold-500 flex items-center justify-center mx-auto text-xl font-bold">
+        ) : filteredCases.length > 0 ? (
+          filteredCases.map((c) => {
+            const isSelected = selectedCase?.id === c.id;
+            return (
+              <div
+                key={c.id}
+                onClick={() => setSelectedCase(c)}
+                className={`group relative p-5 rounded-2xl border bg-card transition-all cursor-pointer flex flex-col justify-between shadow-2xs hover:shadow-sm ${
+                  isSelected
+                    ? "border-forest-500/80 ring-2 ring-forest-500/20 dark:border-gold-500/60 dark:ring-gold-500/20"
+                    : "border-border/80 hover:border-gold-500/40"
+                }`}
+              >
+                <div className="space-y-3">
+                  {/* Top Badges */}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-[10px] uppercase font-bold text-muted-foreground px-2 py-0.5 rounded-md bg-muted/70 truncate border border-border/40">
+                      {c.cnrNumber || c.caseNumber}
+                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span
+                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${getStageBadge(
+                          c.stage
+                        )}`}
+                      >
+                        {c.stage}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => handleDeleteCase(c.id, e)}
+                        className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all"
+                        title="Delete from diary"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Title & Court */}
+                  <div>
+                    <h3 className="font-heading font-bold text-sm sm:text-base text-foreground group-hover:text-forest-800 dark:group-hover:text-gold-300 transition-colors line-clamp-2">
+                      {c.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                      <Building className="w-3 h-3 shrink-0 text-muted-foreground/70" />
+                      <span className="truncate">{c.court}</span>
+                    </p>
+                  </div>
+
+                  {/* Opponent & Judge Info */}
+                  {(c.opponentName || c.judgeName) && (
+                    <div className="text-[11px] text-muted-foreground/80 space-y-0.5 pt-1">
+                      {c.opponentName && (
+                        <p className="truncate">
+                          <span className="font-medium text-foreground/80">vs:</span>{" "}
+                          {c.opponentName}
+                        </p>
+                      )}
+                      {c.judgeName && (
+                        <p className="truncate">
+                          <span className="font-medium text-foreground/80">Bench:</span>{" "}
+                          {c.judgeName}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Bottom Footer: Next Hearing & Stage Progress */}
+                <div className="mt-4 pt-3 border-t border-border/60 space-y-2.5">
+                  {/* Progress bar */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                      <span>Procedural Progress</span>
+                      <span className="font-semibold text-foreground">{c.progress}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-forest-700 dark:bg-gold-500 rounded-full transition-all duration-300"
+                        style={{ width: `${c.progress}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Next Hearing & Order URL Link */}
+                  <div className="flex items-center justify-between text-xs pt-1">
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Calendar className="w-3.5 h-3.5 text-forest-700 dark:text-gold-500" />
+                      <span className="text-[11px]">
+                        {c.nextHearing ? `Next: ${c.nextHearing}` : "Hearing: To be listed"}
+                      </span>
+                    </div>
+
+                    {c.lastOrderUrl ? (
+                      <a
+                        href={c.lastOrderUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-forest-700 dark:text-gold-400 hover:underline"
+                        title="View published judgment order from AWS Open Data"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        <span>Order Copy</span>
+                      </a>
+                    ) : (
+                      <span className="text-[11px] font-medium text-muted-foreground/60 flex items-center gap-0.5 group-hover:text-forest-700 dark:group-hover:text-gold-400 transition-colors">
+                        <span>Details</span>
+                        <ChevronRight className="w-3 h-3" />
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <div className="col-span-full text-center py-16 px-4 bg-card border border-dashed border-border/80 rounded-2xl space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-forest-100 dark:bg-forest-900 border border-gold-500/30 text-gold-500 flex items-center justify-center mx-auto text-xl font-bold">
               ⚖
             </div>
             <div className="space-y-1 max-w-sm mx-auto">
               <p className="text-base font-bold text-foreground font-heading">
-                No Tracked Cases Yet
+                No Tracked Cases Found
               </p>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Add your first Indian court case with its CNR number or court title to monitor upcoming hearing dates and milestones.
+              <p className="text-xs text-muted-foreground">
+                {searchQuery
+                  ? `No cases match "${searchQuery}". Try clearing search or resetting filters.`
+                  : "Add your first Indian court case or enter a 16-character CNR number to monitor proceedings."}
               </p>
             </div>
-            <Button className="bg-forest-800 text-white hover:bg-forest-950 dark:bg-gold-500 dark:text-forest-950 dark:hover:bg-gold-500/90 text-xs">
-              <Plus className="w-3.5 h-3.5 mr-1" /> Add Your First Case
-            </Button>
-          </div>
-        ) : (
-          <div className="col-span-full text-center py-12 bg-card border border-border rounded-xl space-y-3">
-            <p className="text-base font-semibold text-foreground">No matching cases found</p>
-            <p className="text-sm text-muted-foreground">
-              {searchQuery
-                ? `No cases match "${searchQuery}". Try searching with another term.`
-                : "No cases match the selected status filter."}
-            </p>
             <Button
-              variant="outline"
-              size="sm"
               onClick={() => {
-                setSearchQuery("");
-                setFilterStatus("all");
+                if (searchQuery) {
+                  setSearchQuery("");
+                  setFilterStage("all");
+                  setFilterStatus("all");
+                } else {
+                  setIsAddModalOpen(true);
+                }
               }}
-              className="text-xs"
+              className="bg-forest-800 text-white hover:bg-forest-700 dark:bg-gold-500 dark:text-forest-950 text-xs rounded-xl"
             >
-              Reset Filters
+              {searchQuery ? "Reset Filters" : "+ Add Case to Diary"}
             </Button>
           </div>
         )}
       </div>
 
-      {/* Selected Case Timeline & Details Modal Area */}
-      {selectedCase && (
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-card border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm"
-        >
-          <div className="flex justify-between items-start border-b border-border pb-4">
-            <div>
-              <p className="text-xs font-mono font-semibold text-muted-foreground">
-                {selectedCase.caseNumber}
-              </p>
-              <h2 className="text-2xl font-bold text-foreground font-heading">
-                {selectedCase.type}
-              </h2>
-              <p className="text-sm text-muted-foreground">{selectedCase.court}</p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedCase(null)}
-              className="text-xs"
-            >
-              Close Details
-            </Button>
-          </div>
-
-          <Tabs defaultValue="timeline" className="w-full">
-            <TabsList className="bg-forest-100 dark:bg-forest-800 mb-6">
-              <TabsTrigger value="timeline">Procedural Timeline</TabsTrigger>
-              <TabsTrigger value="details">Case Metadata</TabsTrigger>
-              <TabsTrigger value="documents">Filings & Orders</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="timeline">
-              <CaseTimeline caseData={selectedCase} />
-            </TabsContent>
-
-            <TabsContent value="details">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                <div className="p-4 rounded-lg bg-background border border-border space-y-1">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase">
-                    Petitioner / Applicant
-                  </p>
-                  <p className="font-medium text-foreground">Authenticated User</p>
+      {/* 6. Selected Case Modal / Expand Area */}
+      <AnimatePresence>
+        {selectedCase && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 15 }}
+            className="bg-card border border-border/90 rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm"
+          >
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/60 pb-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs font-bold text-forest-700 dark:text-gold-400">
+                    {selectedCase.cnrNumber || selectedCase.caseNumber}
+                  </span>
+                  <span
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${getStageBadge(
+                      selectedCase.stage
+                    )}`}
+                  >
+                    {selectedCase.stage}
+                  </span>
                 </div>
-                <div className="p-4 rounded-lg bg-background border border-border space-y-1">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase">
-                    Respondent / Opponent
-                  </p>
-                  <p className="font-medium text-foreground">
-                    {selectedCase.opponentName || "Not Listed"}
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg bg-background border border-border space-y-1">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase">
-                    Presiding Judge / Forum
-                  </p>
-                  <p className="font-medium text-foreground">
-                    {selectedCase.judgeName || "District Court Judge"}
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg bg-background border border-border space-y-1">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase">
-                    Current Stage
-                  </p>
-                  <p className="font-medium text-foreground">{selectedCase.stage}</p>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="documents">
-              <div className="text-center py-10 border border-dashed border-border rounded-xl space-y-2">
-                <FileText className="w-8 h-8 text-muted-foreground mx-auto" />
-                <p className="text-sm font-semibold text-foreground">No documents attached</p>
-                <p className="text-xs text-muted-foreground">
-                  Upload interim orders, petitions, or notices to link them with this case.
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground font-heading">
+                  {selectedCase.title}
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  {selectedCase.court}
                 </p>
               </div>
-            </TabsContent>
-          </Tabs>
-        </motion.div>
-      )}
+
+              <div className="flex items-center gap-2">
+                {/* Stage switcher */}
+                <Select
+                  value={selectedCase.stage}
+                  onValueChange={(stage: CaseStage) =>
+                    handleStageChange(selectedCase.id, stage, {
+                      stopPropagation: () => {},
+                    } as any)
+                  }
+                >
+                  <SelectTrigger className="h-8 text-xs w-[130px] rounded-lg">
+                    <SelectValue placeholder="Change Stage" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Filed">Filed</SelectItem>
+                    <SelectItem value="Hearing">Hearing</SelectItem>
+                    <SelectItem value="Evidence">Evidence</SelectItem>
+                    <SelectItem value="Arguments">Arguments</SelectItem>
+                    <SelectItem value="Judgment">Judgment</SelectItem>
+                    <SelectItem value="Closed">Closed</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedCase(null)}
+                  className="h-8 text-xs rounded-lg"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+
+            <Tabs defaultValue="timeline" className="w-full">
+              <TabsList className="bg-muted/70 mb-6">
+                <TabsTrigger value="timeline">Procedural Timeline</TabsTrigger>
+                <TabsTrigger value="details">Case Metadata</TabsTrigger>
+                <TabsTrigger value="documents">Filings & Judgments</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="timeline">
+                <CaseTimeline
+                  caseData={{
+                    id: selectedCase.id,
+                    caseNumber: selectedCase.caseNumber,
+                    cnrNumber: selectedCase.cnrNumber,
+                    title: selectedCase.title,
+                    court: selectedCase.court,
+                    type: selectedCase.caseType,
+                    stage: selectedCase.stage,
+                    status: selectedCase.status,
+                    progress: selectedCase.progress,
+                    filingDate: selectedCase.filingDate,
+                    nextHearing: selectedCase.nextHearing,
+                    lastOrderUrl: selectedCase.lastOrderUrl,
+                    timeline: selectedCase.timeline as any,
+                  }}
+                />
+              </TabsContent>
+
+              <TabsContent value="details">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
+                  <div className="p-4 rounded-xl bg-background border border-border/60 space-y-1">
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                      Petitioner / Complainant
+                    </p>
+                    <p className="font-medium text-foreground">
+                      {selectedCase.petitioner || "Self / Complainant"}
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-background border border-border/60 space-y-1">
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                      Respondent / Opponent
+                    </p>
+                    <p className="font-medium text-foreground">
+                      {selectedCase.opponentName || "Not Listed"}
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-background border border-border/60 space-y-1">
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                      Presiding Judge / Bench
+                    </p>
+                    <p className="font-medium text-foreground">
+                      {selectedCase.judgeName || "Roster Bench"}
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-background border border-border/60 space-y-1">
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                      Next Scheduled Hearing
+                    </p>
+                    <p className="font-medium text-forest-700 dark:text-gold-400">
+                      {selectedCase.nextHearing || "Awaiting Listing"}
+                    </p>
+                  </div>
+                  {selectedCase.notes && (
+                    <div className="col-span-full p-4 rounded-xl bg-background border border-border/60 space-y-1">
+                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                        Case Notes & Procedural Strategy
+                      </p>
+                      <p className="text-xs text-foreground leading-relaxed">
+                        {selectedCase.notes}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="documents">
+                <div className="p-6 rounded-xl border border-dashed border-border/80 text-center space-y-3">
+                  <FileText className="w-8 h-8 mx-auto text-muted-foreground/60" />
+                  {selectedCase.lastOrderUrl ? (
+                    <div className="space-y-2">
+                      <p className="text-sm font-bold text-foreground font-heading">
+                        AWS Open Data Judgment Copy Available
+                      </p>
+                      <p className="text-xs text-muted-foreground max-w-md mx-auto">
+                        Official order indexed under open judicial archives (CC-BY-4.0).
+                      </p>
+                      <a
+                        href={selectedCase.lastOrderUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl bg-forest-800 hover:bg-forest-700 text-white dark:text-gold-300"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>Download Certified Order PDF</span>
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-foreground">
+                        No published order attached yet
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        High Court & Supreme Court matters automatically resolve public orders once delivered.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 7. Add Case Modal Dialog */}
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-heading font-bold text-lg">
+              Track New Indian Court Case
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Add a case by entering its 16-character eCourts CNR number or case title.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleCreateCase} className="space-y-4 pt-2">
+            {/* 16-char CNR Input */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold">
+                16-Character eCourts CNR Number
+              </Label>
+              <Input
+                value={cnrInput}
+                onChange={(e) => setCnrInput(e.target.value)}
+                placeholder="e.g. DLHC01-004521-2023 or MHDC02-001234-2022"
+                className="text-xs uppercase font-mono"
+              />
+              {/* CNR Validation Badge */}
+              {cnrDetails ? (
+                <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-[11px] flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 shrink-0" />
+                  <span>
+                    Valid eCourts CNR: <strong>{cnrDetails.courtName}</strong> ({cnrDetails.filingYear})
+                  </span>
+                </div>
+              ) : cnrInput.length > 3 ? (
+                <p className="text-[10px] text-muted-foreground">
+                  Format: 2-char State + 2-char Court + 2-char Bench + 6-digit Case + 4-digit Year
+                </p>
+              ) : null}
+            </div>
+
+            {/* Title & Court Name */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">Matter / Petition Title *</Label>
+                <Input
+                  value={titleInput}
+                  onChange={(e) => setTitleInput(e.target.value)}
+                  placeholder="e.g. Commercial Injunction Suit"
+                  className="text-xs"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">Court / Forum *</Label>
+                <Input
+                  value={courtInput}
+                  onChange={(e) => setCourtInput(e.target.value)}
+                  placeholder="e.g. Delhi High Court"
+                  className="text-xs"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Case Type & Stage */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">Case Type</Label>
+                <Select value={caseTypeInput} onValueChange={setCaseTypeInput}>
+                  <SelectTrigger className="text-xs h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Civil">Civil</SelectItem>
+                    <SelectItem value="Criminal">Criminal</SelectItem>
+                    <SelectItem value="Consumer">Consumer</SelectItem>
+                    <SelectItem value="Labour">Labour</SelectItem>
+                    <SelectItem value="Family">Family</SelectItem>
+                    <SelectItem value="Tenancy">Tenancy</SelectItem>
+                    <SelectItem value="Corporate">Corporate</SelectItem>
+                    <SelectItem value="Insolvency">Insolvency</SelectItem>
+                    <SelectItem value="Intellectual Property">Intellectual Property</SelectItem>
+                    <SelectItem value="Constitutional">Constitutional</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">Judicial Stage</Label>
+                <Select
+                  value={stageInput}
+                  onValueChange={(val: CaseStage) => setStageInput(val)}
+                >
+                  <SelectTrigger className="text-xs h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Filed">Filed (Initial Registration)</SelectItem>
+                    <SelectItem value="Hearing">Hearing (Pleadings)</SelectItem>
+                    <SelectItem value="Evidence">Evidence (Witness Examination)</SelectItem>
+                    <SelectItem value="Arguments">Arguments (Final Oral Hearing)</SelectItem>
+                    <SelectItem value="Judgment">Judgment (Order Reserved)</SelectItem>
+                    <SelectItem value="Closed">Closed (Disposed)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Next Hearing & Opponent */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">Next Scheduled Hearing</Label>
+                <Input
+                  type="date"
+                  value={nextHearingInput}
+                  onChange={(e) => setNextHearingInput(e.target.value)}
+                  className="text-xs"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">Opponent / Respondent</Label>
+                <Input
+                  value={opponentInput}
+                  onChange={(e) => setOpponentInput(e.target.value)}
+                  placeholder="e.g. State of NCT or Private Corp"
+                  className="text-xs"
+                />
+              </div>
+            </div>
+
+            {/* Presiding Judge & Notes */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold">Presiding Judge / Bench</Label>
+              <Input
+                value={judgeInput}
+                onChange={(e) => setJudgeInput(e.target.value)}
+                placeholder="e.g. Hon'ble Justice S. K. Kaul"
+                className="text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold">Procedural Notes / Diary</Label>
+              <textarea
+                value={notesInput}
+                onChange={(e) => setNotesInput(e.target.value)}
+                placeholder="Document filing notes, legal notice dispatch date, or counsel instructions..."
+                rows={2}
+                className="w-full p-2.5 rounded-xl border border-border bg-background text-xs placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-gold-500"
+              />
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsAddModalOpen(false)}
+                className="text-xs"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-forest-800 hover:bg-forest-700 text-white dark:text-gold-300 text-xs font-semibold"
+              >
+                {isSubmitting ? "Saving..." : "Add to Litigation Diary"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

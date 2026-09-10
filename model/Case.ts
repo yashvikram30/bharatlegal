@@ -14,7 +14,19 @@ export type CaseType =
   | "Constitutional"
   | "Other";
 
+export type CaseStage =
+  | "Filed"
+  | "Hearing"
+  | "Evidence"
+  | "Arguments"
+  | "Judgment"
+  | "Closed";
+
 export type CaseStatus =
+  | "Active"
+  | "Pending"
+  | "Delayed"
+  | "Completed"
   | "active"
   | "pending_hearing"
   | "reserved_for_order"
@@ -25,20 +37,26 @@ export interface ICaseTimelineEvent {
   date: Date;
   title: string;
   description: string;
+  status?: "completed" | "current" | "upcoming";
   documentUrl?: string;
 }
 
 export interface ICase extends Document {
   userId: mongoose.Types.ObjectId;
   caseNumber: string;
+  cnrNumber?: string;
   title: string;
   court: string;
   caseType: CaseType;
+  stage: CaseStage;
   status: CaseStatus;
   filingDate?: Date;
   nextHearingDate?: Date;
+  petitioner?: string;
   opponentName?: string;
   judgeName?: string;
+  lastOrderUrl?: string;
+  isLiveSynced?: boolean;
   timeline: ICaseTimelineEvent[];
   notes?: string;
   createdAt: Date;
@@ -50,6 +68,11 @@ const TimelineEventSchema = new Schema<ICaseTimelineEvent>(
     date: { type: Date, required: true, default: Date.now },
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true, trim: true },
+    status: {
+      type: String,
+      enum: ["completed", "current", "upcoming"],
+      default: "completed",
+    },
     documentUrl: { type: String, default: null },
   },
   { _id: false }
@@ -66,6 +89,12 @@ const CaseSchema = new Schema<ICase>(
     caseNumber: {
       type: String,
       required: [true, "Case number / CNR is required"],
+      trim: true,
+      index: true,
+    },
+    cnrNumber: {
+      type: String,
+      default: null,
       trim: true,
       index: true,
     },
@@ -97,10 +126,15 @@ const CaseSchema = new Schema<ICase>(
       ],
       default: "Other",
     },
+    stage: {
+      type: String,
+      enum: ["Filed", "Hearing", "Evidence", "Arguments", "Judgment", "Closed"],
+      default: "Hearing",
+      index: true,
+    },
     status: {
       type: String,
-      enum: ["active", "pending_hearing", "reserved_for_order", "disposed", "appealed"],
-      default: "active",
+      default: "Active",
       index: true,
     },
     filingDate: {
@@ -112,6 +146,11 @@ const CaseSchema = new Schema<ICase>(
       default: null,
       index: true,
     },
+    petitioner: {
+      type: String,
+      default: null,
+      trim: true,
+    },
     opponentName: {
       type: String,
       default: null,
@@ -121,6 +160,15 @@ const CaseSchema = new Schema<ICase>(
       type: String,
       default: null,
       trim: true,
+    },
+    lastOrderUrl: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+    isLiveSynced: {
+      type: Boolean,
+      default: false,
     },
     timeline: {
       type: [TimelineEventSchema],

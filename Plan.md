@@ -19,10 +19,10 @@
   - [x] Citations UI with verified bare act excerpts + `ratio_decidendi` cards (`CitationSheet` drawer)
   - [ ] Landmark Supreme Court precedent queries via DuckDB / AWS Open Data Parquet index
 - **Case Tracker & CNR Intelligence**
-  - [ ] 16-character eCourts CNR schema validation & state/court routing (`lib/courts/cnr.ts`)
-  - [ ] DB-backed User Case Diary (CRUD, stages, notes, hearing dates, timeline)
-  - [ ] AWS Open Data PDF resolver for published High Court & Supreme Court orders
-  - [ ] Provider Adapter interface (`CaseDocketProvider`) with default Diary provider + optional live partner sync stub
+  - [x] 16-character eCourts CNR schema validation & state/court routing (`lib/courts/cnr.ts`)
+  - [x] DB-backed User Case Diary (CRUD, stages, notes, hearing dates, timeline)
+  - [x] AWS Open Data PDF resolver for published High Court & Supreme Court orders
+  - [x] Provider Adapter interface (`CaseDocketProvider`) with default Diary provider + optional live partner sync stub
 - **Document Simplifier**
   - [ ] Real LLM-based structured output (plain summary, risky clauses, recommended actions)
   - [ ] Auto-extract legal sections and link to live IndiaCode bare act provisions + BNS cross-references
