@@ -17,13 +17,16 @@ import {
   Building,
   ExternalLink,
   Trash2,
-  Edit2,
   LogIn,
   Check,
   X,
   ChevronRight,
   ShieldCheck,
   RefreshCw,
+  Download,
+  Eye,
+  FileCheck,
+  Sparkles,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -46,9 +49,9 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { CaseTimeline, CaseData } from "@/components/case-timeline";
+import { CaseTimeline } from "@/components/case-timeline";
 import { parseCNR } from "@/lib/courts/cnr";
-import { CaseStage, CaseStatus, TrackedCaseDTO } from "@/lib/courts/types";
+import { CaseStage, TrackedCaseDTO } from "@/lib/courts/types";
 
 // Curated demo cases for guest preview
 const DEMO_CASES: TrackedCaseDTO[] = [
@@ -56,7 +59,7 @@ const DEMO_CASES: TrackedCaseDTO[] = [
     id: "demo-1",
     caseNumber: "DLHC01-004521-2023",
     cnrNumber: "DLHC01-004521-2023",
-    title: "Civil Writ Petition (Injunction & Property)",
+    title: "Civil Writ Petition (Injunction & Property Dispute)",
     court: "Delhi High Court (Principal Bench)",
     caseType: "Civil",
     stage: "Hearing",
@@ -122,6 +125,17 @@ export default function DashboardPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCase, setSelectedCase] = useState<TrackedCaseDTO | null>(null);
 
+  // Quick Action CNR Bar state
+  const [quickCnr, setQuickCnr] = useState("");
+  const [isFetchingOrder, setIsFetchingOrder] = useState(false);
+  const [orderModalData, setOrderModalData] = useState<{
+    cnrDetails: any;
+    orderPdfUrl: string | null;
+    isPdfLive: boolean;
+    officialOrderUrl: string;
+  } | null>(null);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+
   // Filters & sorting
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -143,6 +157,7 @@ export default function DashboardPage() {
 
   // Live CNR parsing when typing in modal
   const cnrDetails = useMemo(() => parseCNR(cnrInput), [cnrInput]);
+  const quickCnrInfo = useMemo(() => parseCNR(quickCnr), [quickCnr]);
 
   // Automatically prefill court name if valid CNR detected
   useEffect(() => {
@@ -179,7 +194,6 @@ export default function DashboardPage() {
       if (showToast) toast.success("Case diary refreshed");
     } catch (err) {
       console.error("[Fetch Cases Error]:", err);
-      // Fallback to demo cases on connection error
       setCases(DEMO_CASES);
     } finally {
       setIsLoading(false);
@@ -190,6 +204,63 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchCases();
   }, [fetchCases, authStatus]);
+
+  // Quick Action 1: Instant Court Order Lookup (without saving to diary)
+  const handleQuickFetchOrder = async () => {
+    const raw = quickCnr.trim();
+    if (!raw) {
+      toast.error("Please enter a 16-character eCourts CNR number");
+      return;
+    }
+
+    const parsed = parseCNR(raw);
+    if (!parsed) {
+      toast.error(
+        "Invalid CNR format. Expected: 2-char State + 2-char Court + 2-char Bench + 6-digit Number + 4-digit Year (e.g. DLHC01-004521-2023)"
+      );
+      return;
+    }
+
+    setIsFetchingOrder(true);
+    try {
+      const res = await fetch(`/api/cases/order?cnr=${encodeURIComponent(raw)}`);
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setOrderModalData(data);
+        setIsOrderModalOpen(true);
+        if (data.orderPdfUrl) {
+          toast.success("Court order resolved! Opening details...");
+        } else {
+          toast("Court metadata found. Check order portal links.", { icon: "ℹ️" });
+        }
+      } else {
+        toast.error(data.error || "Could not resolve court order for this CNR");
+      }
+    } catch (err) {
+      console.error("[Order Lookup Error]:", err);
+      toast.error("Failed to connect to order resolver");
+    } finally {
+      setIsFetchingOrder(false);
+    }
+  };
+
+  // Quick Action 2: Track this case directly
+  const handleQuickTrack = () => {
+    const raw = quickCnr.trim();
+    if (!raw) {
+      toast.error("Please enter a CNR number first");
+      return;
+    }
+
+    const parsed = parseCNR(raw);
+    setCnrInput(parsed ? parsed.formatted : raw);
+    if (parsed) {
+      setCourtInput(parsed.courtName);
+      setTitleInput(`${parsed.courtType} Matter (${parsed.filingNumber}/${parsed.filingYear})`);
+    }
+    setIsAddModalOpen(true);
+  };
 
   // Handle Add Case Form submission
   const handleCreateCase = async (e: React.FormEvent) => {
@@ -212,8 +283,8 @@ export default function DashboardPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           caseNumber: cnrInput.trim() || titleInput.trim(),
-          title: titleInput.trim() || cnrInput.trim(),
-          court: courtInput.trim() || "District Court",
+          title: titleInput.trim() || (cnrDetails ? `${cnrDetails.courtType} Matter (${cnrDetails.filingNumber}/${cnrDetails.filingYear})` : cnrInput.trim()),
+          court: courtInput.trim() || (cnrDetails ? cnrDetails.courtName : "District Court"),
           caseType: caseTypeInput,
           stage: stageInput,
           status: "Active",
@@ -330,21 +401,6 @@ export default function DashboardPage() {
       });
   }, [cases, filterStatus, filterStage, searchQuery, sortOrder]);
 
-  const getStatusBadge = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "active":
-        return "bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border-emerald-500/20";
-      case "pending":
-        return "bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-500/20";
-      case "delayed":
-        return "bg-rose-500/10 text-rose-800 dark:text-rose-300 border-rose-500/20";
-      case "completed":
-        return "bg-forest-100 text-forest-800 dark:bg-forest-800 dark:text-forest-100 border-forest-500/20";
-      default:
-        return "bg-muted text-muted-foreground border-border";
-    }
-  };
-
   const getStageBadge = (stage: CaseStage) => {
     switch (stage) {
       case "Filed":
@@ -383,7 +439,7 @@ export default function DashboardPage() {
             Litigation Case Tracker
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            Track 16-character CNR numbers, procedural stages, AWS Open Data judgment orders, and upcoming hearings.
+            Instantly fetch certified court order copies or track upcoming hearings and procedural timelines.
           </p>
         </div>
 
@@ -410,7 +466,85 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 2. Guest Mode Notice if unauthenticated */}
+      {/* 2. Instant CNR Intelligence & Dual-Action Box */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-card border border-border/80 dark:border-border shadow-2xs space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-forest-100 dark:bg-forest-900 text-forest-800 dark:text-gold-400 border border-gold-500/30">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-xs sm:text-sm font-bold text-foreground font-heading">
+                Instant CNR Lookup — Fetch Order or Track
+              </h2>
+              <p className="text-[11px] text-muted-foreground">
+                Paste any 16-character eCourts CNR to download the certified judicial order or add it to your litigation diary.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-2.5">
+          <div className="relative flex-1">
+            <Input
+              value={quickCnr}
+              onChange={(e) => setQuickCnr(e.target.value)}
+              placeholder="e.g. DLHC01-004521-2023 or MHCC02-009182-2023"
+              className="h-10 text-xs font-mono uppercase bg-background border-border/70 rounded-xl"
+            />
+            {quickCnr && (
+              <button
+                type="button"
+                onClick={() => setQuickCnr("")}
+                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Action A: Fetch Court Order */}
+            <Button
+              type="button"
+              onClick={handleQuickFetchOrder}
+              disabled={isFetchingOrder || !quickCnr.trim()}
+              className="flex-1 sm:flex-initial h-10 bg-forest-800 hover:bg-forest-700 text-white dark:text-gold-300 text-xs font-semibold rounded-xl px-4 flex items-center justify-center gap-1.5 shadow-2xs shrink-0"
+            >
+              <FileText className="w-3.5 h-3.5 text-gold-400" />
+              <span>{isFetchingOrder ? "Resolving Order..." : "Fetch Court Order"}</span>
+            </Button>
+
+            {/* Action B: Track in Diary */}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleQuickTrack}
+              disabled={!quickCnr.trim()}
+              className="flex-1 sm:flex-initial h-10 text-xs font-semibold rounded-xl px-3.5 border-border/80 hover:bg-muted shrink-0 flex items-center justify-center gap-1.5"
+            >
+              <Plus className="w-3.5 h-3.5 text-forest-700 dark:text-gold-400" />
+              <span>Track in Diary</span>
+            </Button>
+          </div>
+        </div>
+
+        {quickCnrInfo && (
+          <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-[11px] flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Check className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">
+                Valid eCourts CNR: <strong>{quickCnrInfo.courtName}</strong> (Filing Year: {quickCnrInfo.filingYear})
+              </span>
+            </div>
+            <span className="text-[10px] font-mono uppercase text-muted-foreground shrink-0">
+              {quickCnrInfo.formatted}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* 3. Guest Mode Notice if unauthenticated */}
       {authStatus !== "authenticated" && (
         <div className="p-4 rounded-xl bg-forest-50/80 dark:bg-forest-900/40 border border-gold-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
           <div className="flex items-center gap-3">
@@ -437,7 +571,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* 3. Metric KPI Cards */}
+      {/* 4. Metric KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div className="bg-card border border-border/80 rounded-2xl p-4 sm:p-5 space-y-1 shadow-2xs">
           <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
@@ -480,7 +614,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 4. Filter, Search & Sorting Bar */}
+      {/* 5. Filter, Search & Sorting Bar */}
       <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
@@ -549,7 +683,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 5. Case Cards Grid */}
+      {/* 6. Case Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, idx) => (
@@ -712,7 +846,7 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* 6. Selected Case Modal / Expand Area */}
+      {/* 7. Selected Case Modal / Expand Area */}
       <AnimatePresence>
         {selectedCase && (
           <motion.div
@@ -889,15 +1023,143 @@ export default function DashboardPage() {
         )}
       </AnimatePresence>
 
-      {/* 7. Add Case Modal Dialog */}
+      {/* 8. Dedicated Court Order Modal (Instant Lookup) */}
+      <Dialog open={isOrderModalOpen} onOpenChange={setIsOrderModalOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="p-1.5 rounded-lg bg-forest-100 dark:bg-forest-900 text-forest-800 dark:text-gold-400 border border-gold-500/20">
+                <FileCheck className="w-4 h-4" />
+              </div>
+              <DialogTitle className="font-heading font-bold text-base">
+                Certified Court Order Resolver
+              </DialogTitle>
+            </div>
+            <DialogDescription className="text-xs">
+              Direct verification against open judicial archives and official registries.
+            </DialogDescription>
+          </DialogHeader>
+
+          {orderModalData && (
+            <div className="space-y-4 pt-2">
+              <div className="p-3.5 rounded-xl bg-muted/60 border border-border/70 space-y-2">
+                <div className="flex justify-between items-start text-xs">
+                  <span className="font-mono text-[11px] font-bold text-foreground">
+                    {orderModalData.cnrDetails.formatted}
+                  </span>
+                  <span className="text-[10px] uppercase font-bold text-forest-700 dark:text-gold-400 bg-forest-100 dark:bg-forest-950 px-2 py-0.5 rounded border border-gold-500/30">
+                    {orderModalData.cnrDetails.courtType}
+                  </span>
+                </div>
+                <p className="text-xs font-semibold text-foreground">
+                  {orderModalData.cnrDetails.courtName}
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground pt-1 border-t border-border/40">
+                  <p>
+                    Filing #: <strong>{orderModalData.cnrDetails.filingNumber}</strong>
+                  </p>
+                  <p>
+                    Filing Year: <strong>{orderModalData.cnrDetails.filingYear}</strong>
+                  </p>
+                </div>
+              </div>
+
+              {orderModalData.orderPdfUrl ? (
+                <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 space-y-2 text-center">
+                  <div className="inline-flex p-2 rounded-full bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 mx-auto">
+                    <FileCheck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm font-bold text-foreground">
+                      Certified Judgment Order Available
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Hosted under public AWS Open Data repository (CC-BY-4.0).
+                    </p>
+                  </div>
+                  <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
+                    <a
+                      href={orderModalData.orderPdfUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-forest-800 hover:bg-forest-700 text-white dark:text-gold-300 text-xs font-semibold shadow-xs"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Download Order PDF</span>
+                    </a>
+                    <a
+                      href={orderModalData.orderPdfUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-border/80 hover:bg-muted text-xs font-medium text-foreground"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>View in Browser</span>
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 space-y-2 text-center">
+                  <p className="text-xs font-semibold text-foreground">
+                    Direct S3 PDF Not Yet Indexed
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    This district or interim proceeding can be accessed via the official court portal.
+                  </p>
+                  <a
+                    href={orderModalData.officialOrderUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-forest-800 text-white text-xs font-medium"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Open Official Court Portal</span>
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter className="pt-2 flex sm:justify-between items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsOrderModalOpen(false)}
+              className="text-xs"
+            >
+              Close
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setIsOrderModalOpen(false);
+                if (orderModalData?.cnrDetails) {
+                  setCnrInput(orderModalData.cnrDetails.formatted);
+                  setCourtInput(orderModalData.cnrDetails.courtName);
+                  setTitleInput(
+                    `${orderModalData.cnrDetails.courtType} Matter (${orderModalData.cnrDetails.filingNumber}/${orderModalData.cnrDetails.filingYear})`
+                  );
+                  setIsAddModalOpen(true);
+                }
+              }}
+              className="bg-forest-800 hover:bg-forest-700 text-white dark:text-gold-300 text-xs font-semibold flex items-center gap-1.5"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Also Track in Diary</span>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 9. Add Case Modal Dialog */}
       <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-heading font-bold text-lg">
-              Track New Indian Court Case
+              Track New Court Case
             </DialogTitle>
             <DialogDescription className="text-xs">
-              Add a case by entering its 16-character eCourts CNR number or case title.
+              Enter your CNR number to auto-detect court details, or enter matter details manually.
             </DialogDescription>
           </DialogHeader>
 
@@ -915,11 +1177,24 @@ export default function DashboardPage() {
               />
               {/* CNR Validation Badge */}
               {cnrDetails ? (
-                <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-[11px] flex items-center gap-1.5">
-                  <Check className="w-3.5 h-3.5 shrink-0" />
-                  <span>
-                    Valid eCourts CNR: <strong>{cnrDetails.courtName}</strong> ({cnrDetails.filingYear})
-                  </span>
+                <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-[11px] flex items-center justify-between gap-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 shrink-0" />
+                    <span>
+                      Valid eCourts CNR: <strong>{cnrDetails.courtName}</strong> ({cnrDetails.filingYear})
+                    </span>
+                  </div>
+                  {cnrDetails.orderPdfUrl && (
+                    <a
+                      href={cnrDetails.orderPdfUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-[10px] font-bold text-forest-700 dark:text-gold-400 hover:underline shrink-0"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      <span>Order PDF</span>
+                    </a>
+                  )}
                 </div>
               ) : cnrInput.length > 3 ? (
                 <p className="text-[10px] text-muted-foreground">
@@ -928,27 +1203,25 @@ export default function DashboardPage() {
               ) : null}
             </div>
 
-            {/* Title & Court Name */}
+            {/* Title & Court Name (Auto-filled from CNR) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Matter / Petition Title *</Label>
+                <Label className="text-xs font-semibold">Matter / Petition Title</Label>
                 <Input
                   value={titleInput}
                   onChange={(e) => setTitleInput(e.target.value)}
                   placeholder="e.g. Commercial Injunction Suit"
                   className="text-xs"
-                  required
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Court / Forum *</Label>
+                <Label className="text-xs font-semibold">Court / Forum</Label>
                 <Input
                   value={courtInput}
                   onChange={(e) => setCourtInput(e.target.value)}
                   placeholder="e.g. Delhi High Court"
                   className="text-xs"
-                  required
                 />
               </div>
             </div>
@@ -1043,7 +1316,7 @@ export default function DashboardPage() {
               />
             </div>
 
-            <DialogFooter className="pt-2">
+            <DialogFooter className="pt-2 flex items-center justify-between">
               <Button
                 type="button"
                 variant="outline"

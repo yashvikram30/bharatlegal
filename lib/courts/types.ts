@@ -23,6 +23,7 @@ export interface CNRDetails {
   isHighCourt: boolean;
   isSupremeCourt: boolean;
   orderPdfUrl?: string | null;
+  officialOrderUrl?: string;
 }
 
 export interface CaseTimelineItem {

@@ -122,6 +122,11 @@ export function parseCNR(raw: string): CNRDetails | null {
 
   const formatted = `${stateCode}${courtCode}${benchCode}-${filingNumber}-${filingYear}`;
   const orderPdfUrl = resolveOrderPdfUrl(stateCode, courtCode, filingNumber, filingYear);
+  const officialOrderUrl = isSupremeCourt
+    ? "https://main.sci.gov.in/judgments"
+    : isHighCourt
+    ? "https://hcservices.ecourts.gov.in/ecourtindiaHC/cases/order_query.php"
+    : "https://services.ecourts.gov.in/ecourtindia_v6/";
 
   return {
     raw,
@@ -138,6 +143,7 @@ export function parseCNR(raw: string): CNRDetails | null {
     isHighCourt,
     isSupremeCourt,
     orderPdfUrl,
+    officialOrderUrl,
   };
 }
 
