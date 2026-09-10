@@ -1,0 +1,238 @@
+{
+  "acts": [
+    {
+      "id": "bns",
+      "short_title": "The Bharatiya Nyaya Sanhita, 2023",
+      "act_number": "45",
+      "act_year": 2023,
+      "enforcement_date": "2024-07-01",
+      "description": "Consolidates and amends the provisions relating to criminal offences in India, replacing the Indian Penal Code, 1860."
+    },
+    {
+      "id": "bnss",
+      "short_title": "The Bharatiya Nagarik Suraksha Sanhita, 2023",
+      "act_number": "46",
+      "act_year": 2023,
+      "enforcement_date": "2024-07-01",
+      "description": "Consolidates and amends the law relating to criminal procedure in India, replacing the Code of Criminal Procedure, 1973."
+    },
+    {
+      "id": "bsa",
+      "short_title": "The Bharatiya Sakshya Adhiniyam, 2023",
+      "act_number": "47",
+      "act_year": 2023,
+      "enforcement_date": "2024-07-01",
+      "description": "Consolidates and provides general rules and principles of evidence for fair trial, replacing the Indian Evidence Act, 1872."
+    },
+    {
+      "id": "consumer-protection-act-2019",
+      "short_title": "The Consumer Protection Act, 2019",
+      "act_number": "35",
+      "act_year": 2019,
+      "enforcement_date": "2020-07-20",
+      "description": "Provides for protection of the interests of consumers and establishes consumer dispute redressal commissions."
+    },
+    {
+      "id": "negotiable-instruments-act-1881",
+      "short_title": "The Negotiable Instruments Act, 1881",
+      "act_number": "26",
+      "act_year": 1881,
+      "enforcement_date": "1882-03-01",
+      "description": "Defines and amends the law relating to promissory notes, bills of exchange and cheques."
+    }
+  ],
+  "sections": {
+    "bns/103": {
+      "act": {
+        "id": "bns",
+        "short_title": "The Bharatiya Nyaya Sanhita, 2023",
+        "act_number": "45",
+        "act_year": 2023,
+        "enforcement_date": "2024-07-01"
+      },
+      "section": {
+        "number": "103",
+        "title": "Punishment for murder",
+        "text": "(1) Whoever commits murder shall be punished with death or imprisonment for life, and shall also be liable to fine. (2) When a group of five or more persons acting in concert commits murder on the ground of race, caste or community, sex, place of birth, language, personal belief or any other similar ground each member of such group shall be punished with death or with imprisonment for life, and shall also be liable to fine.",
+        "bailable": false,
+        "cognizable": true,
+        "compoundable": false,
+        "court_triable": "Court of Session"
+      },
+      "corresponds_to": [
+        {
+          "direction": "predecessor",
+          "act": "ipc",
+          "section": "302",
+          "relation": "near-identical",
+          "score": 0.9,
+          "notes": "Sub-section (1) corresponds to IPC Section 302. Sub-section (2) introduces a specific penalty for mob lynching/hate murders."
+        }
+      ],
+      "judgments": [
+        {
+          "cnr": "SCIN010195772022",
+          "title": "Chherturam @ Chainu vs The State of Chhattisgarh",
+          "court": "SC",
+          "court_name": "Supreme Court of India",
+          "date": "2022-09-13",
+          "precedential_value": "Binding (SC)",
+          "ratio_decidendi": "When injuries are inflicted on vital body parts in a merciless manner with repeated blows that make survival impossible, the act constitutes murder under Section 302 IPC, and intoxication does not provide a defense under Section 86 IPC.",
+          "applied_to_this_section": "Punishment for murder - life imprisonment or death penalty with fine",
+          "url": "https://ecourtsindia.com/cnr/SCIN010195772022/order-4"
+        }
+      ]
+    },
+    "bns/318": {
+      "act": {
+        "id": "bns",
+        "short_title": "The Bharatiya Nyaya Sanhita, 2023",
+        "act_number": "45",
+        "act_year": 2023,
+        "enforcement_date": "2024-07-01"
+      },
+      "section": {
+        "number": "318",
+        "title": "Cheating",
+        "text": "(1) Whoever, by deceiving any person, fraudulently or dishonestly induces the person so deceived to deliver any property to any person, or to consent that any person shall retain any property... commits cheating. (2) Whoever cheats shall be punished with imprisonment of either description for a term which may extend to three years, or with fine, or with both. (4) Whoever cheats and thereby dishonestly induces the person deceived to deliver any property... shall be punished with imprisonment of either description for a term which may extend to seven years, and shall also be liable to fine.",
+        "bailable": false,
+        "cognizable": true,
+        "compoundable": false,
+        "court_triable": "Magistrate of the first class"
+      },
+      "corresponds_to": [
+        {
+          "direction": "predecessor",
+          "act": "ipc",
+          "section": "420",
+          "relation": "near-identical",
+          "score": 0.95,
+          "notes": "BNS Section 318(4) corresponds directly to Section 420 IPC (Cheating and dishonestly inducing delivery of property)."
+        },
+        {
+          "direction": "predecessor",
+          "act": "ipc",
+          "section": "415",
+          "relation": "near-identical",
+          "score": 0.9,
+          "notes": "BNS Section 318(1) defines cheating, replacing Section 415 IPC."
+        }
+      ],
+      "judgments": [
+        {
+          "cnr": "SCIN010048212019",
+          "title": "Prof. R.K. Vijayasarathy vs Sudha Seetharam",
+          "court": "SC",
+          "court_name": "Supreme Court of India",
+          "date": "2019-02-15",
+          "precedential_value": "Binding (SC)",
+          "ratio_decidendi": "To establish the offence of cheating under Section 420 IPC (now BNS 318(4)), dishonest intention must be shown to exist at the very time of making the representation or inducement. Mere subsequent breach of contract does not give rise to criminal prosecution.",
+          "applied_to_this_section": "Ingredients of Cheating - fraudulent or dishonest inducement at the inception",
+          "url": "https://ecourtsindia.com/cnr/SCIN010048212019/order-1"
+        }
+      ]
+    },
+    "bnss/35": {
+      "act": {
+        "id": "bnss",
+        "short_title": "The Bharatiya Nagarik Suraksha Sanhita, 2023",
+        "act_number": "46",
+        "act_year": 2023,
+        "enforcement_date": "2024-07-01"
+      },
+      "section": {
+        "number": "35",
+        "title": "When police may arrest without warrant",
+        "text": "(1) Any police officer may without an order from a Magistrate and without a warrant, arrest any person who commits, in the presence of a police officer, a cognizable offence... Provided that in offences punishable with imprisonment for a term which may be less than seven years, arrest shall not be made automatically without satisfying conditions of necessity.",
+        "bailable": null,
+        "cognizable": null,
+        "compoundable": null,
+        "court_triable": null
+      },
+      "corresponds_to": [
+        {
+          "direction": "predecessor",
+          "act": "crpc",
+          "section": "41",
+          "relation": "near-identical",
+          "score": 0.95,
+          "notes": "Corresponds to CrPC Section 41 and incorporates Arnesh Kumar guidelines regarding mandatory notice of appearance."
+        }
+      ],
+      "judgments": [
+        {
+          "cnr": "SCIN010001422014",
+          "title": "Arnesh Kumar vs State of Bihar",
+          "court": "SC",
+          "court_name": "Supreme Court of India",
+          "date": "2014-07-02",
+          "precedential_value": "Binding (SC)",
+          "ratio_decidendi": "No arrest should be made automatically in offences punishable with up to 7 years imprisonment. The police officer must satisfy themselves of the necessity of arrest based on the parameters set out in CrPC 41 (now BNSS 35) and record written reasons.",
+          "applied_to_this_section": "Arrest guidelines - mandatory checklist and reasons before arresting an accused",
+          "url": "https://ecourtsindia.com/cnr/SCIN010001422014/order-1"
+        }
+      ]
+    },
+    "negotiable-instruments-act-1881/138": {
+      "act": {
+        "id": "negotiable-instruments-act-1881",
+        "short_title": "The Negotiable Instruments Act, 1881",
+        "act_number": "26",
+        "act_year": 1881,
+        "enforcement_date": "1882-03-01"
+      },
+      "section": {
+        "number": "138",
+        "title": "Dishonour of cheque for insufficiency, etc., of funds in the account",
+        "text": "Where any cheque drawn by a person on an account maintained by him with a banker for payment of any amount of money to another person from out of that account for the discharge, in whole or in part, of any debt or other liability, is returned by the bank unpaid... such person shall be deemed to have committed an offence and shall be punished with imprisonment for a term which may be extended to two years, or with fine which may extend to twice the amount of the cheque, or with both.",
+        "bailable": true,
+        "cognizable": false,
+        "compoundable": true,
+        "court_triable": "Judicial Magistrate of the first class / Metropolitan Magistrate"
+      },
+      "corresponds_to": [],
+      "judgments": [
+        {
+          "cnr": "SCIN010098712021",
+          "title": "Dashrathbhai Trikambhai Patel vs Hitesh Mahendrabhai Patel",
+          "court": "SC",
+          "court_name": "Supreme Court of India",
+          "date": "2022-10-11",
+          "precedential_value": "Binding (SC)",
+          "ratio_decidendi": "For an offence under Section 138 of the NI Act to be made out, the cheque must represent an existing legally enforceable debt or liability on the date of presentation. If part-payment has been made and not endorsed on the cheque under Section 56, the cheque cannot be presented for the full sum.",
+          "applied_to_this_section": "Dishonour of Cheque - existence of legally enforceable liability at presentation",
+          "url": "https://ecourtsindia.com/cnr/SCIN010098712021/order-1"
+        }
+      ]
+    },
+    "consumer-protection-act-2019/35": {
+      "act": {
+        "id": "consumer-protection-act-2019",
+        "short_title": "The Consumer Protection Act, 2019",
+        "act_number": "35",
+        "act_year": 2019,
+        "enforcement_date": "2020-07-20"
+      },
+      "section": {
+        "number": "35",
+        "title": "Manner in which complaint shall be made",
+        "text": "(1) A complaint, in relation to any goods sold or delivered or agreed to be sold or delivered or any service provided or agreed to be provided, may be filed with a District Commission by the consumer, any recognized consumer association, or the Central Authority. The complaint may be filed electronically in such manner as may be prescribed.",
+        "bailable": null,
+        "cognizable": null,
+        "compoundable": null,
+        "court_triable": "District Consumer Disputes Redressal Commission"
+      },
+      "corresponds_to": [
+        {
+          "direction": "predecessor",
+          "act": "consumer-protection-act-1986",
+          "section": "12",
+          "relation": "substantial-revision",
+          "score": 0.85,
+          "notes": "Replaces Section 12 of the 1986 Act, adding explicit electronic filing rights (e-Daakhil) and jurisdiction based on the complainant's residence."
+        }
+      ],
+      "judgments": []
+    }
+  }
+}

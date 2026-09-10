@@ -139,8 +139,8 @@ bharatlegal/
 ├── components/
 │   ├── navbar.tsx              # Header with responsive navigation drawer & theme switcher
 │   ├── footer.tsx              # Footer with statutory disclaimer & official links
-│   ├── legal-resources-sidebar # Persistent drawer menu for portal tools
 │   ├── ui/                     # Accessible UI components (buttons, dialogs, tabs, inputs)
+│   ├── chat/                   # Consultation history sidebar & citation drawer
 │   └── auth/                   # Authentication forms and social login buttons
 ├── lib/
 │   ├── dbConnect.ts            # Resilient Mongoose connection with public DNS fallbacks

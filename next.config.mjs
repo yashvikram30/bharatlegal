@@ -22,11 +22,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  experimental: {
-    webpackBuildWorker: true,
-    parallelServerBuildTraces: true,
-    parallelServerCompiles: true,
-  },
   // ✅ Add webpack customization to support .mjs
   webpack: (config, { isServer }) => {
     config.resolve.extensions.push(".mjs");

@@ -11,12 +11,27 @@
 - [x] Mobile responsiveness pass (hamburger navigation drawer, responsive grids)
 - [x] Replace placeholder testimonials with real project narrative ("Why We Built BharatLegal") and deleted orphaned testimonial-card.tsx
 
-**3. Core feature rebuild**
-- **Chatbot** → add RAG over real IPC/CrPC/consumer law docs, with citations; add tool-calling to query case status
-- **Document Simplifier** → real LLM-based structured output (summary, risky clauses, plain-language rewrite), support PDF/TXT/DOCX
-- **Case Tracker** → real DB-backed CRUD tied to authenticated user, status states, timestamps
-- **Rights Visualizer** → keep (already solid), maybe add search-by-scenario ("landlord not returning deposit" → relevant rights)
-- **Find Legal Help** → real data source if feasible (scraped/curated directory) or clearly labeled as a curated static directory
+**3. Core feature rebuild (Powered by IndiaCode API & AWS Court Data)**
+*(See detailed architecture specification in [docs/phase-3-legal-data-architecture.md](file:///Users/yash/Desktop/legalease/docs/phase-3-legal-data-architecture.md))*
+- **Legal RAG Chatbot**
+  - [x] Build `lib/legal-api/indiacode.ts` wrapper (2,246 Acts, live bare-acts, IPC ↔ BNS concordance, cached, core-acts fallback)
+  - [x] Add LLM Tool-Calling in `/api/chat` (`lookup_statute`, `convert_penal_provision`, `retrieve_precedents`)
+  - [x] Citations UI with verified bare act excerpts + `ratio_decidendi` cards (`CitationSheet` drawer)
+  - [ ] Landmark Supreme Court precedent queries via DuckDB / AWS Open Data Parquet index
+- **Case Tracker & CNR Intelligence**
+  - [ ] 16-character eCourts CNR schema validation & state/court routing (`lib/courts/cnr.ts`)
+  - [ ] DB-backed User Case Diary (CRUD, stages, notes, hearing dates, timeline)
+  - [ ] AWS Open Data PDF resolver for published High Court & Supreme Court orders
+  - [ ] Provider Adapter interface (`CaseDocketProvider`) with default Diary provider + optional live partner sync stub
+- **Document Simplifier**
+  - [ ] Real LLM-based structured output (plain summary, risky clauses, recommended actions)
+  - [ ] Auto-extract legal sections and link to live IndiaCode bare act provisions + BNS cross-references
+  - [ ] Support PDF/TXT/DOCX file upload pipeline
+- **Rights Visualizer**
+  - [ ] Scenario-to-statute search ("landlord withholding deposit" → Rent Control / Consumer Protection)
+  - [ ] Direct statutory citations backed by verified IndiaCode provisions
+- **Find Legal Help**
+  - [ ] Curated, verified legal aid directory (DLSA/SLSA, NALSA front offices, consumer forums)
 
 **4. New feature (pick 1–2, not all)**
 - Legal document generator (rent agreement, complaint draft) from structured form + LLM
