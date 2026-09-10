@@ -1,15 +1,15 @@
 
-**1. Branding & meta fixes**
-- Remove/replace v0.dev generator meta tag
-- Custom favicon, OG image, proper meta description/title
-- Real Privacy Policy, Terms, About, Contact pages (even if brief)
-- Fix or remove dead social links
+**1. Branding & meta fixes** [COMPLETED]
+- [x] Remove/replace v0.dev generator meta tag
+- [x] Custom favicon, OG image, proper meta description/title (per-route layouts for /chat, /dashboard, /rights, /simplify, /help, /contact)
+- [x] Real Privacy Policy, Terms, About, Contact pages (with live /api/contact delivery & DB persistence)
+- [x] Fix or remove dead social links (verified government portals: NALSA, eCourts, RTI, Consumer Helpline)
 
-**2. UI/UX overhaul**
-- Move off default v0/shadcn look — distinct visual identity (custom color palette, typography, not generic AI-SaaS template)
-- Consistent design system across all pages (spacing, components, empty/loading/error states)
-- Mobile responsiveness pass
-- Replace placeholder testimonials with real project narrative (e.g. "why I built this") instead of fake social proof
+**2. UI/UX overhaul** [COMPLETED]
+- [x] Move off default v0/shadcn look — distinct visual identity (Deep Forest & Gold palette, Inter + Outfit typography)
+- [x] Consistent design system across all pages (spacing, components, branded 404 not-found.tsx, error.tsx, loading.tsx, empty & loading states)
+- [x] Mobile responsiveness pass (hamburger navigation drawer, responsive grids)
+- [x] Replace placeholder testimonials with real project narrative ("Why We Built BharatLegal") and deleted orphaned testimonial-card.tsx
 
 **3. Core feature rebuild**
 - **Chatbot** → add RAG over real IPC/CrPC/consumer law docs, with citations; add tool-calling to query case status

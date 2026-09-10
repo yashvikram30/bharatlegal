@@ -221,14 +221,14 @@ export function LegalResourcesSidebar() {
         <button
           type="button"
           className="flex items-center gap-2 font-heading font-extrabold text-xl text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-700 rounded-md p-1 -m-1 hover:opacity-90 transition-opacity cursor-pointer group text-left"
-          aria-label="Open LegalEase Resources Menu"
+          aria-label="Open BharatLegal Resources Menu"
         >
           <span className="w-8 h-8 rounded-lg bg-forest-800 dark:bg-forest-950 text-white flex items-center justify-center text-sm font-bold border border-gold-500/50 shadow-sm group-hover:scale-105 transition-transform">
             ⚖
           </span>
           <span className="flex items-center gap-1.5">
             <span>
-              Legal<span className="text-gold-700 dark:text-gold-500">Ease</span>
+              Bharat<span className="text-gold-700 dark:text-gold-500">Legal</span>
             </span>
             <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 font-semibold border border-forest-500/20">
               Menu
@@ -247,7 +247,7 @@ export function LegalResourcesSidebar() {
               ⚖
             </span>
             <SheetTitle className="text-lg font-bold font-heading text-foreground">
-              Legal<span className="text-gold-700 dark:text-gold-500">Ease</span> Hub
+              Bharat<span className="text-gold-700 dark:text-gold-500">Legal</span> Hub
             </SheetTitle>
           </div>
           <Link
@@ -458,7 +458,7 @@ export function LegalResourcesSidebar() {
                 <div className="p-3.5 rounded-xl bg-forest-100 dark:bg-forest-900/60 border border-forest-500/20 text-[11px] text-muted-foreground space-y-1">
                   <p className="font-semibold text-foreground">Good-Faith Disclaimer</p>
                   <p>
-                    LegalEase provides educational legal information and does not create an advocate-client relationship under the Advocates Act, 1961.
+                    BharatLegal provides educational legal information and does not create an advocate-client relationship under the Advocates Act, 1961.
                   </p>
                 </div>
 

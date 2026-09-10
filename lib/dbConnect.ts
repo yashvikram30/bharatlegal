@@ -1,4 +1,14 @@
 import mongoose from "mongoose";
+import dns from "node:dns";
+
+// Fix for macOS / ISP DNS servers that REFUSE SRV lookups for mongodb+srv://
+try {
+  if (typeof dns.setServers === "function") {
+    dns.setServers(["8.8.8.8", "8.8.4.4", "1.1.1.1"]);
+  }
+} catch (dnsErr) {
+  console.warn("Could not set custom DNS servers:", dnsErr);
+}
 
 interface MongooseCache {
   conn: typeof mongoose | null;

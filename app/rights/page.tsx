@@ -207,7 +207,7 @@ export default function RightsPage() {
   };
 
   const handleShare = (title: string, content: string) => {
-    const textToShare = `${title}\n\n${content}\n\nSource: LegalEase (https://legalease.in/rights)`;
+    const textToShare = `${title}\n\n${content}\n\nSource: BharatLegal (https://bharatlegal.in/rights)`;
     if (typeof navigator !== "undefined" && navigator.share) {
       navigator
         .share({

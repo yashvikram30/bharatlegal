@@ -2,9 +2,9 @@ import { Metadata } from "next";
 import { AlertTriangle, Scale, CheckCircle2, ShieldAlert, Info } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Terms of Service & Legal Disclaimer — LegalEase",
+  title: "Terms of Service & Legal Disclaimer — BharatLegal",
   description:
-    "Terms of service, usage conditions, and statutory educational disclaimers for the LegalEase platform.",
+    "Terms of service, usage conditions, and statutory educational disclaimers for the BharatLegal platform.",
 };
 
 export default function TermsPage() {
@@ -33,7 +33,7 @@ export default function TermsPage() {
               Important Good-Faith Statutory Disclaimer
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              LegalEase is an <strong>educational and informational technology platform</strong> powered by Artificial Intelligence. 
+              BharatLegal is an <strong>educational and informational technology platform</strong> powered by Artificial Intelligence. 
               The content, analyses, chatbot responses, and rights summaries provided on this platform do <strong>not</strong> constitute formal legal advice, legal representation, or a formal legal opinion.
             </p>
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
@@ -51,7 +51,7 @@ export default function TermsPage() {
             1. Nature of the Service
           </h3>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            LegalEase provides tools including an AI Legal Assistant, Document Simplifier, Case Tracker, Rights Visualizer, and Legal Aid Directory. These tools are intended to help users understand legal vocabulary, organize case timelines, and explore basic statutory frameworks.
+            BharatLegal provides tools including an AI Legal Assistant, Document Simplifier, Case Tracker, Rights Visualizer, and Legal Aid Directory. These tools are intended to help users understand legal vocabulary, organize case timelines, and explore basic statutory frameworks.
           </p>
         </div>
 
@@ -83,7 +83,7 @@ export default function TermsPage() {
             4. Limitation of Liability
           </h3>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            To the maximum extent permitted by applicable Indian law, LegalEase, its creators, and contributors shall not be liable for any direct, indirect, incidental, or consequential damages resulting from reliance on any informational outputs provided herein.
+            To the maximum extent permitted by applicable Indian law, BharatLegal, its creators, and contributors shall not be liable for any direct, indirect, incidental, or consequential damages resulting from reliance on any informational outputs provided herein.
           </p>
         </div>
       </div>

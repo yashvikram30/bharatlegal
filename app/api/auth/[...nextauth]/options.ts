@@ -4,6 +4,15 @@ import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User";
+import dns from "node:dns";
+
+try {
+  if (typeof dns.setServers === "function") {
+    dns.setServers(["8.8.8.8", "8.8.4.4", "1.1.1.1"]);
+  }
+} catch {
+  // Ignore in environments where setServers is restricted
+}
 
 interface CustomUser {
   _id?: string;
@@ -77,11 +86,20 @@ export const authOptions: NextAuthOptions = {
         let dbUser = await UserModel.findOne({ email: user.email });
 
         if (!dbUser) {
+          const baseUsername =
+            user?.name?.replace(/[^a-zA-Z0-9]/g, "").toLowerCase() ||
+            (user?.email ? user.email.split("@")[0].replace(/[^a-zA-Z0-9]/g, "") : `user`);
+
+          let finalUsername = baseUsername;
+          // If username is already taken by another account, append random suffix
+          const existingUsername = await UserModel.findOne({ username: finalUsername });
+          if (existingUsername) {
+            finalUsername = `${baseUsername}_${Math.floor(100 + Math.random() * 900)}`;
+          }
+
           dbUser = await UserModel.create({
-            email: user?.email,
-            username:
-              user?.name?.replace(/\s+/g, "").toLowerCase() ||
-              (user.email ? user.email.split("@")[0] : `user_${Date.now()}`),
+            email: user?.email?.toLowerCase().trim(),
+            username: finalUsername,
             password: `GOOGLE_OAUTH_${Math.random().toString(36).slice(2)}`,
           });
         }

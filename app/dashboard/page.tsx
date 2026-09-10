@@ -144,6 +144,12 @@ export default function DashboardPage() {
     }
   };
 
+  // Dynamic metrics
+  const totalActive = cases.filter((c) => c.status === "Active").length;
+  const totalPending = cases.filter((c) => c.status === "Pending").length;
+  const totalCompleted = cases.filter((c) => c.status === "Completed").length;
+  const upcomingHearings = cases.filter((c) => c.nextHearing).length;
+
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-10 max-w-6xl space-y-8">
       {/* Top Header */}
@@ -173,15 +179,15 @@ export default function DashboardPage() {
             Total Active Cases
           </p>
           <p className="text-2xl sm:text-3xl font-extrabold text-forest-800 dark:text-forest-50 font-heading">
-            3
+            {totalActive}
           </p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4 sm:p-5 space-y-1">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Hearings (Next 14 Days)
+            Upcoming Hearings
           </p>
           <p className="text-2xl sm:text-3xl font-extrabold text-forest-800 dark:text-gold-500 font-heading">
-            2
+            {upcomingHearings}
           </p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4 sm:p-5 space-y-1">
@@ -189,7 +195,7 @@ export default function DashboardPage() {
             Pending Filings
           </p>
           <p className="text-2xl sm:text-3xl font-extrabold text-forest-800 dark:text-forest-50 font-heading">
-            1
+            {totalPending}
           </p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4 sm:p-5 space-y-1">
@@ -197,7 +203,7 @@ export default function DashboardPage() {
             Disposed / Completed
           </p>
           <p className="text-2xl sm:text-3xl font-extrabold text-forest-800 dark:text-forest-50 font-heading">
-            1
+            {totalCompleted}
           </p>
         </div>
       </div>
@@ -311,12 +317,42 @@ export default function DashboardPage() {
               </div>
             </div>
           ))
+        ) : cases.length === 0 ? (
+          <div className="col-span-full text-center py-16 px-4 bg-card border border-dashed border-border rounded-2xl space-y-4">
+            <div className="w-12 h-12 rounded-xl bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-gold-500 flex items-center justify-center mx-auto text-xl font-bold">
+              ⚖
+            </div>
+            <div className="space-y-1 max-w-sm mx-auto">
+              <p className="text-base font-bold text-foreground font-heading">
+                No Tracked Cases Yet
+              </p>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Add your first Indian court case with its CNR number or court title to monitor upcoming hearing dates and milestones.
+              </p>
+            </div>
+            <Button className="bg-forest-800 text-white hover:bg-forest-950 dark:bg-gold-500 dark:text-forest-950 dark:hover:bg-gold-500/90 text-xs">
+              <Plus className="w-3.5 h-3.5 mr-1" /> Add Your First Case
+            </Button>
+          </div>
         ) : (
-          <div className="col-span-full text-center py-12 bg-card border border-border rounded-xl space-y-2">
-            <p className="text-base font-semibold text-foreground">No cases found</p>
+          <div className="col-span-full text-center py-12 bg-card border border-border rounded-xl space-y-3">
+            <p className="text-base font-semibold text-foreground">No matching cases found</p>
             <p className="text-sm text-muted-foreground">
-              Try adjusting your search query or status filter.
+              {searchQuery
+                ? `No cases match "${searchQuery}". Try searching with another term.`
+                : "No cases match the selected status filter."}
             </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSearchQuery("");
+                setFilterStatus("all");
+              }}
+              className="text-xs"
+            >
+              Reset Filters
+            </Button>
           </div>
         )}
       </div>

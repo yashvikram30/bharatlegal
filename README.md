@@ -1,115 +1,170 @@
-# LegalEase
-## ⚖️ Simplifying Legal Access for All Indians
-LegalEase is an AI-powered platform designed to demystify the Indian justice system, making legal knowledge accessible and understandable for everyone. By leveraging advanced AI tools, it provides plain language explanations, personalized guidance, and real-time legal assistance, empowering citizens to understand and exercise their rights.
-## ✨ Core Features
-LegalEase offers a suite of powerful tools to simplify your legal journey:
-### 1. AI Legal Chatbot : 
-Get instant, AI-powered answers to your legal questions. The chatbot can be configured with different LLM models (e.g., LLaMA 3 8B Fast, LLaMA 3 70B Powerful) to suit varying needs for speed and depth.
-<img width="1000" height="500" alt="Screenshot 2025-07-23 005313" src="https://github.com/user-attachments/assets/9e7952d4-a2d9-44b2-838f-b387e34cb81f" />
-### 2. Case Tracker :
-Track and manage your legal cases in real-time. Stay updated on statuses, next hearing dates, and key developments. Features include search, filter by status, and sorting options.
-<img width="1000" height="500" alt="Screenshot 2025-07-23 005334" src="https://github.com/user-attachments/assets/2765e469-05bb-4af0-90d0-f10c108f7f81" />
-### 3. Legal Rights Visualizer :
-Explore and understand your legal rights in simple, easy-to-understand language through interactive visualizations. Browse categories like Arrest Rights, Property Rights, Consumer Rights, Employment Rights, and Family Law Rights.
-<img width="1000" height="500" alt="Screenshot 2025-07-23 005350" src="https://github.com/user-attachments/assets/bcf66795-0467-401f-ade1-52fef0361e87" />
-### 4. Document Simplifier :
-Upload complex legal documents (PDF, Word, Text up to 10MB) and receive simplified, plain-language explanations of their content.
-<img width="1000" height="500" alt="Screenshot 2025-07-23 005406" src="https://github.com/user-attachments/assets/d4b18a2e-e635-48fc-9cb8-a9deae2affce" />
-### 5. Find Legal Help :
-Connect with legal aid providers, lawyers, and clinics across India. Search by name, specialization, or location, and filter by state and type of service.
-<img width="1000" height="500" alt="Screenshot 2025-07-23 005420" src="https://github.com/user-attachments/assets/76e2937c-6103-43d5-a23d-0ccd3903c125" />
+# BharatLegal (भारत लीगल)
+### ⚖️ Demystifying the Indian Justice System for Every Citizen
 
-## 🛠️ Technologies Used
-LegalEase is built using a modern MERN (MongoDB, Express, React, Node.js) stack with Next.js for the frontend, leveraging various powerful libraries and services :
-### Frontend : 
-- Next.js: React framework for building server-side rendered and statically generated web applications.
-- React: Frontend JavaScript library for building user interfaces.
-- TypeScript: Superset of JavaScript for type safety.
-- Tailwind CSS: Utility-first CSS framework for rapid UI development.
-- Shadcn/ui: Reusable UI components built with Radix UI and Tailwind CSS.
-- OpenAI API: For AI-powered chatbot and document simplification functionalities.
-- Supabase: Used for specific functionalities, potentially for user management or other data storage.
-- react-day-picker: Date picker component.
-- framer-motion: For animations.
-- recharts: For charting (if used in visualizations).
-- pdf-parse & pdfjs-dist: For PDF document processing.
+BharatLegal is an open-source, AI-powered civic technology platform built to make Indian law accessible, intelligible, and actionable for all citizens. Grounded in contemporary Indian statutory frameworks — including the **Bharatiya Nyaya Sanhita (BNS)**, **BNSS / CrPC**, and the **Consumer Protection Act, 2019** — BharatLegal bridges the divide between archaic legal jargon and fundamental citizen awareness.
 
-### Backend :
-- Node.js: JavaScript runtime environment.
-- Express.js: Web application framework for Node.js.
-- MongoDB: NoSQL database for data storage.
-- Mongoose: MongoDB object data modeling (ODM) library for Node.js.
-- bcryptjs: For password hashing.
-- express-session: For session management.
-- cors: Middleware for enabling Cross-Origin Resource Sharing.
-- ts-node-dev: For development server with TypeScript hot-reloading.
-- typescript: For backend type safety.
+---
 
-## 🚀 Getting Started
-Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+## ✨ Core Capabilities
+
+### 1. 🤖 AI Legal Chatbot (`/chat`)
+- Natural-language legal Q&A grounded specifically in the Indian judicial and statutory system.
+- Powered by high-throughput LLaMA / GPT-OSS inference on **Groq Cloud**.
+- Instant legal context with citation grounding across criminal, civil, consumer, and constitutional matters.
+
+### 2. 📋 Case Tracker & Citizen Dashboard (`/dashboard`)
+- Centralized tracking for ongoing litigation across District Courts, High Courts, and the Supreme Court.
+- Monitor CNR numbers, court venues, hearing dates, and counsel notes.
+- Secure, authenticated user records stored in MongoDB.
+
+### 3. ⚖️ Legal Rights Visualizer (`/rights`)
+- Interactive, plain-language breakdown of fundamental legal rights across 5 core civic categories:
+  - **Arrest & Police Custody** (Articles 20-22, Section 50 CrPC, DK Basu Guidelines)
+  - **Property & Tenancy** (Transfer of Property Act, Model Tenancy Act)
+  - **Consumer Protection** (Consumer Protection Act, 2019 — refund, deficient service, unfair trade)
+  - **Employment & Labor** (Industrial Disputes Act, Maternity Benefit Act)
+  - **Family & Domestic Protection** (DV Act 2005, Maintenance under Section 125 CrPC)
+- One-click provision copying and native mobile sharing.
+
+### 4. 📄 Document Simplifier (`/simplify`)
+- Upload legal contracts, lease deeds, employment terms, or notices (PDF, DOCX, TXT up to 10MB).
+- In-memory parsing with zero raw-document retention commitments on servers.
+- Generates plain-language summaries, identifies high-risk indemnity/arbitration clauses, and flags critical compliance deadlines.
+
+### 5. 🏛️ Free Legal Aid & Helpline Directory (`/help`)
+- Direct access to National Legal Services Authority (**NALSA**), State Legal Services Authorities (**SLSA**), and District Legal Services Authorities (**DLSA**).
+- Verified toll-free legal emergency helplines: **15100** (NALSA Tele-Law), **1091** (Women Helpline), **1930** (Cyber Crime), and **1915** (National Consumer Helpline).
+
+### 6. 📬 Citizen Contact & Feedback (`/contact`)
+- Production-grade contact pipeline validated via Zod schemas.
+- Saves incoming feedback to MongoDB (`ContactMessageModel`) and dispatches email notifications via Nodemailer SMTP.
+
+---
+
+## 🛠️ Architecture & Tech Stack
+
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router, Server Components & Route Handlers)
+- **Language**: TypeScript (strict mode, full end-to-end type safety)
+- **Styling**: Tailwind CSS with custom **Forest & Gold** design tokens (`#1A362B`, `#D4AF37`)
+- **Typography**: Outfit (Headings) + Inter (Body)
+- **Authentication**: NextAuth.js v4 (JWT session strategy, Google OAuth 2.0 + Credentials provider with bcryptjs password hashing)
+- **Database**: MongoDB Atlas with Mongoose ODM (includes DNS SRV fallback for resilient connections)
+- **AI Inference**: [Groq Cloud SDK](https://groq.com/) (`openai/gpt-oss-120b`, `openai/gpt-oss-20b`)
+- **Email Delivery**: Nodemailer with Gmail SMTP
+- **Icons & Components**: Lucide React + Radix UI primitives
+
+---
+
+## 🚀 Getting Started Locally
+
 ### Prerequisites
-Ensure you have the following installed on your system :
-- Node.js (v18 or higher recommended)
-- npm (comes with Node.js): Or yarn if preferred.
-- Git
-- MongoDB Instance
-- OpenAI API Key: Obtain one from OpenAI Platform.
-- Supabase Project URL & Anon Key: Obtain these from your Supabase Dashboard.
+- **Node.js** v18+ or **Bun** v1.0+ (recommended for blazing fast local execution)
+- **MongoDB Atlas** cluster or a local MongoDB instance
+- Free **Groq Cloud API Key** from [console.groq.com](https://console.groq.com/)
+- (Optional) **Google Cloud OAuth Credentials** for Google Sign-In
 
-## Installation & Setup
-1. Clone the Repository :
-```
+### 1. Clone the Repository
+```bash
 git clone https://github.com/yashvikram30/legalease.git
 cd legalease
 ```
-2. Backend Setup :
+
+### 2. Install Dependencies
+Using Bun (recommended):
+```bash
+bun install
 ```
-cd backend
+Or using npm:
+```bash
 npm install
 ```
-- Create a .env file in the backend directory and add the following environment variables :
-```
-MONGO_URI=your_mongodb_connection_string_here
-PORT=5000
-SESSION_SECRET=a_very_long_and_random_string_for_session_secret
-```
-- Replace your_mongodb_connection_string_here with your MongoDB connection string.
-- Replace a_very_long_and_random_string_for_session_secret with a strong, randomly generated string.
 
-- Build the backend TypeScript code :
+### 3. Configure Environment Variables
+Copy the template to `.env`:
+```bash
+cp .env.example .env
 ```
-npm run build
-```
-3. Frontend Setup :
-- Navigate back to the project root directory.
-- Install frontend dependencies :
-```
-npm install
-```
-- Create a .env.local file in the project root directory and add the following environment variables :
-```
-NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
-OPENAI_API_KEY=your_openai_api_key_here
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url_here
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_public_key_here
-```
-- Replace your_openai_api_key_here with your actual OpenAI API Key.
-- Replace your_supabase_project_url_here and your_supabase_anon_public_key_here with your actual Supabase credentials.
+Fill in the necessary keys:
+```env
+# AI Inference
+GROQ_API_KEY=gsk_your_groq_api_key
 
-### Running the Application
-1. Start the Backend Server from the backend directory :
+# NextAuth Authentication
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_32_character_random_secret
+
+# Google OAuth (optional for credentials-only testing)
+GOOGLE_CLIENT_ID=your_client_id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your_client_secret
+
+# Database
+MONGO_URL=mongodb+srv://username:password@cluster.mongodb.net/bharatlegal?retryWrites=true&w=majority
+
+# Nodemailer Email (optional for contact form notifications)
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_gmail_16_char_app_password
 ```
-npm start
+
+### 4. Run the Development Server
+```bash
+bun run dev
+# or: npm run dev
 ```
-2. Build and start the Frontend Development Server from the root project directory :
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 📁 Repository Directory Structure
+
 ```
-npm run build
-npm start
+bharatlegal/
+├── app/
+│   ├── layout.tsx              # Root HTML layout with %s | BharatLegal metadata & font imports
+│   ├── page.tsx                # High-conversion landing page & architectural story
+│   ├── opengraph-image.tsx     # Dynamic Edge SVG OpenGraph preview image
+│   ├── sitemap.ts & robots.ts  # SEO sitemap and crawler policies
+│   ├── not-found.tsx           # Custom 404 handler with portal quick links
+│   ├── loading.tsx             # Global loading state indicator
+│   ├── (auth)/                 # Auth routes (login, register, forgot-password, reset-password)
+│   ├── chat/                   # AI Legal Assistant route
+│   ├── dashboard/              # Case tracker & user dashboard
+│   ├── rights/                 # Legal Rights Visualizer
+│   ├── simplify/               # Document Simplifier
+│   ├── help/                   # Legal Aid Directory & helplines
+│   ├── about/                  # Mission narrative, architecture, & roadmap
+│   ├── contact/                # Feedback & support page
+│   ├── privacy/ & terms/       # Legal disclosures & zero-retention privacy policy
+│   └── api/                    # Route Handlers (/api/chat, /api/auth, /api/contact, /api/sign-up)
+├── components/
+│   ├── navbar.tsx              # Header with responsive navigation drawer & theme switcher
+│   ├── footer.tsx              # Footer with statutory disclaimer & official links
+│   ├── legal-resources-sidebar # Persistent drawer menu for portal tools
+│   ├── ui/                     # Accessible UI components (buttons, dialogs, tabs, inputs)
+│   └── auth/                   # Authentication forms and social login buttons
+├── lib/
+│   ├── dbConnect.ts            # Resilient Mongoose connection with public DNS fallbacks
+│   └── utils.ts                # Tailwind class merge utilities (clsx + tailwind-merge)
+└── model/
+    ├── User.ts                 # User model (bcrypt password, Google provider IDs)
+    ├── Case.ts                 # Case tracking schema
+    ├── ContactMessage.ts       # Contact submissions schema
+    └── DocumentAnalysis.ts     # Document simplification analysis schema
 ```
-## 🤝 Contributing
-Contributions are welcome! If you'd like to contribute, please Check out our [Contributing Guidelines](contributing.md).
 
+---
 
+## ⚖️ Statutory Legal Disclaimer
 
+> [!IMPORTANT]
+> **BharatLegal is an educational and informational civic technology platform powered by Artificial Intelligence.**
+>
+> 1. Outputs, analyses, chatbot dialogues, and statutory summaries generated by BharatLegal do **not** constitute formal legal advice, an official legal opinion, or legal representation.
+> 2. Use of this platform does **not** establish an advocate-client relationship under the *Advocates Act, 1961* or any State Bar Council regulation in the Republic of India.
+> 3. For binding legal representation, case filings, or court appearances, citizens are advised to consult an enrolled advocate or reach out to the National Legal Services Authority (NALSA) at helpline **15100**.
 
+---
 
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).

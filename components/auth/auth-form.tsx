@@ -55,7 +55,7 @@ export function AuthForm() {
           toast.error(result.error || "Authentication failed.");
         }
       } else if (result?.ok) {
-        toast.success("Welcome back to LegalEase!");
+        toast.success("Welcome back to BharatLegal!");
         router.push("/dashboard");
         router.refresh();
       }
@@ -74,13 +74,30 @@ export function AuthForm() {
 
     try {
       const response = await axios.post<ApiResponse>("/api/sign-up", {
-        username,
-        email,
+        username: username.trim(),
+        email: email.trim().toLowerCase(),
         password,
       });
+
       toast.success(response.data.message || "Account created successfully!");
-      router.replace("/dashboard");
-      setActiveTab("signin");
+
+      // Automatically sign in the newly registered user
+      const signInResult = await signIn("credentials", {
+        redirect: false,
+        identifier: email.trim().toLowerCase(),
+        password,
+        callbackUrl: "/dashboard",
+      });
+
+      if (signInResult?.ok) {
+        toast.success("Welcome to BharatLegal!");
+        router.push("/dashboard");
+        router.refresh();
+      } else {
+        // Fallback: switch to sign in tab
+        setActiveTab("signin");
+        setEmailOrUsername(email);
+      }
     } catch (err) {
       const axiosError = err as AxiosError<ApiResponse>;
       const errorMessage = axiosError.response?.data.message;
@@ -97,7 +114,7 @@ export function AuthForm() {
           ⚖
         </div>
         <CardTitle className="text-2xl font-extrabold text-foreground font-heading">
-          Welcome to LegalEase
+          Welcome to BharatLegal
         </CardTitle>
         <CardDescription className="text-xs sm:text-sm text-muted-foreground">
           Sign in to track court cases, analyze documents, and save legal notes.

@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-teal-600 hover:bg-teal-700"
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
               >
                 {isLoading ? (
                   <>
@@ -65,9 +65,9 @@ export default function ForgotPasswordPage() {
                   "Send Reset Link"
                 )}
               </Button>
-              <CardFooter className="text-xs flex items-right justify-center text-slate-500">
+              <CardFooter className="text-xs flex items-right justify-center text-muted-foreground">
                 Don’t have an account?{' '}
-                <Link href="/auth" className="text-teal-600 ml-1 hover:underline">
+                <Link href="/auth" className="text-forest-800 dark:text-gold-500 font-semibold ml-1 hover:underline">
                   Create one
                 </Link>
               </CardFooter>

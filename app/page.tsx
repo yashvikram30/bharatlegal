@@ -100,22 +100,23 @@ export default function LandingPage() {
             Understand your fundamental rights, decode complex contracts, track court timelines, and connect with free legal aid mechanisms across India.
           </p>
 
-          {/* CTAs (Forest buttons in hero, preserving gold for the 2 designated moments) */}
+          {/* CTAs */}
           <div className="flex flex-wrap justify-center gap-3 pt-4">
             <Button
               asChild
               size="lg"
-              className="bg-forest-800 text-white hover:bg-forest-900 hover:text-white dark:bg-forest-800 dark:text-forest-50 dark:hover:bg-forest-700 dark:hover:text-forest-50 font-semibold px-6 focus-visible:ring-2 focus-visible:ring-forest-800 shadow-sm"
+              className="bg-forest-800 text-white hover:bg-forest-900 hover:text-white dark:bg-gold-500 dark:text-forest-950 dark:hover:bg-amber-400 dark:hover:text-forest-950 font-bold px-6 shadow-md dark:shadow-[0_0_24px_rgba(184,134,11,0.28)] border border-transparent dark:border-gold-400/40 focus-visible:ring-2 focus-visible:ring-gold-500 group transition-all duration-200"
             >
               <Link href="/chat" className="flex items-center gap-2">
-                Ask Legal Assistant <ArrowRight className="w-4 h-4" />
+                <span>Ask Legal Assistant</span>
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </Button>
             <Button
               asChild
               variant="outline"
               size="lg"
-              className="border border-forest-800 text-forest-800 bg-transparent hover:bg-forest-100 hover:text-forest-950 dark:border-forest-700 dark:text-forest-100 dark:hover:bg-forest-800 dark:hover:text-forest-50 focus-visible:ring-2 focus-visible:ring-forest-800 font-semibold px-6"
+              className="border border-forest-800/70 text-forest-800 bg-transparent hover:bg-forest-100 hover:text-forest-950 dark:border-forest-700/80 dark:bg-forest-900/40 dark:text-forest-100 dark:hover:bg-forest-800 dark:hover:text-forest-50 dark:hover:border-forest-600 focus-visible:ring-2 focus-visible:ring-forest-800 font-semibold px-6 transition-all duration-200"
             >
               <Link href="/simplify">Simplify a Contract</Link>
             </Button>
@@ -218,13 +219,13 @@ export default function LandingPage() {
                 <span>The Story & Architecture</span>
               </div>
               <h2 className="text-3xl font-extrabold text-white font-heading">
-                Why We Built LegalEase
+                Why We Built BharatLegal
               </h2>
               <p className="text-forest-100/85 leading-relaxed text-sm sm:text-base">
                 Over 45 million court cases are currently pending in India. Millions of everyday citizens sign binding lease deeds, employment bonds, and loan agreements without understanding the fine print.
               </p>
               <p className="text-forest-100/85 leading-relaxed text-sm sm:text-base">
-                Most legal AI platforms are trained on foreign US/UK laws. LegalEase was engineered specifically to decode the Indian justice system — bridging the divide between statutory terminology and common citizens.
+                Most legal AI platforms are trained on foreign US/UK laws. BharatLegal was engineered specifically to decode the Indian justice system — bridging the divide between statutory terminology and common citizens.
               </p>
               <div className="pt-2">
                 <Button

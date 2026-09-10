@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "LegalEase: Simplifying Legal Access for All Indians";
+export const alt = "BharatLegal: Simplifying Legal Access for All Indians";
 export const size = {
   width: 1200,
   height: 630,
@@ -52,7 +52,7 @@ export default function Image() {
               letterSpacing: "-0.5px",
             }}
           >
-            Legal<span style={{ color: "#B8860B" }}>Ease</span>
+            Bharat<span style={{ color: "#B8860B" }}>Legal</span>
           </div>
         </div>
 

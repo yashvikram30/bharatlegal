@@ -4,9 +4,9 @@ import { Scale, BookOpen, ShieldCheck, HeartHandshake, ArrowRight, BrainCircuit,
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "About Us — Demystifying Indian Law",
+  title: "About Us — Demystifying Indian Law | BharatLegal",
   description:
-    "Learn why LegalEase was built, our mission to bridge India's legal literacy divide, and how we ground AI in statutory Indian frameworks like BNS and CrPC.",
+    "Learn why BharatLegal was built, our mission to bridge India's legal literacy divide, and how we ground AI in statutory Indian frameworks like BNS and CrPC.",
 };
 
 export default function AboutPage() {
@@ -27,7 +27,7 @@ export default function AboutPage() {
       icon: ShieldCheck,
       title: "Ethical & Responsible AI",
       description:
-        "Clear boundaries and source citations. LegalEase serves as an informational companion, bridging the gap before formal advocate consultation.",
+        "Clear boundaries and source citations. BharatLegal serves as an informational companion, bridging the gap before formal advocate consultation.",
     },
     {
       icon: HeartHandshake,
@@ -48,7 +48,7 @@ export default function AboutPage() {
       step: "02",
       title: "AI with Indian Context",
       description:
-        "Most global legal AI models are trained on US/UK common law. LegalEase was engineered specifically for Indian jurisprudence, terminology, and court structures.",
+        "Most global legal AI models are trained on US/UK common law. BharatLegal was engineered specifically for Indian jurisprudence, terminology, and court structures.",
     },
     {
       step: "03",
@@ -70,7 +70,7 @@ export default function AboutPage() {
           Demystifying the Indian Justice System
         </h1>
         <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-          LegalEase was built to ensure that legal awareness in India is a fundamental right, not an expensive privilege. We leverage modern AI to make legal literacy accessible, transparent, and actionable for 1.4 billion citizens.
+          BharatLegal was built to ensure that legal awareness in India is a fundamental right, not an expensive privilege. We leverage modern AI to make legal literacy accessible, transparent, and actionable for 1.4 billion citizens.
         </p>
       </div>
 
@@ -78,7 +78,7 @@ export default function AboutPage() {
       <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-rest-card space-y-4">
         <h2 className="text-2xl font-bold text-foreground font-heading flex items-center gap-3">
           <Compass className="w-6 h-6 text-forest-800 dark:text-gold-500" />
-          Why We Built LegalEase
+          Why We Built BharatLegal
         </h2>
         <div className="space-y-3.5 text-muted-foreground text-sm sm:text-base leading-relaxed">
           <p>
@@ -88,7 +88,7 @@ export default function AboutPage() {
             Whether it is an individual trying to recover an unfairly withheld security deposit, a consumer fighting an e-commerce refund refusal, or an employee questioning an unreasonable non-compete covenant, people frequently face confusion and delay.
           </p>
           <p>
-            LegalEase addresses this gap by transforming dense legal jargon into plain-language summaries, providing scenario-based rights visualizations, enabling real-time case tracking, and connecting people with free legal aid mechanisms (DLSA / SLSA) across the country.
+            BharatLegal addresses this gap by transforming dense legal jargon into plain-language summaries, providing scenario-based rights visualizations, enabling real-time case tracking, and connecting people with free legal aid mechanisms (DLSA / SLSA) across the country.
           </p>
         </div>
       </div>
@@ -147,7 +147,7 @@ export default function AboutPage() {
       {/* CTA Box */}
       <div className="text-center bg-forest-100 dark:bg-forest-900/60 border border-forest-500/20 rounded-2xl p-8 sm:p-10 space-y-4">
         <h3 className="text-xl sm:text-2xl font-bold text-foreground font-heading">
-          Explore LegalEase Features Today
+          Explore BharatLegal Features Today
         </h3>
         <p className="text-xs sm:text-sm text-muted-foreground max-w-lg mx-auto">
           Ask a question to our AI Legal Assistant, review your statutory rights, or simplify a legal contract.

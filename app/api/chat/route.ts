@@ -12,8 +12,13 @@ const openai = new OpenAI({
 export async function POST(req: NextRequest) {
   const { messages, model } = await req.json();
 
+  const chosenModel =
+    model && (model.startsWith("openai/") || model.startsWith("qwen/"))
+      ? model
+      : "openai/gpt-oss-120b";
+
   const stream = await openai.chat.completions.create({
-    model,
+    model: chosenModel,
     stream: true,
     messages,
   });

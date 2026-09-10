@@ -17,7 +17,7 @@ export function Footer() {
                 ⚖
               </span>
               <span className="tracking-tight">
-                Legal<span className="text-gold-500">Ease</span>
+                Bharat<span className="text-gold-500">Legal</span>
               </span>
             </Link>
             <p className="text-xs sm:text-sm text-forest-100/75 leading-relaxed">
@@ -181,10 +181,10 @@ export function Footer() {
         {/* 5. Bottom Bar */}
         <div className="mt-8 pt-6 border-t border-forest-900 space-y-2 text-center sm:text-left">
           <p className="text-xs text-forest-100/70">
-            © {new Date().getFullYear()} LegalEase. Built for Indian Legal Literacy & Empowerment.
+            © {new Date().getFullYear()} BharatLegal. Built for Indian Legal Literacy & Empowerment.
           </p>
           <p className="text-[11px] text-forest-100/50 leading-relaxed max-w-4xl">
-            LegalEase is an independent educational initiative and does not provide formal legal counsel or create an advocate-client relationship under the Advocates Act, 1961. Consult an enrolled advocate or your District Legal Services Authority (DLSA) for actionable legal representation.
+            BharatLegal is an independent educational initiative and does not provide formal legal counsel or create an advocate-client relationship under the Advocates Act, 1961. Consult an enrolled advocate or your District Legal Services Authority (DLSA) for actionable legal representation.
           </p>
         </div>
       </div>

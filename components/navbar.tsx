@@ -31,7 +31,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full bg-forest-50 dark:bg-forest-950 border-b border-forest-100 dark:border-forest-900/60 transition-none shadow-none">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex h-16 items-center justify-between gap-3">
-          {/* Left: Logo/emblem + "LegalEase" wordmark */}
+          {/* Left: Logo/emblem + "BharatLegal" wordmark */}
           <Link
             href="/"
             className="flex items-center gap-2.5 font-heading font-extrabold text-xl text-forest-950 dark:text-forest-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-700 rounded-md py-1 shrink-0"
@@ -40,7 +40,7 @@ export function Navbar() {
               ⚖
             </span>
             <span className="tracking-tight">
-              Legal<span className="text-gold-700 dark:text-gold-500">Ease</span>
+              Bharat<span className="text-gold-700 dark:text-gold-500">Legal</span>
             </span>
           </Link>
 

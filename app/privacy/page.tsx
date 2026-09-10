@@ -2,9 +2,9 @@ import { Metadata } from "next";
 import { ShieldCheck, Lock, EyeOff, Server, FileText } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — LegalEase",
+  title: "Privacy Policy — BharatLegal",
   description:
-    "Learn about how LegalEase handles your data, ensures ephemeral document processing, and maintains privacy compliance.",
+    "Learn about how BharatLegal handles your data, ensures ephemeral document processing, and maintains privacy compliance.",
 };
 
 export default function PrivacyPage() {
@@ -55,7 +55,7 @@ export default function PrivacyPage() {
           Last Updated: September 2026 • Effective Immediately
         </p>
         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-          At LegalEase, we understand that legal matters and documents involve sensitive personal and commercial information. We are committed to maintaining the highest standards of data security, transparency, and user privacy.
+          At BharatLegal, we understand that legal matters and documents involve sensitive personal and commercial information. We are committed to maintaining the highest standards of data security, transparency, and user privacy.
         </p>
       </div>
 

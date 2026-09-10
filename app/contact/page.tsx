@@ -25,10 +25,29 @@ export default function ContactPage() {
     }
 
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    setIsSubmitting(false);
-    setSubmitted(true);
-    toast.success("Thank you! Your feedback has been received.");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || "Failed to submit feedback. Please try again.");
+        return;
+      }
+
+      setSubmitted(true);
+      toast.success(data.message || "Thank you! Your feedback has been received.");
+      setFormData({ name: "", email: "", subject: "Feedback", message: "" });
+    } catch (err) {
+      console.error("Contact form error:", err);
+      toast.error("Network error. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -64,7 +83,7 @@ export default function ContactPage() {
                     General Inquiries
                   </p>
                   <p className="font-medium text-foreground">
-                    support@legalease.in
+                    support@bharatlegal.in
                   </p>
                 </div>
               </div>
@@ -90,7 +109,7 @@ export default function ContactPage() {
                 Open Source & Legal Research
               </p>
               <p>
-                LegalEase welcomes law students, advocates, and developers interested in improving public legal literacy.
+                BharatLegal welcomes law students, advocates, and developers interested in improving public legal literacy.
               </p>
             </div>
           </div>

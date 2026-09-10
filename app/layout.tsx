@@ -4,7 +4,7 @@ import ClientLayout from "./clientLayout";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://legalease.in";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://bharatlegal.in";
 
 export const viewport: Viewport = {
   themeColor: [
@@ -18,38 +18,40 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "LegalEase — Simplifying Legal Access for All Indians",
-    template: "%s | LegalEase",
+    default: "BharatLegal — Simplifying Legal Access for All Indians",
+    template: "%s | BharatLegal",
   },
   description:
     "Empowering Indian citizens with AI-powered legal assistance, plain-language rights explanations, statutory citations (BNS/CrPC), real-time case tracking, and intelligent document simplification.",
   keywords: [
-    "LegalEase",
+    "BharatLegal",
+    "Bharat Legal",
     "Indian Law AI",
     "Bharatiya Nyaya Sanhita",
     "BNS",
     "CrPC",
+    "BNSS",
     "Case Tracker India",
     "Legal Document Simplifier",
     "Know Your Rights India",
     "Free Legal Aid",
     "Consumer Court Guidance",
   ],
-  authors: [{ name: "LegalEase Team" }],
-  creator: "LegalEase",
-  publisher: "LegalEase",
+  authors: [{ name: "BharatLegal Team" }],
+  creator: "BharatLegal",
+  publisher: "BharatLegal",
   openGraph: {
     type: "website",
     locale: "en_IN",
     url: siteUrl,
-    siteName: "LegalEase",
-    title: "LegalEase — Simplifying Legal Access for All Indians",
+    siteName: "BharatLegal",
+    title: "BharatLegal — Simplifying Legal Access for All Indians",
     description:
       "Demystifying the Indian justice system through AI-powered assistance, statutory grounding, case tracking, and document simplification.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "LegalEase — Simplifying Legal Access for All Indians",
+    title: "BharatLegal — Simplifying Legal Access for All Indians",
     description:
       "AI-powered legal assistance, plain-language statutory explanations, and case tracking for Indian citizens.",
   },
