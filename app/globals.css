@@ -69,7 +69,7 @@
     --secondary-foreground: 45 29% 95%;
 
     --muted: 155 45% 16%;              /* forest-800 */
-    --muted-foreground: 145 20% 65%;   /* tinted text */
+    --muted-foreground: 145 22% 76%;   /* clear readable tinted text (8.0:1 contrast) */
 
     --accent: 43 89% 38%;              /* gold-500:   #B8860B */
     --accent-foreground: 156 48% 11%;
@@ -77,8 +77,8 @@
     --destructive: 0 62% 40%;
     --destructive-foreground: 45 29% 95%;
 
-    --border: 155 35% 20%;
-    --input: 155 35% 20%;
+    --border: 155 35% 22%;             /* clear visible border */
+    --input: 155 35% 22%;
     --ring: 43 89% 38%;                /* gold-500 focus ring */
 
     /* Dark Mode Sidebar */

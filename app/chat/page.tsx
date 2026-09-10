@@ -102,54 +102,54 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
   const markdownComponents = useMemo(
     () => ({
       h1: ({ children }: any) => (
-        <h1 className="text-lg sm:text-xl font-heading font-bold text-foreground mt-6 mb-3 pb-2 border-b border-border/60">
+        <h1 className="text-lg sm:text-xl font-heading font-bold text-foreground dark:text-forest-50 mt-6 mb-3 pb-2 border-b border-border/60">
           {children}
         </h1>
       ),
       h2: ({ children }: any) => (
-        <h2 className="text-sm sm:text-base font-heading font-bold text-foreground mt-6 mb-2.5 pb-1 border-b border-border/50 flex items-center gap-2 tracking-tight">
+        <h2 className="text-sm sm:text-base font-heading font-bold text-foreground dark:text-forest-50 mt-6 mb-2.5 pb-1 border-b border-border/50 flex items-center gap-2 tracking-tight">
           {children}
         </h2>
       ),
       h3: ({ children }: any) => (
-        <h3 className="text-xs sm:text-sm font-heading font-semibold text-foreground/95 mt-4 mb-1.5 flex items-center gap-1.5">
+        <h3 className="text-xs sm:text-sm font-heading font-semibold text-foreground dark:text-forest-50 mt-4 mb-1.5 flex items-center gap-1.5">
           {children}
         </h3>
       ),
       h4: ({ children }: any) => (
-        <h4 className="text-xs font-heading font-semibold text-foreground/90 mt-3 mb-1">
+        <h4 className="text-xs font-heading font-semibold text-foreground dark:text-forest-50 mt-3 mb-1">
           {children}
         </h4>
       ),
       p: ({ children }: any) => (
-        <p className="text-xs sm:text-sm leading-relaxed text-foreground/90 mb-3 last:mb-0">
+        <p className="text-xs sm:text-sm leading-relaxed text-foreground dark:text-forest-50 mb-3 last:mb-0">
           {children}
         </p>
       ),
       ul: ({ children }: any) => (
-        <ul className="my-3 space-y-1.5 list-disc list-outside pl-5 text-xs sm:text-sm text-foreground/90 marker:text-gold-600 dark:marker:text-gold-400">
+        <ul className="my-3 space-y-1.5 list-disc list-outside pl-5 text-xs sm:text-sm text-foreground dark:text-forest-50 marker:text-gold-600 dark:marker:text-gold-400">
           {children}
         </ul>
       ),
       ol: ({ children }: any) => (
-        <ol className="my-3 space-y-1.5 list-decimal list-outside pl-5 text-xs sm:text-sm text-foreground/90 marker:text-gold-600 dark:marker:text-gold-400 marker:font-semibold">
+        <ol className="my-3 space-y-1.5 list-decimal list-outside pl-5 text-xs sm:text-sm text-foreground dark:text-forest-50 marker:text-gold-600 dark:marker:text-gold-400 marker:font-semibold">
           {children}
         </ol>
       ),
       li: ({ children }: any) => (
-        <li className="leading-relaxed pl-1 text-xs sm:text-sm text-foreground/90">
+        <li className="leading-relaxed pl-1 text-xs sm:text-sm text-foreground dark:text-forest-50">
           {children}
         </li>
       ),
       hr: () => <hr className="my-5 border-t border-border/60" />,
       strong: ({ children }: any) => (
-        <strong className="font-semibold text-foreground">{children}</strong>
+        <strong className="font-bold text-foreground dark:text-gold-200">{children}</strong>
       ),
       em: ({ children }: any) => (
-        <em className="italic text-foreground/85">{children}</em>
+        <em className="italic text-foreground/90 dark:text-forest-100">{children}</em>
       ),
       blockquote: ({ children }: any) => (
-        <blockquote className="my-3 border-l-4 border-gold-500/90 bg-forest-950/5 dark:bg-forest-950/40 px-4 py-3 rounded-r-xl text-foreground/90 text-xs sm:text-sm shadow-2xs font-sans not-italic">
+        <blockquote className="my-3 border-l-4 border-gold-500 dark:border-gold-400 bg-muted/60 dark:bg-forest-900/60 px-4 py-3 rounded-r-xl text-foreground dark:text-forest-50 text-xs sm:text-sm shadow-2xs font-sans not-italic border border-border/40">
           {children}
         </blockquote>
       ),
@@ -159,7 +159,7 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
         if (isInline) {
           return (
             <code
-              className="px-1.5 py-0.5 rounded-md bg-muted/80 text-forest-900 dark:text-gold-300 font-mono text-xs border border-border/50 font-medium"
+              className="px-1.5 py-0.5 rounded-md bg-muted dark:bg-forest-900 text-forest-900 dark:text-gold-300 font-mono text-xs border border-border/60 dark:border-gold-500/30 font-semibold"
               {...props}
             >
               {children}
@@ -167,11 +167,11 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
           );
         }
         return (
-          <div className="my-3 rounded-xl overflow-hidden border border-border/80 bg-forest-950 text-forest-50 text-xs font-mono shadow-xs">
-            <div className="px-3.5 py-1.5 bg-forest-900/90 text-forest-300 border-b border-forest-800 text-[11px] font-sans flex items-center justify-between">
+          <div className="my-3 rounded-xl overflow-hidden border border-border dark:border-forest-700 bg-forest-950 text-forest-50 text-xs font-mono shadow-xs">
+            <div className="px-3.5 py-1.5 bg-forest-900 text-gold-300 border-b border-forest-800 text-[11px] font-sans flex items-center justify-between font-semibold">
               <span>{match[1] || "code"}</span>
             </div>
-            <pre className="p-3.5 overflow-x-auto leading-relaxed">
+            <pre className="p-3.5 overflow-x-auto leading-relaxed text-forest-50 font-mono">
               <code className={className} {...props}>
                 {children}
               </code>
@@ -181,30 +181,30 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
       },
       pre: ({ children }: any) => <>{children}</>,
       table: ({ children }: any) => (
-        <div className="my-4 overflow-x-auto rounded-xl border border-border/80 shadow-2xs bg-card/70 backdrop-blur-xs">
+        <div className="my-4 overflow-x-auto rounded-xl border border-border/80 dark:border-border shadow-2xs bg-card dark:bg-forest-950/80 backdrop-blur-xs">
           <table className="w-full text-left text-xs sm:text-sm border-collapse min-w-[500px]">
             {children}
           </table>
         </div>
       ),
       thead: ({ children }: any) => (
-        <thead className="bg-muted/80 text-foreground border-b border-border/80 font-heading">
+        <thead className="bg-muted/80 dark:bg-forest-900/90 text-foreground dark:text-forest-50 border-b border-border/80 font-heading">
           {children}
         </thead>
       ),
       th: ({ children }: any) => (
-        <th className="px-3.5 py-2.5 font-semibold text-[11px] sm:text-xs tracking-wider uppercase text-foreground/90 border-r border-border/40 last:border-r-0 whitespace-nowrap">
+        <th className="px-3.5 py-2.5 font-bold text-[11px] sm:text-xs tracking-wider uppercase text-foreground dark:text-gold-300 border-r border-border/40 last:border-r-0 whitespace-nowrap">
           {children}
         </th>
       ),
       tbody: ({ children }: any) => (
-        <tbody className="divide-y divide-border/40 bg-card/40">{children}</tbody>
+        <tbody className="divide-y divide-border/40 bg-card/40 dark:bg-forest-950/40">{children}</tbody>
       ),
       tr: ({ children }: any) => (
-        <tr className="hover:bg-muted/30 transition-colors">{children}</tr>
+        <tr className="hover:bg-muted/30 dark:hover:bg-forest-900/40 transition-colors">{children}</tr>
       ),
       td: ({ children }: any) => (
-        <td className="px-3.5 py-2.5 border-b border-border/30 text-foreground/85 leading-relaxed align-top border-r border-border/30 last:border-r-0 text-xs sm:text-sm">
+        <td className="px-3.5 py-2.5 border-b border-border/30 text-foreground dark:text-forest-50 leading-relaxed align-top border-r border-border/30 last:border-r-0 text-xs sm:text-sm">
           {children}
         </td>
       ),
@@ -220,10 +220,10 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
                 e.preventDefault();
                 onOpenCitation(act, section);
               }}
-              className="inline-flex items-center gap-1 px-2 py-0.5 my-0.5 mx-0.5 rounded-md bg-forest-100 dark:bg-forest-900/80 text-forest-900 dark:text-gold-300 font-semibold text-xs border border-forest-500/30 hover:border-gold-500/60 hover:bg-forest-200 dark:hover:bg-forest-800 transition-all shadow-2xs cursor-pointer align-baseline"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 my-0.5 mx-0.5 rounded-lg bg-forest-100 dark:bg-forest-900 text-forest-900 dark:text-gold-300 font-semibold text-xs border border-forest-500/30 dark:border-gold-500/40 hover:border-gold-500 hover:bg-forest-200 dark:hover:bg-forest-800 dark:hover:text-gold-200 transition-all shadow-2xs cursor-pointer align-baseline"
               title={`View statutory bare act text for ${act.toUpperCase()} §${section}`}
             >
-              <Scale className="w-3 h-3 text-gold-500 shrink-0 inline" />
+              <Scale className="w-3 h-3 text-gold-600 dark:text-gold-400 shrink-0 inline" />
               <span>{children}</span>
             </button>
           );
@@ -233,7 +233,7 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
             href={href}
             target="_blank"
             rel="noreferrer"
-            className="text-forest-700 dark:text-gold-400 underline hover:text-foreground font-medium transition-colors"
+            className="text-forest-700 dark:text-gold-400 underline underline-offset-2 hover:text-foreground dark:hover:text-gold-200 font-medium transition-colors"
             {...props}
           >
             {children}
@@ -255,14 +255,14 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
       <div
         className={`${
           isUser
-            ? "bg-forest-900 text-forest-50 dark:bg-forest-800 dark:text-forest-100 rounded-2xl rounded-br-xs px-4 py-2.5 max-w-[85%] sm:max-w-[75%] text-xs sm:text-sm leading-relaxed shadow-xs"
+            ? "bg-forest-900 text-forest-50 dark:bg-forest-800 dark:text-forest-50 rounded-2xl rounded-br-xs px-4 py-2.5 max-w-[85%] sm:max-w-[75%] text-xs sm:text-sm leading-relaxed shadow-xs"
             : "flex-1 space-y-3 min-w-0 pr-1"
         }`}
       >
         {isUser ? (
           <p className="whitespace-pre-wrap">{message.content}</p>
         ) : (
-          <div className="space-y-3 text-foreground">
+          <div className="space-y-3 text-foreground dark:text-forest-50">
             {isStreaming && message.content.length === 0 && (
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-xs font-medium text-forest-900 dark:text-gold-300 animate-pulse">
                 <Scale className="w-3.5 h-3.5 text-gold-500 animate-spin" />
@@ -270,7 +270,7 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
               </div>
             )}
 
-            <div className="text-foreground leading-relaxed">
+            <div className="text-foreground dark:text-forest-50 leading-relaxed">
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                 {sanitizedContent}
               </ReactMarkdown>
@@ -764,15 +764,15 @@ export default function ChatPage() {
                     key={idx}
                     type="button"
                     onClick={() => handleSend(item.prompt)}
-                    className="p-3.5 rounded-xl border border-border/80 bg-card hover:border-gold-500/40 hover:bg-forest-50/50 dark:hover:bg-forest-950/40 transition-all text-left group shadow-2xs"
+                    className="p-3.5 rounded-xl border border-border/80 dark:border-border bg-card dark:bg-forest-900/50 hover:border-gold-500/50 hover:bg-forest-50/50 dark:hover:bg-forest-900/90 transition-all text-left group shadow-2xs"
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <div className="p-1.5 rounded-lg bg-forest-100 dark:bg-forest-900/60 text-forest-800 dark:text-gold-400 border border-forest-500/20">
+                      <div className="p-1.5 rounded-lg bg-forest-100 dark:bg-forest-900 text-forest-800 dark:text-gold-400 border border-forest-500/20 dark:border-gold-500/30">
                         <item.icon className="w-3.5 h-3.5" />
                       </div>
                       <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
-                    <p className="font-semibold text-xs sm:text-sm text-foreground mt-2 font-heading">
+                    <p className="font-semibold text-xs sm:text-sm text-foreground dark:text-forest-50 mt-2 font-heading">
                       {item.title}
                     </p>
                     <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
