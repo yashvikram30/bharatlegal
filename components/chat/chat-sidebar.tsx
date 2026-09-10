@@ -12,7 +12,6 @@ import {
   Check,
   X,
   Search,
-  Scale,
   LogOut,
   LogIn,
   MoreVertical,
@@ -135,39 +134,30 @@ export function ChatSidebar({
         }`}
       >
         {/* Top Header Actions */}
-        <div className="p-3.5 space-y-3 border-b border-border/40 shrink-0">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-md bg-forest-800 text-gold-400 flex items-center justify-center border border-gold-500/30">
-                <Scale className="w-3.5 h-3.5 text-gold-500" />
-              </div>
-              <span className="font-heading font-bold text-xs uppercase tracking-wider text-muted-foreground">
-                Consultations
-              </span>
-            </div>
+        <div className="p-3 space-y-2.5 border-b border-border/40 shrink-0">
+          <div className="flex items-center gap-2">
+            {/* New Chat Primary CTA */}
+            <Button
+              onClick={() => {
+                onNewChat();
+                if (window.innerWidth < 768) onToggle();
+              }}
+              className="flex-1 h-9 bg-forest-800 hover:bg-forest-700 text-forest-50 dark:text-gold-300 font-heading font-semibold text-xs rounded-xl border border-gold-500/40 shadow-xs flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <Plus className="w-4 h-4 text-gold-500" />
+              <span>New Consultation</span>
+            </Button>
 
             <Button
               variant="ghost"
               size="icon"
               onClick={onToggle}
-              className="h-7 w-7 text-muted-foreground hover:text-foreground"
+              className="h-9 w-9 text-muted-foreground hover:text-foreground shrink-0 rounded-xl border border-border/60 hover:bg-muted transition-colors"
               title="Collapse sidebar"
             >
               <PanelLeftClose className="w-4 h-4" />
             </Button>
           </div>
-
-          {/* New Chat Primary CTA */}
-          <Button
-            onClick={() => {
-              onNewChat();
-              if (window.innerWidth < 768) onToggle();
-            }}
-            className="w-full h-9 bg-forest-800 hover:bg-forest-700 text-forest-50 dark:text-gold-300 font-heading font-semibold text-xs rounded-xl border border-gold-500/40 shadow-xs flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99]"
-          >
-            <Plus className="w-4 h-4 text-gold-500" />
-            <span>New Consultation</span>
-          </Button>
 
           {/* Search bar */}
           {conversations.length > 3 && (

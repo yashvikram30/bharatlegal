@@ -563,10 +563,19 @@ function streamToResponse(
           const content = chunk.choices[0]?.delta?.content || "";
           if (content) {
             fullText += content;
-            controller.enqueue(encoder.encode(content));
+            try {
+              controller.enqueue(encoder.encode(content));
+            } catch {
+              // Client disconnected or closed stream early
+              break;
+            }
           }
         }
-        controller.close();
+        try {
+          controller.close();
+        } catch {
+          // Already closed
+        }
 
         if (onCompletion) {
           onCompletion(fullText).catch((err) =>
