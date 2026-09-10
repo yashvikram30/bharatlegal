@@ -166,7 +166,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="https://github.com/yashvikram30/legalease"
+                  href="https://github.com/yashvikram30/bharatlegal"
                   target="_blank"
                   rel="noreferrer"
                   className="text-forest-100/75 hover:text-gold-500 transition-colors inline-flex items-center gap-1"

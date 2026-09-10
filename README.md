@@ -65,8 +65,8 @@ BharatLegal is an open-source, AI-powered civic technology platform built to mak
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yashvikram30/legalease.git
-cd legalease
+git clone https://github.com/yashvikram30/bharatlegal.git
+cd bharatlegal
 ```
 
 ### 2. Install Dependencies
