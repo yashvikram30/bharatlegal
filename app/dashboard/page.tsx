@@ -71,7 +71,7 @@ const DEMO_CASES: TrackedCaseDTO[] = [
     petitioner: "Yash Vikram (Authenticated Petitioner)",
     opponentName: "Municipal Corporation of Delhi",
     lastOrderUrl:
-      "https://indian-high-court-judgments.s3.ap-south-1.amazonaws.com/delhi/2023/004521.pdf",
+      "https://indian-high-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2023/court=7_26/bench=dhcdb/DLHC010045212023_1_2023-02-14.pdf",
     notes: "Interim stay granted on demolition. Notice issued to respondent.",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -1064,7 +1064,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {orderModalData.orderPdfUrl ? (
+              {orderModalData.orderPdfUrl && orderModalData.isPdfLive ? (
                 <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 space-y-2 text-center">
                   <div className="inline-flex p-2 rounded-full bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 mx-auto">
                     <FileCheck className="w-5 h-5" />

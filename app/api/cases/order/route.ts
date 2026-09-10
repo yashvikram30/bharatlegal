@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { parseCNR } from "@/lib/courts/cnr";
+import { parseCNR, findLiveOrderPdf } from "@/lib/courts/cnr";
 
 export const runtime = "nodejs";
 
@@ -26,24 +26,18 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    let isPdfLive = false;
-    if (cnrDetails.orderPdfUrl) {
-      try {
-        const checkRes = await fetch(cnrDetails.orderPdfUrl, {
-          method: "HEAD",
-          next: { revalidate: 3600 },
-        });
-        isPdfLive = checkRes.ok;
-      } catch (headErr) {
-        // If S3 HEAD check fails, still return URL for client fallback
-        isPdfLive = false;
-      }
-    }
+    // Attempt to resolve verified S3 judgment PDF
+    const liveS3Pdf = await findLiveOrderPdf(cnr);
+    const orderPdfUrl = liveS3Pdf || cnrDetails.orderPdfUrl || null;
+    const isPdfLive = Boolean(liveS3Pdf);
 
     return NextResponse.json({
       success: true,
-      cnrDetails,
-      orderPdfUrl: cnrDetails.orderPdfUrl,
+      cnrDetails: {
+        ...cnrDetails,
+        orderPdfUrl,
+      },
+      orderPdfUrl,
       isPdfLive,
       officialOrderUrl: cnrDetails.officialOrderUrl,
       message: isPdfLive

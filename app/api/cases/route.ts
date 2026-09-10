@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import dbConnect from "@/lib/dbConnect";
 import CaseModel, { CaseStage, CaseStatus } from "@/model/Case";
-import { parseCNR } from "@/lib/courts/cnr";
+import { parseCNR, findLiveOrderPdf } from "@/lib/courts/cnr";
 
 export const runtime = "nodejs";
 
@@ -129,7 +129,10 @@ export async function POST(req: NextRequest) {
       (cnrParsed
         ? `${cnrParsed.courtType} Matter (${cnrParsed.filingNumber}/${cnrParsed.filingYear})`
         : `Matter ${caseNumber.trim()}`);
-    const finalOrderUrl = cnrParsed?.orderPdfUrl || null;
+
+    // Resolve verified AWS Open Data PDF if available
+    const liveS3Pdf = await findLiveOrderPdf(caseNumber);
+    const finalOrderUrl = liveS3Pdf || cnrParsed?.orderPdfUrl || null;
 
     // Standard initial timeline milestones
     const today = new Date();

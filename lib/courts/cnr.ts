@@ -66,7 +66,83 @@ const AWS_HC_BUCKET = "https://indian-high-court-judgments.s3.ap-south-1.amazona
 const AWS_SC_BUCKET = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com";
 
 /**
- * Construct public AWS Open Data URL for a High Court / Supreme Court order
+ * Mapping of CNR state/court prefix to S3 directory prefixes
+ */
+const COURT_S3_PREFIXES: Record<string, string[]> = {
+  DLHC: ["court=7_26/bench=dhcdb/"],
+  BRHC: ["court=10_8/bench=patnahcucisdb94/"],
+  WBCH: [
+    "court=19_16/bench=calcutta_original_side/",
+    "court=19_16/bench=calcutta_appellate_side/",
+    "court=19_16/bench=calcutta_circuit_bench_at_jalpaiguri/",
+  ],
+  KAHC: [
+    "court=29_3/bench=karnataka_bng_old/",
+    "court=29_3/bench=karhcdharwad/",
+    "court=29_3/bench=karhckalaburagi/",
+  ],
+  BOMHC: [
+    "court=27_1/bench=newos/",
+    "court=27_1/bench=newas/",
+    "court=27_1/bench=hcaurdb/",
+    "court=27_1/bench=hcbgoa/",
+  ],
+  MHHC: [
+    "court=27_1/bench=newos/",
+    "court=27_1/bench=newas/",
+    "court=27_1/bench=hcaurdb/",
+    "court=27_1/bench=hcbgoa/",
+  ],
+  MHCC: ["court=27_1/bench=newos/", "court=27_1/bench=newas/"],
+  APHC: ["court=28_2/bench=aphc/"],
+  JKHC: ["court=1_12/bench=jammuhc/", "court=1_12/bench=kashmirhc/"],
+};
+
+/**
+ * Look up certified judgment order PDF in public AWS Open Data bucket
+ */
+export async function findLiveOrderPdf(rawCnr: string): Promise<string | null> {
+  if (!rawCnr) return null;
+  const clean = rawCnr.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (clean.length !== 16) return null;
+
+  const cnrPrefix4 = clean.slice(0, 4);
+  const possibleCourtPrefixes = COURT_S3_PREFIXES[cnrPrefix4] || [""];
+
+  // Search in recent judgment years (from 2024 down to 2019)
+  const years = [2024, 2023, 2022, 2021, 2020, 2019];
+
+  for (const year of years) {
+    for (const courtPrefix of possibleCourtPrefixes) {
+      try {
+        const queryUrl = `${AWS_HC_BUCKET}/?list-type=2&prefix=data/pdf/year=${year}/${courtPrefix}${clean}&max-keys=1`;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+        const res = await fetch(queryUrl, {
+          signal: controller.signal,
+          next: { revalidate: 86400 },
+        });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) continue;
+
+        const text = await res.text();
+        const match = text.match(/<Key>(.*?)<\/Key>/);
+        if (match && match[1]) {
+          return `${AWS_HC_BUCKET}/${match[1]}`;
+        }
+      } catch (err) {
+        // Skip on network timeout
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Synchronous URL constructor fallback
  */
 export function resolveOrderPdfUrl(
   stateCode: string,
@@ -76,12 +152,6 @@ export function resolveOrderPdfUrl(
 ): string | null {
   if (stateCode === "SC" || courtCode === "SC") {
     return `${AWS_SC_BUCKET}/${filingYear}/${filingNumber}.pdf`;
-  }
-  if (courtCode === "HC") {
-    const stateSlug = (STATE_CODES[stateCode] || stateCode)
-      .toLowerCase()
-      .replace(/\s+/g, "-");
-    return `${AWS_HC_BUCKET}/${stateSlug}/${filingYear}/${filingNumber}.pdf`;
   }
   return null;
 }
