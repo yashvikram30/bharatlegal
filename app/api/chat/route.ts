@@ -210,131 +210,142 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    let toolExecuted = false;
     const sources: IMessageSource[] = [];
+    const retrievedContextBlocks: string[] = [];
 
-    // Multi-turn agentic tool execution loop (up to 2 rounds)
-    for (let round = 0; round < 2; round++) {
-      let response: any;
-      try {
-        response = await createCompletionWithRetry({
-          model: chosenModel,
-          messages: conversationHistory,
-          tools: legalTools,
-          tool_choice: "auto",
-        });
-      } catch (err: any) {
-        // Fallback model if primary model is rate limited
-        if (err?.status === 429 && chosenModel === "openai/gpt-oss-120b") {
-          console.warn("[Chat Route] Rate limit on 120b, falling back to 20b...");
-          response = await createCompletionWithRetry({
-            model: "openai/gpt-oss-20b",
-            messages: conversationHistory,
-            tools: legalTools,
-            tool_choice: "auto",
-          });
-        } else {
-          throw err;
-        }
-      }
-
-      const message = response.choices[0]?.message;
-      if (!message?.tool_calls || message.tool_calls.length === 0) {
-        break;
-      }
-
-      toolExecuted = true;
-      conversationHistory.push(message);
-
-      for (const toolCall of message.tool_calls) {
-        let toolOutput = "";
-        try {
-          const args = JSON.parse(toolCall.function.arguments || "{}");
-          const fnName = toolCall.function.name;
-
-          if (fnName === "lookup_statute" || fnName === "search_penalties") {
-            const detail = await lookupSection(args.act || "bns", args.section);
+    // 1. Fast statutory pre-fetch based on detected Acts and Sections in the user query
+    if (lastUserMsg?.content) {
+      const detectedRefs = extractStatutoryRefs(lastUserMsg.content);
+      for (const ref of detectedRefs) {
+        if (!sources.some((s) => s.act === ref.act && s.section === ref.section)) {
+          try {
+            const detail = await lookupSection(ref.act, ref.section);
             if (detail) {
-              // Record source citation for RAG re-rendering
               sources.push({
                 act: detail.act.id,
                 section: detail.section.number,
                 title: `${detail.act.short_title} §${detail.section.number}`,
               });
+              retrievedContextBlocks.push(formatDetailContext(detail));
 
-              // Compact token-efficient representation to avoid Groq 8000 TPM limit
-              toolOutput = JSON.stringify({
-                found: true,
-                act_slug: detail.act.id,
-                act_title: detail.act.short_title,
-                section_number: detail.section.number,
-                section_title: detail.section.title,
-                bare_text:
-                  detail.section.text.length > 2000
-                    ? detail.section.text.slice(0, 2000) + "... [truncated]"
-                    : detail.section.text,
-                bailable: detail.section.bailable,
-                cognizable: detail.section.cognizable,
-                court_triable: detail.section.court_triable,
-                corresponds_to: detail.corresponds_to,
-                landmark_precedents: detail.judgments.slice(0, 2).map((j) => ({
-                  title: j.title,
-                  court: j.court_name,
-                  date: j.date,
-                  ratio_decidendi: j.ratio_decidendi,
-                  precedential_value: j.precedential_value,
-                })),
-              });
-            } else {
-              toolOutput = JSON.stringify({
-                found: false,
-                message: `No statutory provision found for ${args.act} Section ${args.section}`,
-              });
+              // If an old IPC/CrPC section is referenced, auto-fetch corresponding BNS/BNSS
+              if (Array.isArray(detail.corresponds_to)) {
+                for (const corr of detail.corresponds_to) {
+                  if (
+                    corr.act &&
+                    corr.section &&
+                    !sources.some((s) => s.act === corr.act && s.section === corr.section)
+                  ) {
+                    const corrDetail = await lookupSection(corr.act, corr.section);
+                    if (corrDetail) {
+                      sources.push({
+                        act: corrDetail.act.id,
+                        section: corrDetail.section.number,
+                        title: `${corrDetail.act.short_title} §${corrDetail.section.number}`,
+                      });
+                      retrievedContextBlocks.push(formatDetailContext(corrDetail));
+                    }
+                  }
+                }
+              }
             }
-          } else if (fnName === "convert_penal_provision") {
-            const conversion = await convertProvision(args.sourceAct, args.section);
-            toolOutput = JSON.stringify({
-              success: !!conversion,
-              source: `${args.sourceAct} ${args.section}`,
-              converted: conversion,
-            });
+          } catch (err) {
+            console.warn("[Chat Route] Pre-fetch lookup error for", ref, err);
           }
-        } catch (toolError: any) {
-          console.error("[Chat Route] Tool execution error:", toolError);
-          toolOutput = JSON.stringify({ error: toolError.message || "Failed to execute tool" });
         }
-
-        conversationHistory.push({
-          role: "tool",
-          tool_call_id: toolCall.id,
-          content: toolOutput,
-        });
       }
     }
 
-    if (toolExecuted) {
-      conversationHistory.push({
-        role: "system",
-        content:
-          "TOOL EXECUTION FINISHED. Output your final grounded, structured legal answer in exact GitHub Flavored Markdown (GFM) format as specified in the system instructions (Executive Summary, Statutory Matrix table, Bare Act blockquote with [#citation:act:section] links, Legal Ingredients, Landmark Precedents with ratio decidendi, Actionable Next Steps, and Disclaimer). Begin directly with '## 📌 Executive Summary'. Ensure blank lines before and after every table, blockquote, and heading. Do NOT wrap your output in ```markdown code fences or call any more tools.",
-      });
+    // 2. If no statutory refs pre-fetched, run dynamic agentic tool-calling round
+    if (retrievedContextBlocks.length === 0) {
+      try {
+        const toolResponse = await createCompletionWithRetry({
+          model: chosenModel,
+          messages: conversationHistory,
+          tools: legalTools,
+          tool_choice: "auto",
+        });
+
+        const toolMessage = toolResponse.choices[0]?.message;
+        if (toolMessage?.tool_calls && toolMessage.tool_calls.length > 0) {
+          for (const toolCall of toolMessage.tool_calls) {
+            try {
+              const args = JSON.parse(toolCall.function.arguments || "{}");
+              const fnName = toolCall.function.name;
+
+              if (fnName === "lookup_statute" || fnName === "search_penalties") {
+                const detail = await lookupSection(args.act || "bns", args.section);
+                if (detail && !sources.some((s) => s.act === detail.act.id && s.section === detail.section.number)) {
+                  sources.push({
+                    act: detail.act.id,
+                    section: detail.section.number,
+                    title: `${detail.act.short_title} §${detail.section.number}`,
+                  });
+                  retrievedContextBlocks.push(formatDetailContext(detail));
+                }
+              } else if (fnName === "convert_penal_provision") {
+                const conversion = await convertProvision(args.sourceAct, args.section);
+                if (conversion?.act && conversion?.section) {
+                  const detail = await lookupSection(conversion.act, conversion.section);
+                  if (detail && !sources.some((s) => s.act === detail.act.id && s.section === detail.section.number)) {
+                    sources.push({
+                      act: detail.act.id,
+                      section: detail.section.number,
+                      title: `${detail.act.short_title} §${detail.section.number}`,
+                    });
+                    retrievedContextBlocks.push(formatDetailContext(detail));
+                  }
+                }
+              }
+            } catch (toolExecErr) {
+              console.warn("[Chat Route] Dynamic tool parsing error:", toolExecErr);
+            }
+          }
+        }
+      } catch (agenticErr: any) {
+        console.warn("[Chat Route] Dynamic agentic round skipped:", agenticErr?.message);
+      }
     }
 
-    // Stream final response to client with backoff and fallback
+    // 3. Construct clean streaming conversation history (system + user/assistant text turns only)
+    // IMPORTANT: Exclude assistant tool_calls and tool-role messages to prevent Groq 'Tool choice is none' error.
+    const groundedSystemPrompt =
+      retrievedContextBlocks.length > 0
+        ? `${SYSTEM_PROMPT}\n\n## 📚 Verified Statutory Provisions & Landmark Jurisprudence (IndiaCode Grounding):\n${retrievedContextBlocks.join(
+            "\n\n---\n\n"
+          )}\n\nGround your response strictly in the verified statutory provisions and precedents above. Begin directly with '## 📌 Executive Summary'. Include statutory matrices and [#citation:act:section] links. Do NOT wrap your output in markdown code fences.`
+        : SYSTEM_PROMPT;
+
+    const streamingHistory: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+      { role: "system", content: groundedSystemPrompt },
+      ...recentMessages
+        .filter(
+          (m: any) =>
+            (m.role === "user" || m.role === "assistant") &&
+            typeof m.content === "string" &&
+            m.content.trim().length > 0
+        )
+        .map((m: any) => ({
+          role: m.role as "user" | "assistant",
+          content: m.content,
+        })),
+    ];
+
+    // 4. Stream final response to client with backoff and rate-limit fallback
     let stream: any;
     try {
       stream = await createCompletionWithRetry({
         model: chosenModel,
         stream: true,
-        messages: conversationHistory,
+        messages: streamingHistory,
       });
     } catch (streamErr: any) {
       if (streamErr?.status === 429 && chosenModel === "openai/gpt-oss-120b") {
-        console.warn("[Chat Route] Rate limit on final stream 120b, falling back to 20b...");
+        console.warn("[Chat Route] Rate limit on 120b, falling back to openai/gpt-oss-20b...");
         stream = await createCompletionWithRetry({
           model: "openai/gpt-oss-20b",
           stream: true,
-          messages: conversationHistory,
+          messages: streamingHistory,
         });
       } else {
         throw streamErr;
@@ -447,6 +458,97 @@ async function createCompletionWithRetry(
   }
 }
 
+/**
+ * Format a statutory detail object into an authoritative context block for RAG grounding
+ */
+function formatDetailContext(detail: any): string {
+  const parts: string[] = [
+    `Act: ${detail.act.short_title} (${detail.act.id.toUpperCase()})`,
+    `Section: ${detail.section.number} — ${detail.section.title}`,
+    `Bare Statutory Text: ${detail.section.text.slice(0, 2000)}`,
+  ];
+  if (detail.section.bailable !== undefined) {
+    parts.push(`Bail Classification: ${detail.section.bailable ? "Bailable" : "Non-Bailable"}`);
+  }
+  if (detail.section.cognizable !== undefined) {
+    parts.push(`Cognizance: ${detail.section.cognizable ? "Cognizable" : "Non-Cognizable"}`);
+  }
+  if (detail.section.court_triable) {
+    parts.push(`Court Triable By: ${detail.section.court_triable}`);
+  }
+  if (Array.isArray(detail.corresponds_to) && detail.corresponds_to.length > 0) {
+    const corrText = detail.corresponds_to
+      .map((c: any) => `${c.act.toUpperCase()} §${c.section} (${c.relation})`)
+      .join(", ");
+    parts.push(`Corresponding Old/New Penal Provision: ${corrText}`);
+  }
+  if (detail.judgments && detail.judgments.length > 0) {
+    const judgments = detail.judgments
+      .slice(0, 2)
+      .map(
+        (j: any) =>
+          `- **${j.title}** (${j.court_name}, ${j.date}): ${j.ratio_decidendi}`
+      )
+      .join("\n");
+    parts.push(`Landmark Judicial Precedents:\n${judgments}`);
+  }
+  return parts.join("\n");
+}
+
+/**
+ * Extract statutory references (Act and Section) from user prompts
+ */
+function extractStatutoryRefs(text: string): { act: string; section: string }[] {
+  const refs: { act: string; section: string }[] = [];
+  const seen = new Set<string>();
+
+  const add = (act: string, sec: string) => {
+    const cleanSec = sec.replace(/[^0-9a-zA-Z]/g, "").toLowerCase();
+    const key = `${act}:${cleanSec}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      refs.push({ act, section: sec });
+    }
+  };
+
+  // Standard Act-first matches: "BNS Section 318", "BNS §318", "BNS 318"
+  const patterns: [RegExp, string][] = [
+    [/\b(?:bns|bharatiya\s*nyaya\s*sanhita)\D*?(\d+[a-z]?)/gi, "bns"],
+    [/\b(?:bnss|bharatiya\s*nagarik\s*suraksha\s*sanhita)\D*?(\d+[a-z]?)/gi, "bnss"],
+    [/\b(?:bsa|bharatiya\s*sakshya\s*adhiniyam)\D*?(\d+[a-z]?)/gi, "bsa"],
+    [/\b(?:ipc|indian\s*penal\s*code)\D*?(\d+[a-z]?)/gi, "ipc"],
+    [/\b(?:crpc|code\s*of\s*criminal\s*procedure)\D*?(\d+[a-z]?)/gi, "crpc"],
+    [/\b(?:ni\s*act|negotiable\s*instruments(?:\s*act)?)\D*?(\d+[a-z]?)/gi, "negotiable-instruments-act-1881"],
+    [/\b(?:cpc|code\s*of\s*civil\s*procedure)\D*?(\d+[a-z]?)/gi, "code-of-civil-procedure-1908"],
+    [/\b(?:rera)\D*?(\d+[a-z]?)/gi, "real-estate-regulation-and-development-act-2016"],
+  ];
+
+  for (const [regex, act] of patterns) {
+    const matches = text.matchAll(regex);
+    for (const m of matches) {
+      if (m[1]) add(act, m[1]);
+    }
+  }
+
+  // Reverse Section-first matches: "Section 420 IPC", "Section 138 NI Act", "Section 35 BNSS"
+  const revRegex = /\b(?:section|sec|§)\s*(\d+[a-z]?)\s*(?:of\s*(?:the\s*)?)?(bns|bnss|bsa|ipc|crpc|cpc|ni\s*act|negotiable\s*instruments)/gi;
+  const revMatches = text.matchAll(revRegex);
+  for (const m of revMatches) {
+    const sec = m[1];
+    const actStr = m[2].toLowerCase();
+    let act = "bns";
+    if (actStr.includes("ipc")) act = "ipc";
+    else if (actStr.includes("crpc")) act = "crpc";
+    else if (actStr.includes("bnss")) act = "bnss";
+    else if (actStr.includes("bsa")) act = "bsa";
+    else if (actStr.includes("cpc")) act = "code-of-civil-procedure-1908";
+    else if (actStr.includes("ni") || actStr.includes("negotiable")) act = "negotiable-instruments-act-1881";
+    add(act, sec);
+  }
+
+  return refs;
+}
+
 function streamToResponse(
   stream: any,
   onCompletion?: (fullText: string) => Promise<void>
@@ -473,7 +575,18 @@ function streamToResponse(
         }
       } catch (err: any) {
         console.error("[Stream Controller Error]:", err);
-        controller.error(err);
+        try {
+          if (!fullText) {
+            controller.enqueue(
+              encoder.encode(
+                "## ⚠️ High Legal Query Volume\n\nBharatLegal AI experienced a transient rate limit while synthesizing statutory jurisprudence. Please retry your question."
+              )
+            );
+          }
+          controller.close();
+        } catch {
+          // Controller might already be closed
+        }
       }
     },
   });
