@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import axios, { AxiosError } from "axios";
 import toast from "react-hot-toast";
 import { Eye, EyeOff, Loader2, Scale } from "lucide-react";
@@ -33,7 +33,15 @@ export function AuthForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
 
+  const { data: session, status } = useSession();
   const router = useRouter();
+
+  // If user is already authenticated (e.g. after OAuth callback), redirect to dashboard
+  useEffect(() => {
+    if (status === "authenticated" && session?.user) {
+      router.replace("/dashboard");
+    }
+  }, [status, session, router]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -302,6 +310,25 @@ export function AuthForm() {
                 ) : (
                   "Create Free Account"
                 )}
+              </Button>
+
+              <div className="relative my-4 text-center">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border" />
+                </div>
+                <span className="relative bg-card px-2 text-[11px] text-muted-foreground uppercase">
+                  Or Continue With
+                </span>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-10 flex items-center justify-center gap-2 border-border bg-background hover:bg-forest-100/50 dark:hover:bg-forest-800/40 text-xs font-semibold"
+                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+              >
+                <Image src="/google.svg" alt="Google" width={16} height={16} />
+                Sign Up with Google
               </Button>
             </form>
           </TabsContent>

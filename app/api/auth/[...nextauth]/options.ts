@@ -79,54 +79,120 @@ export const authOptions: NextAuthOptions = {
       : []),
   ],
   callbacks: {
-    async jwt({ token, user, account }) {
+    async signIn({ user, account }) {
       if (account?.provider === "google") {
-        await dbConnect();
-
-        let dbUser = await UserModel.findOne({ email: user.email });
-
-        if (!dbUser) {
-          const baseUsername =
-            user?.name?.replace(/[^a-zA-Z0-9]/g, "").toLowerCase() ||
-            (user?.email ? user.email.split("@")[0].replace(/[^a-zA-Z0-9]/g, "") : `user`);
-
-          let finalUsername = baseUsername;
-          // If username is already taken by another account, append random suffix
-          const existingUsername = await UserModel.findOne({ username: finalUsername });
-          if (existingUsername) {
-            finalUsername = `${baseUsername}_${Math.floor(100 + Math.random() * 900)}`;
+        try {
+          await dbConnect();
+          const email = user?.email?.toLowerCase().trim();
+          if (!email) {
+            console.error("Google OAuth: No email returned from provider");
+            return false;
           }
 
-          dbUser = await UserModel.create({
-            email: user?.email?.toLowerCase().trim(),
-            username: finalUsername,
-            password: `GOOGLE_OAUTH_${Math.random().toString(36).slice(2)}`,
+          let dbUser = await UserModel.findOne({
+            email: { $regex: new RegExp(`^${email}$`, "i") },
           });
+
+          if (!dbUser) {
+            const baseUsername =
+              user?.name?.replace(/[^a-zA-Z0-9]/g, "").toLowerCase() ||
+              email.split("@")[0].replace(/[^a-zA-Z0-9]/g, "") ||
+              `user`;
+
+            let finalUsername = baseUsername;
+            const existingUsername = await UserModel.findOne({ username: finalUsername });
+            if (existingUsername) {
+              finalUsername = `${baseUsername}_${Math.floor(100 + Math.random() * 900)}`;
+            }
+
+            try {
+              await UserModel.create({
+                email,
+                username: finalUsername,
+                password: `GOOGLE_OAUTH_${Math.random().toString(36).slice(2)}`,
+              });
+            } catch (createErr) {
+              // If race condition created it in parallel, ignore duplicate error
+              console.warn("User already created during Google OAuth callback:", createErr);
+            }
+          }
+          return true;
+        } catch (error) {
+          console.error("Error in Google signIn callback:", error);
+          // Allow authentication to proceed even if MongoDB sync has a transient network failure
+          return true;
+        }
+      }
+      return true;
+    },
+
+    async jwt({ token, user }) {
+      // Executed whenever a JWT token is created or updated
+      if (user) {
+        try {
+          await dbConnect();
+          const email = user.email?.toLowerCase().trim();
+          if (email) {
+            const dbUser = await UserModel.findOne({
+              email: { $regex: new RegExp(`^${email}$`, "i") },
+            });
+            if (dbUser) {
+              token._id = (dbUser._id as { toString: () => string }).toString();
+              token.username = dbUser.username;
+            }
+          }
+        } catch (dbErr) {
+          console.warn("Could not sync MongoDB user into JWT token:", dbErr);
         }
 
-        token._id = (dbUser._id as { toString: () => string }).toString();
-        token.username = dbUser.username;
-      } else if (user) {
-        const customUser = user as CustomUser;
-        token._id = customUser._id?.toString?.() || user.id;
-        token.username = customUser.username || user.name || "";
+        if (!token._id) {
+          const customUser = user as CustomUser;
+          token._id = customUser._id?.toString?.() || user.id || token.sub;
+        }
+        if (!token.username) {
+          const customUser = user as CustomUser;
+          token.username = customUser.username || user.name || "User";
+        }
       }
 
       return token;
     },
 
     async session({ session, token }) {
-      if (token) {
+      if (session?.user && token) {
         session.user._id = token._id as string | undefined;
         session.user.username =
           typeof token.username === "string" ? token.username : undefined;
+        if (!session.user.email && token.email) {
+          session.user.email = token.email as string;
+        }
+        if (!session.user.name && token.name) {
+          session.user.name = token.name as string;
+        }
       }
       return session;
     },
+
     redirect({ url, baseUrl }) {
-      // Allows relative callback URLs or default to /dashboard
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      else if (new URL(url).origin === baseUrl) return url;
+      // If the redirect target is /auth or contains /auth, NEVER redirect back to the login page!
+      if (url === "/auth" || url.endsWith("/auth") || url.includes("/auth?")) {
+        return `${baseUrl}/dashboard`;
+      }
+      if (url.startsWith("/")) {
+        if (url === "/auth" || url.startsWith("/auth?")) {
+          return `${baseUrl}/dashboard`;
+        }
+        return `${baseUrl}${url}`;
+      }
+      try {
+        const parsedUrl = new URL(url);
+        if (parsedUrl.origin === baseUrl) {
+          if (parsedUrl.pathname === "/auth") {
+            return `${baseUrl}/dashboard`;
+          }
+          return url;
+        }
+      } catch {}
       return `${baseUrl}/dashboard`;
     },
   },
