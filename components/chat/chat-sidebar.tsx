@@ -264,7 +264,9 @@ export function ChatSidebar({
                               isActive ? "text-gold-500" : "text-muted-foreground"
                             }`}
                           />
-                          <span className="truncate">{convo.title || "Untitled consultation"}</span>
+                          <span className="truncate">
+                            {(convo.title || "Untitled consultation").replace(/^Title:\s*/i, "")}
+                          </span>
                         </div>
 
                         {/* Actions Menu */}

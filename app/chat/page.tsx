@@ -101,11 +101,31 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
 
   const markdownComponents = useMemo(
     () => ({
-      h1: ({ children }: any) => (
-        <h1 className="text-lg sm:text-xl font-heading font-bold text-foreground dark:text-forest-50 mt-6 mb-3 pb-2 border-b border-border/60">
-          {children}
-        </h1>
-      ),
+      h1: ({ children }: any) => {
+        let textContent = "";
+        if (typeof children === "string") {
+          textContent = children;
+        } else if (Array.isArray(children)) {
+          textContent = children.map((c) => (typeof c === "string" ? c : "")).join("");
+        }
+        const cleanTitle = textContent ? textContent.replace(/^Title:\s*/i, "").trim() : "";
+
+        return (
+          <div className="mt-2 mb-4 p-3 rounded-xl bg-forest-50/70 dark:bg-forest-900/40 border border-forest-500/20 dark:border-gold-500/30 flex items-center justify-between gap-3 shadow-2xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="p-1.5 rounded-lg bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-gold-400 border border-gold-500/30 shrink-0">
+                <Scale className="w-4 h-4" />
+              </div>
+              <h1 className="text-sm sm:text-base font-heading font-bold text-foreground dark:text-gold-200 truncate">
+                {cleanTitle || children}
+              </h1>
+            </div>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/80 px-2 py-0.5 rounded-md bg-muted/60 dark:bg-forest-950/60 shrink-0 border border-border/40">
+              Consultation Topic
+            </span>
+          </div>
+        );
+      },
       h2: ({ children }: any) => (
         <h2 className="text-sm sm:text-base font-heading font-bold text-foreground dark:text-forest-50 mt-6 mb-2.5 pb-1 border-b border-border/50 flex items-center gap-2 tracking-tight">
           {children}
@@ -653,6 +673,8 @@ export default function ChatPage() {
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder("utf-8");
+        let accumulatedRaw = "";
+        let hasExtractedHeading = false;
 
         while (true) {
           const { value, done } = await reader.read();
@@ -663,7 +685,80 @@ export default function ChatPage() {
           }
 
           const chunk = decoder.decode(value, { stream: true });
+          accumulatedRaw += chunk;
           appendChunk(chunk);
+
+          // Real-time title extraction: save heading as soon as first line arrives
+          if (!hasExtractedHeading && currentConvoId) {
+            const headingMatch = accumulatedRaw.match(/^\s*#\s*(?:Title:?\s*)?([^\n\r#]+)/im);
+            if (
+              headingMatch &&
+              headingMatch[1] &&
+              (accumulatedRaw.includes("\n") || headingMatch[1].trim().split(/\s+/).length >= 3)
+            ) {
+              const cleanHeading = headingMatch[1]
+                .replace(/[*_"'`]/g, "")
+                .trim()
+                .split(/\s+/)
+                .slice(0, 5)
+                .join(" ")
+                .slice(0, 50);
+
+              if (cleanHeading) {
+                hasExtractedHeading = true;
+                // Live update sidebar list item immediately
+                setConversations((prev) =>
+                  prev.map((c) =>
+                    c.id === currentConvoId &&
+                    (!c.title ||
+                      c.title === "New consultation" ||
+                      c.title === "New chat" ||
+                      c.title === "Untitled consultation")
+                      ? { ...c, title: cleanHeading }
+                      : c
+                  )
+                );
+                // Proactively persist to backend
+                fetch(`/api/conversations/${currentConvoId}`, {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ title: cleanHeading }),
+                }).catch(() => {});
+              }
+            }
+          }
+        }
+
+        // Post-stream fallback if short output or single chunk
+        if (!hasExtractedHeading && currentConvoId) {
+          const headingMatch = accumulatedRaw.match(/^\s*#\s*(?:Title:?\s*)?([^\n\r#]+)/im);
+          if (headingMatch && headingMatch[1]) {
+            const cleanHeading = headingMatch[1]
+              .replace(/[*_"'`]/g, "")
+              .trim()
+              .split(/\s+/)
+              .slice(0, 5)
+              .join(" ")
+              .slice(0, 50);
+            if (cleanHeading) {
+              setConversations((prev) =>
+                prev.map((c) =>
+                  c.id === currentConvoId &&
+                  (!c.title ||
+                    c.title === "New consultation" ||
+                    c.title === "New chat" ||
+                    c.title === "Untitled consultation")
+                    ? { ...c, title: cleanHeading }
+                    : c
+                )
+              );
+              fetch(`/api/conversations/${currentConvoId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title: cleanHeading }),
+              }).catch(() => {});
+            }
+          }
         }
       } catch (err: any) {
         if (err.name === "AbortError") {

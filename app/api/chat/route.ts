@@ -18,6 +18,15 @@ const openai = new OpenAI({
 const SYSTEM_PROMPT = `You are BharatLegal AI, an authoritative, highly articulate Indian legal research and intelligence assistant.
 Your responses MUST be deeply structured, authoritative, and strictly formatted in clean GitHub Flavored Markdown (GFM).
 
+### 🏷️ MANDATORY FIRST LINE — 3-4 WORD CONSULTATION HEADING:
+On the very first line of your response, output a concise 3-4 word heading for this consultation starting with a single #, formatted as:
+# Title: 3-4 Word Topic Heading
+Example: # Title: BNS 318 Cheating Penalty
+Example: # Title: Police Arrest Rights BNSS
+Example: # Title: Cheque Bounce Notice Procedure
+Example: # Title: Security Deposit Refund Dispute
+Do not use quotation marks, colons inside the heading, or trailing periods. Follow immediately with a blank line, and then begin directly with '## 📌 Executive Summary'.
+
 ### REQUIRED RESPONSE STRUCTURE & MARKDOWN SPECIFICATION:
 Format your entire response using the following exact Markdown headings, tables, blockquotes, and lists:
 
@@ -86,7 +95,7 @@ Provide concrete, numbered practical steps for the citizen or advocate:
 *BharatLegal provides educational statutory intelligence and legal literacy; it does not constitute formal legal counsel or create an attorney-client relationship.*
 
 ### MANDATORY MARKDOWN FORMATTING RULES:
-1. **Never enclose entire response in code blocks**: DO NOT wrap your entire output in \`\`\`markdown ... \`\`\` or \`\`\` ... \`\`\`. Output raw Markdown directly, beginning immediately with \`## 📌 Executive Summary\`.
+1. **Never enclose entire response in code blocks**: DO NOT wrap your entire output in \`\`\`markdown ... \`\`\` or \`\`\` ... \`\`\`. Output raw Markdown directly. Line 1 MUST be your concise 3-4 word heading starting with \`# Title: 3-4 Word Topic Heading\`, followed immediately by a blank line, and then \`## 📌 Executive Summary\`.
 2. **Double Blank Lines**: Always include a blank line (\`\\n\\n\`) before and after every Heading (\`##\`), Table, Blockquote (\`>\`), List (\`-\`, \`1.\`), and Horizontal Rule (\`---\`). Markdown tables and blockquotes fail to parse if there is no blank line above them!
 3. **Table Syntax**: Always use standard GFM table syntax with pipe delimiters \`|\` and an alignment row \`| :--- | :--- |\`. Ensure every row is on its own line.
 4. **Interactive Citation Links**: Every statutory section mentioned MUST be formatted as: \`[Act §Number](#citation:act_slug:number)\`. Valid slugs include:
@@ -313,7 +322,7 @@ export async function POST(req: NextRequest) {
       retrievedContextBlocks.length > 0
         ? `${SYSTEM_PROMPT}\n\n## 📚 Verified Statutory Provisions & Landmark Jurisprudence (IndiaCode Grounding):\n${retrievedContextBlocks.join(
             "\n\n---\n\n"
-          )}\n\nGround your response strictly in the verified statutory provisions and precedents above. Begin directly with '## 📌 Executive Summary'. Include statutory matrices and [#citation:act:section] links. Do NOT wrap your output in markdown code fences.`
+          )}\n\nGround your response strictly in the verified statutory provisions and precedents above. Remember: Begin line 1 with '# Title: 3-4 Word Topic Heading', followed immediately by a blank line and '## 📌 Executive Summary'. Include statutory matrices and [#citation:act:section] links. Do NOT wrap your output in markdown code fences.`
         : SYSTEM_PROMPT;
 
     const streamingHistory: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
@@ -364,13 +373,37 @@ export async function POST(req: NextRequest) {
             sources,
           });
 
-          await ConversationModel.findByIdAndUpdate(conversationId, {
-            updatedAt: new Date(),
-          });
+          // Extract 3-4 word heading from line 1 of assistant response
+          const headingMatch = assistantText.match(/^\s*#\s*(?:Title:?\s*)?([^\n\r#]+)/im);
+          let extractedTitle: string | null = null;
+          if (headingMatch && headingMatch[1]) {
+            const rawTitle = headingMatch[1].replace(/[*_"'`]/g, "").trim();
+            const words = rawTitle.split(/\s+/).filter(Boolean);
+            if (words.length >= 1) {
+              extractedTitle = words.slice(0, 5).join(" ").slice(0, 50);
+            }
+          }
 
-          // Trigger automatic titling if conversation has default title
-          if (lastUserMsg?.content) {
-            await autoTitleConversation(conversationId, lastUserMsg.content, assistantText);
+          const existingConvo = await ConversationModel.findById(conversationId);
+          const needsTitle =
+            !existingConvo?.title ||
+            existingConvo.title === "New consultation" ||
+            existingConvo.title === "New chat" ||
+            existingConvo.title === "Untitled consultation";
+
+          if (needsTitle) {
+            if (extractedTitle) {
+              await ConversationModel.findByIdAndUpdate(conversationId, {
+                title: extractedTitle,
+                updatedAt: new Date(),
+              });
+            } else if (lastUserMsg?.content) {
+              await autoTitleConversation(conversationId, lastUserMsg.content, assistantText);
+            }
+          } else {
+            await ConversationModel.findByIdAndUpdate(conversationId, {
+              updatedAt: new Date(),
+            });
           }
         } catch (saveErr) {
           console.error("[Chat Route] Post-stream persistence error:", saveErr);
@@ -411,7 +444,7 @@ async function autoTitleConversation(
         {
           role: "system",
           content:
-            "You are an Indian legal editor. Generate a concise 3-5 word title summarizing this legal consultation. Do not include quotes, periods, or extra words. Example: Cheating Penalty Under BNS 318",
+            "You are an Indian legal editor. Generate a concise 3-4 word title summarizing this legal consultation. Do not include quotes, periods, or extra words. Example: Cheating Penalty Under BNS",
         },
         {
           role: "user",
