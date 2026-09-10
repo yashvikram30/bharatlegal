@@ -161,13 +161,16 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session?.user && token) {
         session.user._id = token._id as string | undefined;
-        session.user.username =
+        const resolvedUsername =
           typeof token.username === "string" ? token.username : undefined;
+        session.user.username = resolvedUsername;
+        if (resolvedUsername) {
+          session.user.name = resolvedUsername;
+        } else if (!session.user.name && token.name) {
+          session.user.name = token.name as string;
+        }
         if (!session.user.email && token.email) {
           session.user.email = token.email as string;
-        }
-        if (!session.user.name && token.name) {
-          session.user.name = token.name as string;
         }
       }
       return session;

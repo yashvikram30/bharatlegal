@@ -57,7 +57,7 @@ export default function ProfilePage() {
         <CardContent className="space-y-4 text-sm sm:text-base">
           <div className="flex gap-2">
             <span className="font-semibold text-muted-foreground">Username: </span>
-            <span className="text-foreground font-medium">{session.user.name || '-'}</span>
+            <span className="text-foreground font-medium">{session.user.username || session.user.name || '-'}</span>
           </div>
           <div className="flex gap-2">
             <span className="font-semibold text-muted-foreground">Email: </span>
