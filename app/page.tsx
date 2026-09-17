@@ -13,6 +13,7 @@ import {
   Gavel,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { IssueIntake } from "@/components/intake/issue-intake";
 
 export default function LandingPage() {
   const coreFeatures = [
@@ -46,9 +47,9 @@ export default function LandingPage() {
     {
       icon: FileText,
       title: "Document Simplifier",
-      tag: "Zero-Retention",
+      tag: "Private Processing",
       description:
-        "Upload tenancy agreements, employment contracts, or legal notices. Detect risky clauses and read plain-language obligation breakdowns.",
+        "Upload tenancy agreements, employment contracts, or legal notices. Detect risky clauses and read plain-language obligation breakdowns, with optional account history.",
       link: "/simplify",
       cta: "Simplify Document",
     },
@@ -75,52 +76,48 @@ export default function LandingPage() {
   const stats = [
     { number: "500+", label: "Statutory Sections & Acts Indexed", isAccent: true },
     { number: "100%", label: "Free Public Legal Aid Mapping", isAccent: false },
-    { number: "0s", label: "Raw Document Storage Retention", isAccent: false },
+    { number: "Private", label: "Account-Controlled Document History", isAccent: false },
     { number: "24/7", label: "Accessible Citizen Guidance", isAccent: false },
   ];
 
   return (
     <div className="flex flex-col min-h-screen bg-forest-50 dark:bg-forest-950 text-forest-950 dark:text-forest-50">
       {/* 1. HERO SECTION (forest-50 base / forest-950 dark) */}
-      <section className="py-16 sm:py-24 border-b border-forest-100 dark:border-forest-900/60">
-        <div className="container mx-auto px-4 sm:px-6 max-w-5xl text-center space-y-6">
-          {/* Eyebrow badge (neutral forest tones) */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-forest-100 text-forest-800 dark:bg-forest-800 dark:text-forest-100 border border-forest-500/20">
-            <Scale className="w-3.5 h-3.5 text-forest-800 dark:text-forest-100" />
-            <span>Democratizing Legal Literacy for 1.4 Billion Indians</span>
-          </div>
+      <section className="py-14 sm:py-20 border-b border-forest-100 dark:border-forest-900/60">
+        <div className="container mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
+          <div className="space-y-6 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-forest-100 text-forest-800 dark:bg-forest-800 dark:text-forest-100 border border-forest-500/20">
+              <Scale className="w-3.5 h-3.5 text-forest-800 dark:text-forest-100" />
+              <span>Indian legal guidance in plain language</span>
+            </div>
 
-          {/* Main Headline */}
-          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-forest-950 dark:text-forest-50 font-heading leading-[1.15]">
-            Demystifying Indian Law with Plain Language & AI
-          </h1>
+            <div className="space-y-4">
+              <h1 className="text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight text-forest-950 dark:text-forest-50 font-heading leading-[1.08]">
+                Tell us what happened. We’ll help you find your next step.
+              </h1>
+              <p className="text-base sm:text-lg text-forest-800/80 dark:text-forest-100/75 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                Understand your rights, review a contract, prepare for a hearing, or reach official legal-aid services—with the law behind every answer.
+              </p>
+            </div>
 
-          {/* Subtitle */}
-          <p className="text-base sm:text-xl text-forest-800/80 dark:text-forest-100/75 max-w-2xl mx-auto leading-relaxed">
-            Understand your fundamental rights, decode complex contracts, track court timelines, and connect with free legal aid mechanisms across India.
-          </p>
-
-          {/* CTAs */}
-          <div className="flex flex-wrap justify-center gap-3 pt-4">
-            <Button
-              asChild
-              size="lg"
-              className="bg-forest-800 text-white hover:bg-forest-900 hover:text-white dark:bg-gold-500 dark:text-forest-950 dark:hover:bg-amber-400 dark:hover:text-forest-950 font-bold px-6 shadow-md dark:shadow-[0_0_24px_rgba(184,134,11,0.28)] border border-transparent dark:border-gold-400/40 focus-visible:ring-2 focus-visible:ring-gold-500 group transition-all duration-200"
-            >
-              <Link href="/chat" className="flex items-center gap-2">
-                <span>Ask Legal Assistant</span>
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            <div className="flex flex-wrap justify-center lg:justify-start gap-3 pt-1">
+              <Button
+                asChild
+                size="lg"
+                className="bg-forest-800 text-white hover:bg-forest-900 hover:text-white dark:bg-gold-500 dark:text-forest-950 dark:hover:bg-amber-400 dark:hover:text-forest-950 font-bold px-6 shadow-md dark:shadow-[0_0_24px_rgba(184,134,11,0.28)] border border-transparent dark:border-gold-400/40 focus-visible:ring-2 focus-visible:ring-gold-500 group transition-all duration-200"
+              >
+                <a href="#choose-your-situation" className="flex items-center gap-2">
+                  <span>Get a clear next step</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </a>
+              </Button>
+              <Link href="/simplify" className="inline-flex items-center gap-1.5 self-center text-xs font-semibold text-forest-800 underline-offset-4 hover:underline dark:text-gold-400">
+                Review a contract instead <ArrowRight className="w-3.5 h-3.5" />
               </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="border border-forest-800/70 text-forest-800 bg-transparent hover:bg-forest-100 hover:text-forest-950 dark:border-forest-700/80 dark:bg-forest-900/40 dark:text-forest-100 dark:hover:bg-forest-800 dark:hover:text-forest-50 dark:hover:border-forest-600 focus-visible:ring-2 focus-visible:ring-forest-800 font-semibold px-6 transition-all duration-200"
-            >
-              <Link href="/simplify">Simplify a Contract</Link>
-            </Button>
+            </div>
           </div>
+
+          <IssueIntake />
         </div>
       </section>
 
@@ -256,7 +253,7 @@ export default function LandingPage() {
                 <li className="flex items-start gap-2.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-forest-100 mt-2 shrink-0" />
                   <span>
-                    <strong className="text-white">Zero Document Retention:</strong> Uploaded contracts are analyzed in-memory and never stored.
+                    <strong className="text-white">Clear Storage Choices:</strong> Documents are processed for analysis; signed-in users can access saved analysis history in their account.
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">

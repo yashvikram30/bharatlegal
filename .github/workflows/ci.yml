@@ -31,3 +31,9 @@ jobs:
 
       - name: Run Document Simplifier Verification
         run: bun test/verify-simplifier.ts
+
+      - name: Run Statutory Legal Drafter Verification
+        run: bun test/verify-drafting.ts
+
+      - name: Run Matter Workspace Verification
+        run: bun test/verify-matters.ts

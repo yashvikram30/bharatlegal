@@ -4,16 +4,16 @@ import { ShieldCheck, Lock, EyeOff, Server, FileText } from "lucide-react";
 export const metadata: Metadata = {
   title: "Privacy Policy — BharatLegal",
   description:
-    "Learn about how BharatLegal handles your data, ensures ephemeral document processing, and maintains privacy compliance.",
+    "Learn how BharatLegal handles document processing, account history, and privacy controls.",
 };
 
 export default function PrivacyPage() {
   const sections = [
     {
       icon: EyeOff,
-      title: "1. Ephemeral Document Processing",
+      title: "1. Document Processing & Saved History",
       content:
-        "When you upload documents (PDF, Word, or plain text) to the Document Simplifier, the text is processed in-memory solely for the purpose of generating your summary and risk analysis. We do not permanently store your raw uploaded documents on our servers unless you explicitly save a case or document summary to your authenticated dashboard.",
+        "When you upload documents (PDF, Word, or plain text) to the Document Simplifier, the text is processed to generate your summary and risk analysis. Raw uploaded files are not retained. If you are signed in, we save the generated analysis and extracted document text to your account so you can access your document history; guests do not receive saved document history.",
     },
     {
       icon: Lock,

@@ -70,7 +70,7 @@ const DEMO_CASES: TrackedCaseDTO[] = [
     status: "Active",
     progress: 45,
     filingDate: "2023-04-10",
-    nextHearing: "2024-11-20",
+    nextHearing: "2026-10-20",
     judgeName: "Hon'ble Justice S. K. Kaul",
     petitioner: "Yash Vikram (Authenticated Petitioner)",
     opponentName: "Municipal Corporation of Delhi",
@@ -91,7 +91,7 @@ const DEMO_CASES: TrackedCaseDTO[] = [
     status: "Active",
     progress: 80,
     filingDate: "2023-06-15",
-    nextHearing: "2024-12-05",
+    nextHearing: "2026-11-05",
     judgeName: "Additional District Judge P. Verma",
     petitioner: "Applicant Commercial Entity",
     opponentName: "Tech Logistics Pvt. Ltd.",
@@ -111,7 +111,7 @@ const DEMO_CASES: TrackedCaseDTO[] = [
     status: "Active",
     progress: 60,
     filingDate: "2022-09-01",
-    nextHearing: "2024-11-28",
+    nextHearing: "2026-10-28",
     judgeName: "President, DCDRC Bench 1",
     opponentName: "Nationalized Commercial Bank",
     lastOrderUrl: null,
@@ -160,6 +160,8 @@ export default function DashboardPage() {
   const [opponentInput, setOpponentInput] = useState("");
   const [judgeInput, setJudgeInput] = useState("");
   const [notesInput, setNotesInput] = useState("");
+  const [matters, setMatters] = useState<Array<{ id: string; title: string; status: string }>>([]);
+  const [matterIdInput, setMatterIdInput] = useState("");
 
   // Live CNR detection from search input
   const detectedCnrInSearch = useMemo(() => {
@@ -214,6 +216,17 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchCases();
   }, [fetchCases, authStatus]);
+
+  useEffect(() => {
+    if (authStatus !== "authenticated") {
+      setMatters([]);
+      return;
+    }
+    fetch("/api/matters")
+      .then((res) => res.json())
+      .then((data) => data.success && setMatters(data.matters || []))
+      .catch(() => {});
+  }, [authStatus]);
 
   // Quick Action: Fetch Court Order
   const handleQuickFetchOrder = async (targetCnr?: string) => {
@@ -284,6 +297,7 @@ export default function DashboardPage() {
           opponentName: opponentInput.trim() || null,
           judgeName: judgeInput.trim() || null,
           notes: notesInput.trim() || "",
+          matterId: matterIdInput || undefined,
         }),
       });
 
@@ -299,6 +313,7 @@ export default function DashboardPage() {
         setOpponentInput("");
         setJudgeInput("");
         setNotesInput("");
+        setMatterIdInput("");
       } else {
         toast.error(data.error || "Failed to add case");
       }
@@ -409,7 +424,7 @@ export default function DashboardPage() {
       {authStatus !== "authenticated" && (
         <div className="flex items-center justify-between text-xs py-1.5 px-3 rounded-lg bg-muted/40 border border-border/50 text-muted-foreground">
           <span>
-            Viewing demo court cases. Sign in to save persistent litigation records.
+            Viewing illustrative sample cases only — not live court data. Sign in to save your own case records.
           </span>
           <button
             onClick={() => signIn()}
@@ -1189,6 +1204,20 @@ export default function DashboardPage() {
                 className="w-full p-2 rounded-lg border border-border bg-background text-xs"
               />
             </div>
+
+            {matters.length > 0 && (
+              <div className="space-y-1">
+                <Label className="text-xs font-medium">Link to Matter (Optional)</Label>
+                <select
+                  value={matterIdInput}
+                  onChange={(e) => setMatterIdInput(e.target.value)}
+                  className="h-8 w-full rounded-md border border-border bg-background px-2 text-xs text-foreground"
+                >
+                  <option value="">Keep this as a standalone case</option>
+                  {matters.map((matter) => <option key={matter.id} value={matter.id}>{matter.title} · {matter.status}</option>)}
+                </select>
+              </div>
+            )}
 
             <DialogFooter className="pt-2 flex justify-between">
               <Button

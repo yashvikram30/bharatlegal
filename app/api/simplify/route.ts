@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import dbConnect from "@/lib/dbConnect";
 import DocumentAnalysisModel from "@/model/DocumentAnalysis";
+import MatterModel from "@/model/Matter";
+import mongoose from "mongoose";
 
 export const runtime = "nodejs";
 
@@ -61,7 +63,7 @@ IMPORTANT LEGAL GROUNDING RULES UNDER INDIAN LAW:
 
 export async function POST(req: NextRequest) {
   try {
-    const { text, fileName = "Document", fileSize = 0 } = await req.json();
+    const { text, fileName = "Document", fileSize = 0, matterId } = await req.json();
 
     if (!text || typeof text !== "string" || text.trim().length < 20) {
       return NextResponse.json(
@@ -98,9 +100,9 @@ export async function POST(req: NextRequest) {
         console.warn("[Simplify API] Primary Groq LLM failed, attempting fallback model:", llmError?.message);
 
         try {
-          // Secondary attempt with llama-3.3-70b-versatile
+          // Secondary attempt with openai/gpt-oss-20b
           const fallbackResponse = await openai.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+            model: "openai/gpt-oss-20b",
             messages: [
               { role: "system", content: SYSTEM_PROMPT },
               {
@@ -146,11 +148,23 @@ export async function POST(req: NextRequest) {
 
       if (userId) {
         await dbConnect();
+        let ownedMatterId: string | null = null;
+        if (matterId) {
+          if (!mongoose.Types.ObjectId.isValid(matterId)) {
+            return NextResponse.json({ error: "Invalid Matter selected" }, { status: 400 });
+          }
+          const matter = await MatterModel.exists({ _id: matterId, userId });
+          if (!matter) {
+            return NextResponse.json({ error: "Selected Matter was not found" }, { status: 404 });
+          }
+          ownedMatterId = matterId;
+        }
         const extension = fileName.split(".").pop()?.toUpperCase() || "PDF";
         const fileTypeEnum = ["PDF", "DOCX", "TXT"].includes(extension) ? extension : "OTHER";
 
         const newDoc = await DocumentAnalysisModel.create({
           userId,
+          matterId: ownedMatterId,
           fileName,
           fileType: fileTypeEnum,
           fileSize: fileSize || Buffer.byteLength(text, "utf-8"),

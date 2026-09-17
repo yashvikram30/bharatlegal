@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "bun test/verify-indiacode.ts && bun test/verify-simplifier.ts && bun test/verify-document-history.ts",
-    "test:all": "bun test/verify-indiacode.ts && bun test/verify-simplifier.ts && bun test/verify-document-history.ts && bun x tsc --noEmit",
+    "test": "bun test/verify-indiacode.ts && bun test/verify-simplifier.ts && bun test/verify-document-history.ts && bun test/verify-drafting.ts && bun test/verify-matters.ts",
+    "test:all": "bun test/verify-indiacode.ts && bun test/verify-simplifier.ts && bun test/verify-document-history.ts && bun test/verify-drafting.ts && bun test/verify-matters.ts && bun x tsc --noEmit",
     "postinstall": "patch-package"
   },
   "dependencies": {

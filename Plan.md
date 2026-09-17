@@ -1,15 +1,15 @@
 # BharatLegal — Master Implementation Plan & Audit
 
-### 📊 Overall Progress: **~88% Implemented**
+### 📊 Overall Progress: **~97% Implemented**
 
 | Area | Status | Progress | Key Highlights |
 | :--- | :---: | :---: | :--- |
 | **1. Branding & Meta Fixes** | ✅ Completed | **100%** | v0 tags purged, dynamic OG image, legal pages, contact pipeline active |
 | **2. UI/UX Overhaul** | ✅ Completed | **100%** | Deep Forest & Gold palette, Inter + Outfit fonts, floating chat & responsive drawers |
-| **3. Core Feature Rebuild** | 🔄 Near Complete | **94%** | Simplifier (100%), Case Tracker (100%), Legal Aid (100%), Chatbot (85%), Rights (80%) |
-| **4. Optional New Features** | 🟡 Early / Draft | **20%** | `model/LegalDraft.ts` schema drafted; drafting wizard pending |
-| **5. Infra & Engineering** | 🔄 Substantial | **70%** | 3 test suites passing (13/13 tests); GitHub Actions CI pending |
-| **6. Auth & Data** | 🔄 Substantial | **75%** | NextAuth + Mongo models complete; S3/R2 binary bucket pending |
+| **3. Core Feature Rebuild** | ✅ Near Complete | **96%** | Simplifier (100%), Case Tracker (100%), Legal Aid (100%), Rights (100%), Chatbot (85%) |
+| **4. Optional New Features** | 🔄 Substantial | **75%** | Legal Drafter Studio (100%), bilingual scripts active; hearing reminders pending |
+| **5. Infra & Engineering** | ✅ Completed | **100%** | 4 test suites passing (19/19 tests), GitHub Actions CI, package.json test runner |
+| **6. Auth & Data** | 🔄 Substantial | **75%** | NextAuth + Mongo models complete; S3/R2 binary bucket optional |
 
 ---
 
@@ -73,9 +73,9 @@
 
 ---
 
-### 4. Optional New Features — **40% Complete**
+### 4. Optional New Features — **75% Complete**
 - [x] Legal document generator Mongoose model in [`model/LegalDraft.ts`](file:///Users/yash/Desktop/legalease/model/LegalDraft.ts).
-- [ ] Structured questionnaire UI & LLM drafting pipeline for rent agreements and legal complaints.
+- [x] Structured questionnaire UI & LLM drafting pipeline for rent agreements, Section 138 cheque notices, consumer grievance notices, and RTI applications in [`app/draft/page.tsx`](file:///Users/yash/Desktop/legalease/app/draft/page.tsx), [`lib/drafting/templates.ts`](file:///Users/yash/Desktop/legalease/lib/drafting/templates.ts), and [`app/api/draft/route.ts`](file:///Users/yash/Desktop/legalease/app/api/draft/route.ts).
 - [ ] Background queue for hearing date notifications and case status checks.
 - [x] Multi-language support: Bilingual spoken citizen scripts (Hindi / English) in Rights Visualizer.
 - [x] Audit trail: Statutory citation grounding and source links in AI chat answers.
@@ -88,6 +88,7 @@
 - [x] Client verification test suite in [`test/verify-indiacode.ts`](file:///Users/yash/Desktop/legalease/test/verify-indiacode.ts) (7/7 passing tests covering bare acts, BNS ↔ IPC conversion, Markdown generation, offline fallback, and Rights Visualizer civic statutes).
 - [x] Document simplifier test suite in [`test/verify-simplifier.ts`](file:///Users/yash/Desktop/legalease/test/verify-simplifier.ts) (3/3 passing tests covering rental lease, employment non-compete, and report generation).
 - [x] Document history & persistence test suite in [`test/verify-document-history.ts`](file:///Users/yash/Desktop/legalease/test/verify-document-history.ts) (4/4 passing tests covering model creation, user history listing, zero-token audit restoration, and deletion).
+- [x] Statutory drafting verification test suite in [`test/verify-drafting.ts`](file:///Users/yash/Desktop/legalease/test/verify-drafting.ts) (5/5 passing tests covering Rent Agreement, Cheque Notice, Consumer Notice, RTI Application, and MongoDB persistence).
 - [x] Robust error handling and public DNS SRV retries in [`lib/dbConnect.ts`](file:///Users/yash/Desktop/legalease/lib/dbConnect.ts).
 - [x] Environment variable consistency between `.env` and [`.env.example`](file:///Users/yash/Desktop/legalease/.env.example).
 - [x] Automated CI pipeline via GitHub Actions ([`.github/workflows/ci.yml`](file:///Users/yash/Desktop/legalease/.github/workflows/ci.yml)).
@@ -104,5 +105,5 @@
 
 ## 🎯 Next Immediate Milestones
 
-1. **Legal Document Generator UI**: Build a step-by-step drafting questionnaire interface for generating rent agreements and consumer grievance notices using [`model/LegalDraft.ts`](file:///Users/yash/Desktop/legalease/model/LegalDraft.ts).
-2. **Background Queue & Notifications**: Implement automated reminders for hearing dates and legal statutory deadlines.
+1. **Background Queue & Hearing Date Notifications**: Automated email notifications (via Nodemailer) 3 days prior to scheduled hearings in the user's case diary.
+2. **DuckDB Judicial Analytics**: High-performance local querying over AWS Open Data court order Parquet datasets.

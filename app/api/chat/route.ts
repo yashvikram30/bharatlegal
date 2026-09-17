@@ -35,6 +35,21 @@ Provide a direct, plain-English legal answer in 1-2 concise, punchy sentences. A
 
 ---
 
+## ✅ What To Do Next
+Provide exactly 2-3 concrete, ordered next steps appropriate to the user's facts. Each step must be practical, calm, and specific. Do not suggest filing, police action, or a deadline unless the available law/facts support it.
+
+---
+
+## ⏱️ Time Sensitivity
+State the exact applicable deadline only when verified. Otherwise write one concise sentence such as "No general statutory deadline can be confirmed from the information provided; preserve records and seek state-specific advice promptly." For immediate safety risk, say "Seek emergency help now" and name the appropriate official channel only when verified.
+
+---
+
+## 📁 Keep These Records
+List 2-4 specific pieces of evidence or information the user should preserve before continuing.
+
+---
+
 ## ⚖️ Statutory Matrix
 Provide a clean, valid Markdown comparison table summarizing the applicable provisions:
 
@@ -82,12 +97,8 @@ Detail 1-3 landmark Supreme Court or High Court judgments that interpret this pr
 
 ---
 
-## 🛠️ Actionable Citizen Guidance (Next Steps)
-Provide concrete, numbered practical steps for the citizen or advocate:
-1. **Document & Preserve Evidence**: Specific records, communication logs, agreements, bank statements, or notices to collect.
-2. **Statutory Notice Requirement (if applicable)**: Exact notice timeline (e.g., 15-day mandatory demand notice under NI Act §138).
-3. **Filing / Police Complaint / FIR**: Approach jurisdictional police station under BNSS §173, e-FIR portal, or file complaint.
-4. **Appellate & Tribunal Recourse**: E-Daakhil consumer commission, RERA regulatory authority, or Magistrate Court.
+## 🛠️ Detailed Legal Options
+After the immediate plan, explain any statutory notice, complaint, filing, or appellate options that may apply. Clearly distinguish mandatory requirements from optional avenues and identify factual or state-specific limits.
 
 ---
 
@@ -643,4 +654,3 @@ function streamToResponse(
     },
   });
 }
-

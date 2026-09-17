@@ -21,6 +21,7 @@ export interface IStatutoryReference {
 
 export interface IDocumentAnalysis extends Document {
   userId?: mongoose.Types.ObjectId;
+  matterId?: mongoose.Types.ObjectId | null;
   fileName: string;
   fileType: "PDF" | "DOCX" | "TXT" | "OTHER";
   fileSize: number;
@@ -71,6 +72,12 @@ const DocumentAnalysisSchema = new Schema<IDocumentAnalysis>(
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      default: null,
+      index: true,
+    },
+    matterId: {
+      type: Schema.Types.ObjectId,
+      ref: "Matter",
       default: null,
       index: true,
     },

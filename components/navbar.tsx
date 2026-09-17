@@ -14,12 +14,14 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
-  // Core 5 features
+  // Core features
   const navItems = [
     { name: "AI Legal Chatbot", href: "/chat" },
     { name: "Case Tracker", href: "/dashboard" },
+    { name: "My Matters", href: "/matters" },
     { name: "Rights Visualizer", href: "/rights" },
     { name: "Document Simplifier", href: "/simplify" },
+    { name: "Legal Drafter", href: "/draft" },
     { name: "Find Legal Help", href: "/help" },
   ];
 

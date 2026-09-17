@@ -36,6 +36,7 @@ export interface CaseTimelineItem {
 
 export interface TrackedCaseDTO {
   id: string;
+  matterId?: string | null;
   cnrNumber?: string;
   caseNumber: string;
   title: string;

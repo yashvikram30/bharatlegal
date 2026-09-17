@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import dbConnect from "@/lib/dbConnect";
 import CaseModel, { CaseStage, CaseStatus } from "@/model/Case";
+import MatterModel from "@/model/Matter";
+import mongoose from "mongoose";
 import { parseCNR, findLiveOrderPdf } from "@/lib/courts/cnr";
 
 export const runtime = "nodejs";
@@ -22,6 +24,7 @@ function formatCaseDoc(c: any) {
 
   return {
     id: c._id.toString(),
+    matterId: c.matterId?.toString() || null,
     caseNumber: c.caseNumber,
     cnrNumber: c.cnrNumber || null,
     title: c.title,
@@ -111,6 +114,7 @@ export async function POST(req: NextRequest) {
       opponentName,
       judgeName,
       notes = "",
+      matterId,
     } = body;
 
     if (!caseNumber || typeof caseNumber !== "string" || !caseNumber.trim()) {
@@ -161,9 +165,21 @@ export async function POST(req: NextRequest) {
     }
 
     await dbConnect();
+    let ownedMatterId: string | null = null;
+    if (matterId) {
+      if (!mongoose.Types.ObjectId.isValid(matterId)) {
+        return NextResponse.json({ success: false, error: "Invalid Matter selected" }, { status: 400 });
+      }
+      const matter = await MatterModel.exists({ _id: matterId, userId });
+      if (!matter) {
+        return NextResponse.json({ success: false, error: "Selected Matter was not found" }, { status: 404 });
+      }
+      ownedMatterId = matterId;
+    }
 
     const createdCase = await CaseModel.create({
       userId,
+      matterId: ownedMatterId,
       caseNumber: caseNumber.trim(),
       cnrNumber: finalCnr,
       title: finalTitle,

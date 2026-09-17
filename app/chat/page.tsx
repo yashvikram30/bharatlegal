@@ -29,6 +29,8 @@ import { CitationSheet } from "@/components/chat/citation-sheet";
 import { ChatSidebar, ConversationItem } from "@/components/chat/chat-sidebar";
 import { useStreamDripper } from "@/hooks/useStreamDripper";
 import { useThrottledValue } from "@/hooks/useThrottledValue";
+import { extractLegalActionPlan } from "@/lib/legal-action-plan";
+import { ActionPlanCard } from "@/components/chat/action-plan-card";
 
 interface Message {
   id: string;
@@ -99,6 +101,11 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
     }
     return clean;
   }, [message.content]);
+
+  const actionPlan = useMemo(
+    () => (isUser || isStreaming ? null : extractLegalActionPlan(sanitizedContent)),
+    [isUser, isStreaming, sanitizedContent]
+  );
 
   const markdownComponents = useMemo(
     () => ({
@@ -291,6 +298,8 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
               </div>
             )}
 
+            {actionPlan && <ActionPlanCard plan={actionPlan} />}
+
             <div className="text-foreground dark:text-forest-50 leading-relaxed">
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                 {sanitizedContent}
@@ -363,8 +372,10 @@ function ChatPageContent() {
   const { data: session, status: authStatus } = useSession();
   const searchParams = useSearchParams();
   const queryParam = searchParams.get("q");
+  const autoStartParam = searchParams.get("autostart") === "1";
   const convoIdParam = searchParams.get("conversationId") || searchParams.get("id");
   const initialHandled = useRef(false);
+  const autoStarted = useRef(false);
 
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -864,6 +875,14 @@ function ChatPageContent() {
       abortControllerRef.current.abort();
     }
   };
+
+  // Guided intake has already collected a situation and urgency. Start its
+  // action plan directly, while ordinary ?q= links remain a safe prefill.
+  useEffect(() => {
+    if (!autoStartParam || !queryParam || autoStarted.current || isLoading || isDripping) return;
+    autoStarted.current = true;
+    handleSend(queryParam);
+  }, [autoStartParam, queryParam, isLoading, isDripping, handleSend]);
 
   const isInitialState = messages.length <= 1;
 

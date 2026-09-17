@@ -44,6 +44,7 @@ export async function GET(
 
     const formatted = {
       id: doc._id.toString(),
+      matterId: doc.matterId?.toString() || null,
       fileName: doc.fileName,
       fileType: doc.fileType,
       fileSize: doc.fileSize,

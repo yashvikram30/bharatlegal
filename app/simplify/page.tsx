@@ -103,6 +103,8 @@ export interface SavedDocumentSummary {
   updatedAt: string;
 }
 
+type MatterOption = { id: string; title: string; status: string };
+
 const sampleRentAgreement = `RESIDENTIAL LEASE AGREEMENT
 This Agreement is entered into on 1st day of January 2025 between Mr. Rajesh Sharma (Lessor/Landlord) and Ms. Ananya Sen (Lessee/Tenant).
 1. PREMISES & TERM: The Landlord leases Flat No. 402, Greenview Heights, Bengaluru for a term of 11 months commencing 01/01/2025.
@@ -151,6 +153,8 @@ export default function SimplifyPage() {
   const [isHistorySheetOpen, setIsHistorySheetOpen] = useState(false);
   const [leftNavTab, setLeftNavTab] = useState<"samples" | "history">("samples");
   const [historySearch, setHistorySearch] = useState("");
+  const [matters, setMatters] = useState<MatterOption[]>([]);
+  const [selectedMatterId, setSelectedMatterId] = useState("");
 
   const fetchHistory = useCallback(async () => {
     if (authStatus !== "authenticated") {
@@ -176,6 +180,18 @@ export default function SimplifyPage() {
   useEffect(() => {
     fetchHistory();
   }, [fetchHistory]);
+
+  useEffect(() => {
+    if (authStatus !== "authenticated") {
+      setMatters([]);
+      setSelectedMatterId("");
+      return;
+    }
+    fetch("/api/matters")
+      .then((res) => res.json())
+      .then((data) => data.success && setMatters(data.matters || []))
+      .catch(() => {});
+  }, [authStatus]);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -357,6 +373,7 @@ export default function SimplifyPage() {
           text: originalContent,
           fileName: file?.name || "Legal_Document.txt",
           fileSize: file?.size || originalContent.length,
+          matterId: selectedMatterId || undefined,
         }),
       });
 
@@ -888,6 +905,25 @@ export default function SimplifyPage() {
                       <span className="sr-only">Remove file</span>
                     </Button>
                   </div>
+
+                  {authStatus === "authenticated" && (
+                    <div className="rounded-xl border border-border bg-muted/30 p-3">
+                      <label htmlFor="matter-select" className="block text-xs font-semibold text-foreground">Save this review to a Matter</label>
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <select
+                          id="matter-select"
+                          value={selectedMatterId}
+                          onChange={(event) => setSelectedMatterId(event.target.value)}
+                          className="h-9 min-w-0 flex-1 rounded-lg border border-border bg-background px-2.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-gold-500/40"
+                        >
+                          <option value="">Document history only</option>
+                          {matters.map((matter) => <option key={matter.id} value={matter.id}>{matter.title} · {matter.status}</option>)}
+                        </select>
+                        <Link href="/matters" className="text-[11px] font-semibold text-forest-700 hover:underline dark:text-gold-400">Manage</Link>
+                      </div>
+                      <p className="mt-1.5 text-[10px] leading-relaxed text-muted-foreground">The analysis stays in your private history and will also appear in the selected Matter.</p>
+                    </div>
+                  )}
 
                   {/* Action Button */}
                   <Button

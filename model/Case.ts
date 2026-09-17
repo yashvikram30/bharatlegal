@@ -43,6 +43,7 @@ export interface ICaseTimelineEvent {
 
 export interface ICase extends Document {
   userId: mongoose.Types.ObjectId;
+  matterId?: mongoose.Types.ObjectId | null;
   caseNumber: string;
   cnrNumber?: string;
   title: string;
@@ -84,6 +85,12 @@ const CaseSchema = new Schema<ICase>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: [true, "User ID is required"],
+      index: true,
+    },
+    matterId: {
+      type: Schema.Types.ObjectId,
+      ref: "Matter",
+      default: null,
       index: true,
     },
     caseNumber: {

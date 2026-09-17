@@ -28,7 +28,7 @@ BharatLegal is an open-source, AI-powered civic technology platform built to mak
 
 ### 4. 📄 Document Simplifier (`/simplify`)
 - Upload legal contracts, lease deeds, employment terms, or notices (PDF, DOCX, TXT up to 10MB).
-- In-memory parsing with zero raw-document retention commitments on servers.
+- Raw uploaded files are not retained; signed-in users can access saved analysis and extracted-text history in their account.
 - Generates plain-language summaries, identifies high-risk indemnity/arbitration clauses, and flags critical compliance deadlines.
 
 ### 5. 🏛️ Free Legal Aid & Helpline Directory (`/help`)
@@ -134,7 +134,7 @@ bharatlegal/
 │   ├── help/                   # Legal Aid Directory & helplines
 │   ├── about/                  # Mission narrative, architecture, & roadmap
 │   ├── contact/                # Feedback & support page
-│   ├── privacy/ & terms/       # Legal disclosures & zero-retention privacy policy
+│   ├── privacy/ & terms/       # Legal disclosures and document-data handling policy
 │   └── api/                    # Route Handlers (/api/chat, /api/auth, /api/contact, /api/sign-up)
 ├── components/
 │   ├── navbar.tsx              # Header with responsive navigation drawer & theme switcher

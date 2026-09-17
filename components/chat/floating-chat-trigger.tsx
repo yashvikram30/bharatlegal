@@ -43,7 +43,7 @@ export function FloatingChatTrigger() {
           <div className="absolute right-0 bottom-full mb-2.5 w-56 p-2.5 rounded-xl bg-card border border-border shadow-xl text-left pointer-events-none animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
               <Sparkles className="w-3.5 h-3.5 text-gold-500" />
-              <span>Instant Legal Counsel</span>
+              <span>Legal Guidance, On Demand</span>
             </div>
             <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
               Got a question about a law, police notice, or contract? Ask anytime without leaving this page.
