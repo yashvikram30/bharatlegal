@@ -16,7 +16,7 @@ async function getParams(params: Promise<{ id: string }> | { id: string }) {
 // GET /api/conversations/[id] - Fetch single conversation and its chronological messages
 export async function GET(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await getParams(context.params);
@@ -72,7 +72,7 @@ export async function GET(
 // PATCH /api/conversations/[id] - Rename conversation title
 export async function PATCH(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await getParams(context.params);
@@ -123,7 +123,7 @@ export async function PATCH(
 // DELETE /api/conversations/[id] - Delete conversation and its messages
 export async function DELETE(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await getParams(context.params);

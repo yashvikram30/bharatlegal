@@ -39,6 +39,46 @@
       "act_year": 1881,
       "enforcement_date": "1882-03-01",
       "description": "Defines and amends the law relating to promissory notes, bills of exchange and cheques."
+    },
+    {
+      "id": "model-tenancy-act",
+      "short_title": "The Model Tenancy Act, 2021",
+      "act_number": "Policy",
+      "act_year": 2021,
+      "enforcement_date": "2021-06-02",
+      "description": "Framework to regulate the renting of premises and to balance the interests of owner and tenant."
+    },
+    {
+      "id": "indian-contract-act-1872",
+      "short_title": "The Indian Contract Act, 1872",
+      "act_number": "9",
+      "act_year": 1872,
+      "enforcement_date": "1872-09-01",
+      "description": "Defines the law relating to contracts and agreements in India."
+    },
+    {
+      "id": "posh-act-2013",
+      "short_title": "Sexual Harassment of Women at Workplace Act, 2013",
+      "act_number": "14",
+      "act_year": 2013,
+      "enforcement_date": "2013-12-09",
+      "description": "Provides protection against sexual harassment of women at workplace and for prevention and redressal."
+    },
+    {
+      "id": "payment-of-gratuity-act-1972",
+      "short_title": "The Payment of Gratuity Act, 1972",
+      "act_number": "39",
+      "act_year": 1972,
+      "enforcement_date": "1972-09-16",
+      "description": "Provides for a scheme for the payment of gratuity to employees engaged in factories, mines, oilfields, and other establishments."
+    },
+    {
+      "id": "protection-of-women-from-domestic-violence-act-2005",
+      "short_title": "Protection of Women from Domestic Violence Act, 2005",
+      "act_number": "43",
+      "act_year": 2005,
+      "enforcement_date": "2006-10-26",
+      "description": "Provides for more effective protection of the rights of women guaranteed under the Constitution who are victims of violence of any kind occurring within the family."
     }
   ],
   "sections": {
@@ -233,6 +273,431 @@
         }
       ],
       "judgments": []
+    },
+    "bnss/47": {
+      "act": {
+        "id": "bnss",
+        "short_title": "The Bharatiya Nagarik Suraksha Sanhita, 2023",
+        "act_number": "46",
+        "act_year": 2023,
+        "enforcement_date": "2024-07-01"
+      },
+      "section": {
+        "number": "47",
+        "title": "Person arrested to be informed of grounds of arrest and of right to bail",
+        "text": "(1) Every police officer or other person arresting any person without warrant shall forthwith communicate to him full particulars of the offence for which he is arrested or other grounds for such arrest. (2) Where a police officer arrests without warrant any person other than a person accused of a non-bailable offence, he shall inform the person arrested that he is entitled to be released on bail and that he may arrange for sureties on his behalf.",
+        "bailable": null,
+        "cognizable": null,
+        "compoundable": null,
+        "court_triable": null
+      },
+      "corresponds_to": [
+        {
+          "direction": "predecessor",
+          "act": "crpc",
+          "section": "50",
+          "relation": "identical",
+          "score": 1.0,
+          "notes": "Corresponds to Section 50 of the Code of Criminal Procedure, 1973."
+        }
+      ],
+      "judgments": [
+        {
+          "cnr": "SCIN010012341997",
+          "title": "D.K. Basu vs State of West Bengal",
+          "court": "SC",
+          "court_name": "Supreme Court of India",
+          "date": "1997-12-18",
+          "precedential_value": "Binding (SC Landmark)",
+          "ratio_decidendi": "Arrest without informing grounds of arrest and informing relatives within 8-12 hours violates fundamental rights under Article 21 and 22(1). Mandatory preparation of Arrest Memo required.",
+          "applied_to_this_section": "Grounds of arrest and communication to friends/family",
+          "url": "https://ecourtsindia.com/cnr/SCIN010012341997/order-1"
+        }
+      ]
+    },
+    "bnss/179": {
+      "act": {
+        "id": "bnss",
+        "short_title": "The Bharatiya Nagarik Suraksha Sanhita, 2023",
+        "act_number": "46",
+        "act_year": 2023,
+        "enforcement_date": "2024-07-01"
+      },
+      "section": {
+        "number": "179",
+        "title": "Police officer's power to require attendance of witnesses",
+        "text": "(1) Any police officer making an investigation may, by order in writing, require the attendance before himself of any person being within the limits of his own or any adjoining station who, from the information given or otherwise, appears to be acquainted with the facts and circumstances of the case: Provided that no male person under the age of fifteen years or of the age of sixty years or above or a woman or a person with disability shall be required to attend at any place other than the place in which such person resides.",
+        "bailable": null,
+        "cognizable": null,
+        "compoundable": null,
+        "court_triable": null
+      },
+      "corresponds_to": [
+        {
+          "direction": "predecessor",
+          "act": "crpc",
+          "section": "160",
+          "relation": "identical",
+          "score": 1.0,
+          "notes": "Corresponds to Section 160 CrPC, 1973."
+        }
+      ],
+      "judgments": [
+        {
+          "cnr": "SCIN010023451978",
+          "title": "Nandini Satpathy vs P.L. Dani",
+          "court": "SC",
+          "court_name": "Supreme Court of India",
+          "date": "1978-04-07",
+          "precedential_value": "Binding (SC Landmark)",
+          "ratio_decidendi": "Article 20(3) right against self-incrimination applies at the stage of police questioning under Section 160 CrPC (now BNSS 179). An accused person cannot be coerced into answering self-incriminating queries.",
+          "applied_to_this_section": "Police summons and right to silence",
+          "url": "https://ecourtsindia.com/cnr/SCIN010023451978/order-1"
+        }
+      ]
+    },
+    "bnss/53": {
+      "act": {
+        "id": "bnss",
+        "short_title": "The Bharatiya Nagarik Suraksha Sanhita, 2023",
+        "act_number": "46",
+        "act_year": 2023,
+        "enforcement_date": "2024-07-01"
+      },
+      "section": {
+        "number": "53",
+        "title": "Examination of arrested person by medical officer",
+        "text": "(1) When any person is arrested, he shall be examined by a medical officer in the service of Central Government or a State Government, and in case the medical officer is not available, by a registered medical practitioner, immediately after the arrest is made. (2) The medical officer shall prepare the record of such examination, mentioning therein any injuries or marks of violence upon the person arrested, and the approximate time when such injuries or marks may have been inflicted.",
+        "bailable": null,
+        "cognizable": null,
+        "compoundable": null,
+        "court_triable": null
+      },
+      "corresponds_to": [
+        {
+          "direction": "predecessor",
+          "act": "crpc",
+          "section": "54",
+          "relation": "identical",
+          "score": 1.0,
+          "notes": "Corresponds to Section 54 of CrPC 1973."
+        }
+      ],
+      "judgments": []
+    },
+    "bnss/58": {
+      "act": {
+        "id": "bnss",
+        "short_title": "The Bharatiya Nagarik Suraksha Sanhita, 2023",
+        "act_number": "46",
+        "act_year": 2023,
+        "enforcement_date": "2024-07-01"
+      },
+      "section": {
+        "number": "58",
+        "title": "Person arrested not to be detained more than twenty-four hours",
+        "text": "No police officer shall detain in custody a person arrested without warrant for a longer period than under all the circumstances of the case is reasonable, and such period shall not, in the absence of a special order of a Magistrate under section 187, exceed twenty-four hours exclusive of the time necessary for the journey from the place of arrest to the Magistrate's Court.",
+        "bailable": null,
+        "cognizable": null,
+        "compoundable": null,
+        "court_triable": null
+      },
+      "corresponds_to": [
+        {
+          "direction": "predecessor",
+          "act": "crpc",
+          "section": "57",
+          "relation": "identical",
+          "score": 1.0,
+          "notes": "Corresponds to Section 57 CrPC 1973 and Article 22(2) of the Constitution."
+        }
+      ],
+      "judgments": [
+        {
+          "cnr": "SCIN010034562014",
+          "title": "Manoj vs State of M.P.",
+          "court": "SC",
+          "court_name": "Supreme Court of India",
+          "date": "1999-02-10",
+          "precedential_value": "Binding (SC)",
+          "ratio_decidendi": "Detention beyond 24 hours without production before a Magistrate is unlawful and renders the police officers liable for illegal confinement under criminal law.",
+          "applied_to_this_section": "24-hour presentation limit",
+          "url": "https://ecourtsindia.com/cnr/SCIN010034562014/order-1"
+        }
+      ]
+    },
+    "indian-contract-act-1872/27": {
+      "act": {
+        "id": "indian-contract-act-1872",
+        "short_title": "The Indian Contract Act, 1872",
+        "act_number": "9",
+        "act_year": 1872,
+        "enforcement_date": "1872-09-01"
+      },
+      "section": {
+        "number": "27",
+        "title": "Agreement in restraint of trade, void",
+        "text": "Every agreement by which any one is restrained from exercising a lawful profession, trade or business of any kind, is to that extent void. Exception 1: One who sells the goodwill of a business may agree with the buyer to refrain from carrying on a similar business, within specified local limits, so long as the buyer carries on a like business therein.",
+        "bailable": null,
+        "cognizable": null,
+        "compoundable": null,
+        "court_triable": "Civil Court"
+      },
+      "corresponds_to": [],
+      "judgments": [
+        {
+          "cnr": "SCIN010045672006",
+          "title": "Percept D'Mark (India) Pvt. Ltd. vs Zaheer Khan",
+          "court": "SC",
+          "court_name": "Supreme Court of India",
+          "date": "2006-03-22",
+          "precedential_value": "Binding (SC Landmark)",
+          "ratio_decidendi": "Under Section 27 of the Indian Contract Act, 1872, a restrictive covenant extending beyond the term of the agreement is void and unenforceable. The doctrine of restraint of trade does not permit post-contractual non-compete covenants against individuals.",
+          "applied_to_this_section": "Void post-employment non-compete clauses",
+          "url": "https://ecourtsindia.com/cnr/SCIN010045672006/order-1"
+        }
+      ]
+    },
+    "bnss/144": {
+      "act": {
+        "id": "bnss",
+        "short_title": "The Bharatiya Nagarik Suraksha Sanhita, 2023",
+        "act_number": "46",
+        "act_year": 2023,
+        "enforcement_date": "2024-07-01"
+      },
+      "section": {
+        "number": "144",
+        "title": "Order for maintenance of wives, children and parents",
+        "text": "(1) If any person having sufficient means neglects or refuses to maintain: (a) his wife, unable to maintain herself, or (b) his legitimate or illegitimate minor child, whether married or not, unable to maintain itself, or (d) his father or mother, unable to maintain himself or herself, a Magistrate of the first class may, upon proof of such neglect or refusal, order such person to make a monthly allowance for the maintenance of his wife or such child, father or mother, at such monthly rate as such Magistrate thinks fit.",
+        "bailable": null,
+        "cognizable": null,
+        "compoundable": null,
+        "court_triable": "Magistrate of the first class / Family Court"
+      },
+      "corresponds_to": [
+        {
+          "direction": "predecessor",
+          "act": "crpc",
+          "section": "125",
+          "relation": "identical",
+          "score": 1.0,
+          "notes": "Corresponds to Section 125 of CrPC 1973."
+        }
+      ],
+      "judgments": [
+        {
+          "cnr": "SCIN010056782020",
+          "title": "Rajnesh vs Neha",
+          "court": "SC",
+          "court_name": "Supreme Court of India",
+          "date": "2020-11-04",
+          "precedential_value": "Binding (SC Landmark Guidelines)",
+          "ratio_decidendi": "Both parties in all maintenance proceedings under Section 125 CrPC (now BNSS 144), PWDVA, and Hindu Marriage Act must mandatorily file comprehensive Affidavits of Assets and Liabilities. Maintenance awarded must be realistic and commensurate with the standard of living enjoyed in matrimonial home.",
+          "applied_to_this_section": "Interim and final maintenance calculation guidelines",
+          "url": "https://ecourtsindia.com/cnr/SCIN010056782020/order-1"
+        }
+      ]
+    },
+    "model-tenancy-act/15": {
+      "act": {
+        "id": "model-tenancy-act",
+        "short_title": "The Model Tenancy Act, 2021",
+        "act_number": "Policy",
+        "act_year": 2021,
+        "enforcement_date": "2021-06-02"
+      },
+      "section": {
+        "number": "15",
+        "title": "Entry of premises by landlord or property manager",
+        "text": "(1) A landlord or the property manager may enter the premises rented by giving a prior notice of twenty-four hours to the tenant. (2) The entry shall be between nine o'clock in the morning and six o'clock in the evening to carry out inspection or necessary repairs.",
+        "bailable": null,
+        "cognizable": null,
+        "compoundable": null,
+        "court_triable": "Rent Authority / Rent Court"
+      },
+      "corresponds_to": [],
+      "judgments": []
+    },
+    "model-tenancy-act/13": {
+      "act": {
+        "id": "model-tenancy-act",
+        "short_title": "The Model Tenancy Act, 2021",
+        "act_number": "Policy",
+        "act_year": 2021,
+        "enforcement_date": "2021-06-02"
+      },
+      "section": {
+        "number": "13",
+        "title": "Security deposit refund upon vacation",
+        "text": "The security deposit paid by the tenant shall be refunded to the tenant on the date of taking over vacant possession of the premises from the tenant, after making due deduction of any liability of the tenant. Where deductions are made, an itemized statement shall be provided.",
+        "bailable": null,
+        "cognizable": null,
+        "compoundable": null,
+        "court_triable": "Rent Authority / Rent Court"
+      },
+      "corresponds_to": [],
+      "judgments": []
+    },
+    "model-tenancy-act/21": {
+      "act": {
+        "id": "model-tenancy-act",
+        "short_title": "The Model Tenancy Act, 2021",
+        "act_number": "Policy",
+        "act_year": 2021,
+        "enforcement_date": "2021-06-02"
+      },
+      "section": {
+        "number": "21",
+        "title": "Eviction and recovery of possession of premises",
+        "text": "(1) A landlord shall not be entitled to recover possession of any premises except on an application made by him to the Rent Court. (2) The Rent Court may make an order for the recovery of possession on grounds of non-payment of rent, denial of landlord's title, or misuse of premises after reasonable notice.",
+        "bailable": null,
+        "cognizable": null,
+        "compoundable": null,
+        "court_triable": "Rent Court / Rent Tribunal"
+      },
+      "corresponds_to": [],
+      "judgments": []
+    },
+    "posh-act-2013/4": {
+      "act": {
+        "id": "posh-act-2013",
+        "short_title": "Sexual Harassment of Women at Workplace Act, 2013",
+        "act_number": "Act 14 of 2013",
+        "act_year": 2013,
+        "enforcement_date": "2013-12-09"
+      },
+      "section": {
+        "number": "4",
+        "title": "Constitution of Internal Complaints Committee (ICC)",
+        "text": "(1) Every employer of a workplace employing ten or more workers shall, by an order in writing, constitute a Committee to be known as the Internal Complaints Committee. (2) The Committee shall consist of: (a) a Presiding Officer who shall be a woman employed at a senior level; (b) not less than two Members from amongst employees preferably committed to the cause of women; (c) one member from amongst non-governmental organisations or associations committed to the cause of women. At least one-half of the total Members so nominated shall be women.",
+        "bailable": null,
+        "cognizable": null,
+        "compoundable": null,
+        "court_triable": "District Officer / Labour Court"
+      },
+      "corresponds_to": [],
+      "judgments": [
+        {
+          "cnr": "SCIN010023452023",
+          "title": "Aureliano Fernandes v. State of Goa and Others",
+          "court": "SC",
+          "court_name": "Supreme Court of India",
+          "date": "2023-05-12",
+          "precedential_value": "binding",
+          "ratio_decidendi": "The Supreme Court issued nationwide directions emphasizing that serious lapses in constituting Internal Complaints Committees under Section 4 POSH Act render the entire disciplinary process unconstitutional, creating hostile environments for working women."
+        }
+      ]
+    },
+    "payment-of-gratuity-act-1972/4": {
+      "act": {
+        "id": "payment-of-gratuity-act-1972",
+        "short_title": "The Payment of Gratuity Act, 1972",
+        "act_number": "Act 39 of 1972",
+        "act_year": 1972,
+        "enforcement_date": "1972-09-16"
+      },
+      "section": {
+        "number": "4",
+        "title": "Payment of gratuity",
+        "text": "(1) Gratuity shall be payable to an employee on the termination of his employment after he has rendered continuous service for not less than five years: (a) on his superannuation, or (b) on his retirement or resignation, or (c) on his death or disablement due to accident or disease. (2) For every completed year of service or part thereof in excess of six months, the employer shall pay gratuity to an employee at the rate of fifteen days wages based on the rate of wages last drawn. (6) The gratuity of an employee can only be forfeited to the extent of the damage or loss caused in case of termination for willful omission or negligence, or moral turpitude.",
+        "bailable": null,
+        "cognizable": null,
+        "compoundable": null,
+        "court_triable": "Controlling Authority under Payment of Gratuity Act"
+      },
+      "corresponds_to": [],
+      "judgments": [
+        {
+          "cnr": "SCIN010041232021",
+          "title": "Union Bank of India v. C.G. Ajay Babu",
+          "court": "SC",
+          "court_name": "Supreme Court of India",
+          "date": "2018-08-14",
+          "precedential_value": "binding",
+          "ratio_decidendi": "Gratuity is a statutory right under Section 4 and cannot be withheld arbitrarily without conviction or proven quantification of moral turpitude."
+        }
+      ]
+    },
+    "consumer-protection-act-2019/2": {
+      "act": {
+        "id": "consumer-protection-act-2019",
+        "short_title": "The Consumer Protection Act, 2019",
+        "act_number": "Act 35 of 2019",
+        "act_year": 2019,
+        "enforcement_date": "2020-07-20"
+      },
+      "section": {
+        "number": "2",
+        "title": "Definitions (Consumer, Deficiency, Unfair Contract & Unfair Trade Practice)",
+        "text": "(7) 'consumer' means any person who buys any goods or hires any service for a consideration. (11) 'deficiency' means any fault, imperfection, shortcoming or inadequacy in the quality, nature and manner of performance. (46) 'unfair contract' means a contract between a manufacturer/trader and a consumer having terms which cause significant change in rights of consumer including imposing unreasonable penalty or unilateral termination. (47) 'unfair trade practice' includes false representations and deceptive statements.",
+        "bailable": null,
+        "cognizable": null,
+        "compoundable": null,
+        "court_triable": "District Consumer Commission"
+      },
+      "corresponds_to": [],
+      "judgments": [
+        {
+          "cnr": "SCIN010034562021",
+          "title": "Pioneer Urban Land & Infrastructure Ltd. v. Govindan Raghavan",
+          "court": "SC",
+          "court_name": "Supreme Court of India",
+          "date": "2019-04-02",
+          "precedential_value": "binding",
+          "ratio_decidendi": "One-sided standard form contract terms constitute an unfair contract under Consumer Protection jurisprudence and are not binding upon consumers who have unequal bargaining power."
+        }
+      ]
+    },
+    "consumer-protection-act-2019/84": {
+      "act": {
+        "id": "consumer-protection-act-2019",
+        "short_title": "The Consumer Protection Act, 2019",
+        "act_number": "Act 35 of 2019",
+        "act_year": 2019,
+        "enforcement_date": "2020-07-20"
+      },
+      "section": {
+        "number": "84",
+        "title": "Liability of product manufacturer and e-commerce seller",
+        "text": "(1) A product manufacturer shall be liable in a product liability action, if: (a) the product contains a manufacturing defect; or (b) the product is defective in design; or (c) there is a deviation from manufacturing specifications; or (d) the product does not conform to the express warranty; or (e) the product fails to contain adequate instructions of correct usage to prevent any harm.",
+        "bailable": null,
+        "cognizable": null,
+        "compoundable": null,
+        "court_triable": "District / State / National Consumer Commission"
+      },
+      "corresponds_to": [],
+      "judgments": []
+    },
+    "protection-of-women-from-domestic-violence-act-2005/12": {
+      "act": {
+        "id": "protection-of-women-from-domestic-violence-act-2005",
+        "short_title": "Protection of Women from Domestic Violence Act, 2005",
+        "act_number": "Act 43 of 2005",
+        "act_year": 2005,
+        "enforcement_date": "2006-10-26"
+      },
+      "section": {
+        "number": "12",
+        "title": "Application to Magistrate for emergency reliefs and protection",
+        "text": "(1) An aggrieved person or a Protection Officer or any other person on behalf of the aggrieved person may present an application to the Magistrate seeking one or more reliefs under this Act. (2) The relief sought may include protection orders (Section 18), residence orders in shared household (Section 19), monetary relief (Section 20), custody orders (Section 21), and compensation orders (Section 22). (4) The Magistrate shall fix the first date of hearing, which shall not ordinarily be beyond three days from the date of receipt of the application.",
+        "bailable": null,
+        "cognizable": null,
+        "compoundable": null,
+        "court_triable": "Judicial Magistrate of the first class / Metropolitan Magistrate"
+      },
+      "corresponds_to": [],
+      "judgments": [
+        {
+          "cnr": "SCIN010078902022",
+          "title": "Prabha Tyagi v. Kamlesh Devi",
+          "court": "SC",
+          "court_name": "Supreme Court of India",
+          "date": "2022-05-12",
+          "precedential_value": "binding",
+          "ratio_decidendi": "Section 12 of the DV Act is a beneficial legislation; an aggrieved woman has an absolute right to reside in a shared household and petition for emergency protection regardless of whether she was cohabiting at the immediate time of complaint."
+        }
+      ]
     }
   }
 }

@@ -59,7 +59,7 @@ function formatCaseDoc(c: any) {
 // GET /api/cases/[id]
 export async function GET(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await getParams(context.params);
@@ -97,7 +97,7 @@ export async function GET(
 // PATCH /api/cases/[id] - Update case stage, next hearing date, or metadata
 export async function PATCH(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await getParams(context.params);
@@ -171,7 +171,7 @@ export async function PATCH(
 // DELETE /api/cases/[id]
 export async function DELETE(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await getParams(context.params);

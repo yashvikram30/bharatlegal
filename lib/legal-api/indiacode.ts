@@ -99,11 +99,30 @@ const ACT_ALIASES: Record<string, string> = {
   "motor-vehicles-act": "motor-vehicles-act-1988",
   "it-act": "information-technology-act-2000",
   "information-technology-act": "information-technology-act-2000",
+  "model-tenancy-act": "model-tenancy-act",
+  "tenancy-act": "model-tenancy-act",
+  "posh": "posh-act-2013",
+  "posh-act": "posh-act-2013",
+  "posh-act-2013": "posh-act-2013",
+  "gratuity": "payment-of-gratuity-act-1972",
+  "gratuity-act": "payment-of-gratuity-act-1972",
+  "payment-of-gratuity-act": "payment-of-gratuity-act-1972",
+  "payment-of-gratuity-act-1972": "payment-of-gratuity-act-1972",
+  pwdva: "protection-of-women-from-domestic-violence-act-2005",
+  "domestic-violence": "protection-of-women-from-domestic-violence-act-2005",
+  "domestic-violence-act": "protection-of-women-from-domestic-violence-act-2005",
+  "protection-of-women-from-domestic-violence-act-2005": "protection-of-women-from-domestic-violence-act-2005",
 };
 
 export function resolveActSlug(act: string): string {
   const normalized = act.trim().toLowerCase().replace(/\s+/g, "-");
-  return ACT_ALIASES[normalized] || normalized;
+  if (ACT_ALIASES[normalized]) return ACT_ALIASES[normalized];
+  if (normalized.startsWith("the-")) {
+    const withoutThe = normalized.slice(4);
+    if (ACT_ALIASES[withoutThe]) return ACT_ALIASES[withoutThe];
+    return withoutThe;
+  }
+  return normalized;
 }
 
 // In-memory SWR cache to avoid repeated HTTP calls

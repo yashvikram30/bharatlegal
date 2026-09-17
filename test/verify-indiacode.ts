@@ -138,6 +138,40 @@ async function runTests() {
     failed++;
   }
 
+  console.log("\n--------------------------------------------------");
+
+  // Test 7: Rights Visualizer Civic Statutes Resolution
+  console.log("▶ Test 7: Rights Visualizer Civic Statutes Resolution (Tenancy, POSH, CPA, DV, Contract, BNSS)...");
+  try {
+    const statutesToVerify = [
+      { act: "model-tenancy-act", sec: "13", expectedTitle: "deposit" },
+      { act: "posh-act-2013", sec: "4", expectedTitle: "Complaints Committee" },
+      { act: "payment-of-gratuity-act-1972", sec: "4", expectedTitle: "gratuity" },
+      { act: "consumer-protection-act-2019", sec: "2", expectedTitle: "Definitions" },
+      { act: "protection-of-women-from-domestic-violence-act-2005", sec: "12", expectedTitle: "Magistrate" },
+      { act: "the-indian-contract-act-1872", sec: "27", expectedTitle: "trade" },
+      { act: "bnss", sec: "47", expectedTitle: "arrest" },
+    ];
+
+    for (const item of statutesToVerify) {
+      const detail = await lookupSection(item.act, item.sec);
+      if (!detail) {
+        throw new Error(`Failed to resolve ${item.act} §${item.sec}`);
+      }
+      if (detail.section.number !== item.sec) {
+        throw new Error(`Section number mismatch for ${item.act} §${item.sec}: got '${detail.section.number}'`);
+      }
+      if (!detail.section.text || detail.section.text.length < 20) {
+        throw new Error(`Section text missing or too short for ${item.act} §${item.sec}`);
+      }
+      console.log(`  ✓ Resolved ${detail.act.short_title} §${detail.section.number} (${detail.source})`);
+    }
+    passed++;
+  } catch (err: any) {
+    console.error(`  ✗ Test 7 FAILED:`, err.message);
+    failed++;
+  }
+
   console.log("\n==================================================");
   console.log(`📊 TEST RESULTS: ${passed} PASSED, ${failed} FAILED`);
   console.log("==================================================");

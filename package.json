@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "bun test/verify-indiacode.ts && bun test/verify-simplifier.ts && bun test/verify-document-history.ts",
+    "test:all": "bun test/verify-indiacode.ts && bun test/verify-simplifier.ts && bun test/verify-document-history.ts && bun x tsc --noEmit",
     "postinstall": "patch-package"
   },
   "dependencies": {
@@ -59,6 +61,7 @@
     "framer-motion": "latest",
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
+    "mammoth": "^1.12.3",
     "mongoose": "^7.5.0",
     "next": "15.5.25",
     "next-auth": "^4.24.11",

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Know Your Rights",
+  title: "Legal Rights Visualizer | BharatLegal",
   description:
-    "Explore your statutory rights across arrest and detention, tenancy, consumer disputes, and employment law with clear Indian legal citations.",
+    "Interactive procedural roadmaps, actionable citizen scripts, and 2024 statutory concordance (CrPC ➔ BNSS, IPC ➔ BNS) for real-world legal situations in India.",
 };
 
 export default function RightsLayout({

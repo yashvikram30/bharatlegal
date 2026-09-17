@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUp,
@@ -358,8 +359,12 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
   );
 });
 
-export default function ChatPage() {
+function ChatPageContent() {
   const { data: session, status: authStatus } = useSession();
+  const searchParams = useSearchParams();
+  const queryParam = searchParams.get("q");
+  const convoIdParam = searchParams.get("conversationId") || searchParams.get("id");
+  const initialHandled = useRef(false);
 
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -413,6 +418,8 @@ export default function ChatPage() {
   useEffect(() => {
     fetchConversations();
   }, [fetchConversations]);
+
+
 
   // 1. Smoothing & drip buffer hook: smooths bursty tokens into steady 60fps drips
   const { displayedText, appendChunk, endStream, reset, isDripping } = useStreamDripper({
@@ -539,6 +546,70 @@ export default function ChatPage() {
     },
     [activeConversationId, isLoading, isDripping, reset]
   );
+
+  // Seamless zero-token handoff from sidebar drawer and URL query hydration
+  useEffect(() => {
+    if (initialHandled.current) return;
+
+    // 1. Priority 1: Check if an active consultation was handed off from the sidebar drawer
+    if (typeof window !== "undefined") {
+      try {
+        const transferJson = sessionStorage.getItem("bharatlegal_drawer_transfer");
+        if (transferJson) {
+          const transfer = JSON.parse(transferJson);
+          const isRecent = Date.now() - (transfer.timestamp || 0) < 120000; // within 2 mins
+
+          if (isRecent && Array.isArray(transfer.messages) && transfer.messages.length > 0) {
+            // Match if no convoIdParam specified or matches the handed-off conversation
+            if (!convoIdParam || transfer.conversationId === convoIdParam) {
+              initialHandled.current = true;
+              sessionStorage.removeItem("bharatlegal_drawer_transfer");
+
+              if (transfer.conversationId) {
+                setActiveConversationId(transfer.conversationId);
+              }
+
+              setMessages(
+                transfer.messages.map((m: any) => ({
+                  id: m.id,
+                  role: m.role,
+                  content: m.content,
+                  timestamp: new Date(m.timestamp || Date.now()),
+                }))
+              );
+              setTimeout(() => scrollToBottom("instant"), 50);
+
+              // Refresh sidebar to show newly persisted consultation thread
+              setTimeout(() => fetchConversations(), 1000);
+              return;
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("[Chat Page] Session transfer handoff error:", err);
+      }
+    }
+
+    // 2. Priority 2: If navigated to /chat?conversationId=..., load thread from MongoDB
+    if (convoIdParam && convoIdParam !== activeConversationId) {
+      initialHandled.current = true;
+      handleSelectConversation(convoIdParam);
+      return;
+    }
+
+    // 3. Priority 3: If navigated with ?q=..., prefill textarea and auto-focus
+    if (queryParam) {
+      initialHandled.current = true;
+      setInput(queryParam);
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+          textareaRef.current.style.height = "auto";
+          textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+        }
+      }, 100);
+    }
+  }, [convoIdParam, queryParam, activeConversationId, handleSelectConversation, fetchConversations]);
 
   const handleNewChat = useCallback(() => {
     if (isLoading || isDripping) return;
@@ -997,5 +1068,19 @@ export default function ChatPage() {
       />
       </div>
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="h-screen bg-background flex items-center justify-center text-xs text-muted-foreground">
+          Loading BharatLegal AI...
+        </div>
+      }
+    >
+      <ChatPageContent />
+    </Suspense>
   );
 }
