@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { AlertTriangle, Scale, CheckCircle2, ShieldAlert, Info } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Terms of Service & Legal Disclaimer — BharatLegal",
+  title: "Terms of Service & Legal Disclaimer",
   description:
     "Terms of service, usage conditions, and statutory educational disclaimers for the BharatLegal platform.",
 };

@@ -4,7 +4,7 @@ import { lookupSection, convertProvision } from "@/lib/legal-api/indiacode";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import dbConnect from "@/lib/dbConnect";
-import ConversationModel from "@/model/Conversation";
+import ConversationModel, { DEFAULT_CONVERSATION_TITLE } from "@/model/Conversation";
 import MessageModel, { IMessageSource } from "@/model/Message";
 import mongoose from "mongoose";
 
@@ -18,7 +18,7 @@ const openai = new OpenAI({
 const SYSTEM_PROMPT = `You are BharatLegal AI, an authoritative, highly articulate Indian legal research and intelligence assistant.
 Your responses MUST be deeply structured, authoritative, and strictly formatted in clean GitHub Flavored Markdown (GFM).
 
-### 🏷️ MANDATORY FIRST LINE — 3-4 WORD CONSULTATION HEADING:
+### 🏷️ MANDATORY FIRST LINE: 3-4 WORD CONSULTATION HEADING
 On the very first line of your response, output a concise 3-4 word heading for this consultation starting with a single #, formatted as:
 # Title: 3-4 Word Topic Heading
 Example: # Title: BNS 318 Cheating Penalty
@@ -209,11 +209,26 @@ export async function POST(req: NextRequest) {
     // Auth verification for conversation persistence
     const session = await getServerSession(authOptions);
     const userId = (session?.user as any)?._id || (session?.user as any)?.id;
-    const isValidConvo =
+    const hasValidConvoId =
       userId &&
       conversationId &&
       typeof conversationId === "string" &&
       mongoose.Types.ObjectId.isValid(conversationId);
+
+    // Verify the caller actually owns this conversation before writing to it,
+    // to prevent an authenticated user from injecting messages into (or
+    // renaming) another user's conversation by supplying its ID.
+    let isValidConvo = false;
+    if (hasValidConvoId) {
+      try {
+        await dbConnect();
+        isValidConvo = Boolean(
+          await ConversationModel.exists({ _id: conversationId, userId })
+        );
+      } catch (ownershipErr) {
+        console.warn("[Chat Route] Could not verify conversation ownership:", ownershipErr);
+      }
+    }
 
     // If authenticated and valid conversationId, persist user turn
     const lastUserMsg = recentMessages.filter((m: any) => m.role === "user").pop();
@@ -397,10 +412,7 @@ export async function POST(req: NextRequest) {
 
           const existingConvo = await ConversationModel.findById(conversationId);
           const needsTitle =
-            !existingConvo?.title ||
-            existingConvo.title === "New consultation" ||
-            existingConvo.title === "New chat" ||
-            existingConvo.title === "Untitled consultation";
+            !existingConvo?.title || existingConvo.title === DEFAULT_CONVERSATION_TITLE;
 
           if (needsTitle) {
             if (extractedTitle) {
@@ -445,7 +457,7 @@ async function autoTitleConversation(
 ) {
   try {
     const convo = await ConversationModel.findById(conversationId);
-    if (!convo || (convo.title !== "New consultation" && convo.title !== "New chat")) {
+    if (!convo || convo.title !== DEFAULT_CONVERSATION_TITLE) {
       return;
     }
 
@@ -508,7 +520,7 @@ async function createCompletionWithRetry(
 function formatDetailContext(detail: any): string {
   const parts: string[] = [
     `Act: ${detail.act.short_title} (${detail.act.id.toUpperCase()})`,
-    `Section: ${detail.section.number} — ${detail.section.title}`,
+    `Section ${detail.section.number}: ${detail.section.title}`,
     `Bare Statutory Text: ${detail.section.text.slice(0, 2000)}`,
   ];
   if (detail.section.bailable !== undefined) {
@@ -557,7 +569,9 @@ function extractStatutoryRefs(text: string): { act: string; section: string }[] 
 
   // Standard Act-first matches: "BNS Section 318", "BNS §318", "BNS 318"
   const patterns: [RegExp, string][] = [
-    [/\b(?:bns|bharatiya\s*nyaya\s*sanhita)\D*?(\d+[a-z]?)/gi, "bns"],
+    // Negative lookahead (?!s\b) stops "bns" from also matching inside "bnss",
+    // which would otherwise wrongly ground the answer in BNS instead of BNSS.
+    [/\b(?:bns(?!s\b)|bharatiya\s*nyaya\s*sanhita)\D*?(\d+[a-z]?)/gi, "bns"],
     [/\b(?:bnss|bharatiya\s*nagarik\s*suraksha\s*sanhita)\D*?(\d+[a-z]?)/gi, "bnss"],
     [/\b(?:bsa|bharatiya\s*sakshya\s*adhiniyam)\D*?(\d+[a-z]?)/gi, "bsa"],
     [/\b(?:ipc|indian\s*penal\s*code)\D*?(\d+[a-z]?)/gi, "ipc"],

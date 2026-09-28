@@ -424,7 +424,7 @@ export default function DashboardPage() {
       {authStatus !== "authenticated" && (
         <div className="flex items-center justify-between text-xs py-1.5 px-3 rounded-lg bg-muted/40 border border-border/50 text-muted-foreground">
           <span>
-            Viewing illustrative sample cases only — not live court data. Sign in to save your own case records.
+            Viewing illustrative sample cases only, not live court data. Sign in to save your own case records.
           </span>
           <button
             onClick={() => signIn()}
@@ -768,7 +768,7 @@ export default function DashboardPage() {
                       <span className="font-medium text-foreground/80">{c.stage}</span>
                     </td>
                     <td className="py-3 px-3.5 text-muted-foreground">
-                      {c.nextHearing || "—"}
+                      {c.nextHearing || "Not set"}
                     </td>
                     <td className="py-3 px-3.5">
                       <div className="flex items-center gap-2">

@@ -14,7 +14,7 @@ export default function NotFound() {
         {/* Eyebrow Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 border border-forest-500/20">
           <Scale className="w-3.5 h-3.5" />
-          <span>Error 404 — Section Not Found</span>
+          <span>Error 404: Section Not Found</span>
         </div>
 
         {/* Headline */}

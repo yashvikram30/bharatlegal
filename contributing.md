@@ -66,7 +66,7 @@ git push origin feature-name
 ## 8. Wait for Review
 - Admin will review your PR.
 - Submit a couple of screenshots & screen recordings of the resolved issue, in order to get a fast response and quick merging of the issue
-- They may suggest changes — you can make them in the same branch and push again.
+- They may suggest changes. You can make them in the same branch and push again.
 - Once approved, your PR will be merged into the gssoc branch! 
 ---
 Thank you for contributing! 🌟

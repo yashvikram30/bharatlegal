@@ -96,7 +96,7 @@ export default function LandingPage() {
                 Tell us what happened. We’ll help you find your next step.
               </h1>
               <p className="text-base sm:text-lg text-forest-800/80 dark:text-forest-100/75 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Understand your rights, review a contract, prepare for a hearing, or reach official legal-aid services—with the law behind every answer.
+                Understand your rights, review a contract, prepare for a hearing, or reach official legal-aid services, with the law behind every answer.
               </p>
             </div>
 
@@ -222,7 +222,7 @@ export default function LandingPage() {
                 Over 45 million court cases are currently pending in India. Millions of everyday citizens sign binding lease deeds, employment bonds, and loan agreements without understanding the fine print.
               </p>
               <p className="text-forest-100/85 leading-relaxed text-sm sm:text-base">
-                Most legal AI platforms are trained on foreign US/UK laws. BharatLegal was engineered specifically to decode the Indian justice system — bridging the divide between statutory terminology and common citizens.
+                Most legal AI platforms are trained on foreign US/UK laws. BharatLegal was engineered specifically to decode the Indian justice system, bridging the divide between statutory terminology and common citizens.
               </p>
               <div className="pt-2">
                 <Button

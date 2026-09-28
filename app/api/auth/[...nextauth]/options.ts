@@ -4,6 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User";
+import { escapeRegExp } from "@/lib/utils";
 import dns from "node:dns";
 
 try {
@@ -45,6 +46,12 @@ export const authOptions: NextAuthOptions = {
 
           if (!user) {
             throw new Error("No user found with this email or username");
+          }
+
+          if (!user.password || !user.password.startsWith("$2")) {
+            throw new Error(
+              "This account signs in with Google. Please use the 'Continue with Google' button."
+            );
           }
 
           const isPasswordCorrect = await bcrypt.compare(
@@ -90,7 +97,7 @@ export const authOptions: NextAuthOptions = {
           }
 
           let dbUser = await UserModel.findOne({
-            email: { $regex: new RegExp(`^${email}$`, "i") },
+            email: { $regex: new RegExp(`^${escapeRegExp(email)}$`, "i") },
           });
 
           if (!dbUser) {
@@ -134,7 +141,7 @@ export const authOptions: NextAuthOptions = {
           const email = user.email?.toLowerCase().trim();
           if (email) {
             const dbUser = await UserModel.findOne({
-              email: { $regex: new RegExp(`^${email}$`, "i") },
+              email: { $regex: new RegExp(`^${escapeRegExp(email)}$`, "i") },
             });
             if (dbUser) {
               token._id = (dbUser._id as { toString: () => string }).toString();

@@ -1,7 +1,7 @@
 # BharatLegal (भारत लीगल)
 ### ⚖️ Demystifying the Indian Justice System for Every Citizen
 
-BharatLegal is an open-source, AI-powered civic technology platform built to make Indian law accessible, intelligible, and actionable for all citizens. Grounded in contemporary Indian statutory frameworks — including the **Bharatiya Nyaya Sanhita (BNS)**, **BNSS / CrPC**, and the **Consumer Protection Act, 2019** — BharatLegal bridges the divide between archaic legal jargon and fundamental citizen awareness.
+BharatLegal is an open-source, AI-powered civic technology platform built to make Indian law accessible, intelligible, and actionable for all citizens. Grounded in contemporary Indian statutory frameworks, including the **Bharatiya Nyaya Sanhita (BNS)**, **BNSS / CrPC**, and the **Consumer Protection Act, 2019**, BharatLegal bridges the divide between archaic legal jargon and fundamental citizen awareness.
 
 ---
 
@@ -21,7 +21,7 @@ BharatLegal is an open-source, AI-powered civic technology platform built to mak
 - Interactive, plain-language breakdown of fundamental legal rights across 5 core civic categories:
   - **Arrest & Police Custody** (Articles 20-22, Section 50 CrPC, DK Basu Guidelines)
   - **Property & Tenancy** (Transfer of Property Act, Model Tenancy Act)
-  - **Consumer Protection** (Consumer Protection Act, 2019 — refund, deficient service, unfair trade)
+  - **Consumer Protection** (Consumer Protection Act, 2019: refund, deficient service, unfair trade)
   - **Employment & Labor** (Industrial Disputes Act, Maternity Benefit Act)
   - **Family & Domestic Protection** (DV Act 2005, Maintenance under Section 125 CrPC)
 - One-click provision copying and native mobile sharing.

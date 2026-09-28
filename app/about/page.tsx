@@ -4,7 +4,7 @@ import { Scale, BookOpen, ShieldCheck, HeartHandshake, ArrowRight, BrainCircuit,
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "About Us — Demystifying Indian Law | BharatLegal",
+  title: "About Us: Demystifying Indian Law",
   description:
     "Learn why BharatLegal was built, our mission to bridge India's legal literacy divide, and how we ground AI in statutory Indian frameworks like BNS and CrPC.",
 };
@@ -15,7 +15,7 @@ export default function AboutPage() {
       icon: Scale,
       title: "Statutory Grounding",
       description:
-        "Legal guidance grounded in authentic Indian statutes — including Bharatiya Nyaya Sanhita (BNS), CrPC/BNSS, Consumer Protection Act, and RTI Act.",
+        "Legal guidance grounded in authentic Indian statutes, including Bharatiya Nyaya Sanhita (BNS), CrPC/BNSS, Consumer Protection Act, and RTI Act.",
     },
     {
       icon: BookOpen,

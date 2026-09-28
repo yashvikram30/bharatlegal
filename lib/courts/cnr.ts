@@ -109,8 +109,12 @@ export async function findLiveOrderPdf(rawCnr: string): Promise<string | null> {
   const cnrPrefix4 = clean.slice(0, 4);
   const possibleCourtPrefixes = COURT_S3_PREFIXES[cnrPrefix4] || [""];
 
-  // Search in recent judgment years (from 2024 down to 2019)
-  const years = [2024, 2023, 2022, 2021, 2020, 2019];
+  // Search the current year down through the previous 5 years, newest first,
+  // so the range keeps up automatically instead of going stale (it was
+  // previously hardcoded to 2019-2024 and stopped finding any order once
+  // 2025 arrived).
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 6 }, (_, i) => currentYear - i);
 
   for (const year of years) {
     for (const courtPrefix of possibleCourtPrefixes) {

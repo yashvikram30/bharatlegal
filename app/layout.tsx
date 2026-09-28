@@ -18,7 +18,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "BharatLegal — Simplifying Legal Access for All Indians",
+    default: "BharatLegal: Simplifying Legal Access for All Indians",
     template: "%s | BharatLegal",
   },
   description:
@@ -45,13 +45,13 @@ export const metadata: Metadata = {
     locale: "en_IN",
     url: siteUrl,
     siteName: "BharatLegal",
-    title: "BharatLegal — Simplifying Legal Access for All Indians",
+    title: "BharatLegal: Simplifying Legal Access for All Indians",
     description:
       "Demystifying the Indian justice system through AI-powered assistance, statutory grounding, case tracking, and document simplification.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "BharatLegal — Simplifying Legal Access for All Indians",
+    title: "BharatLegal: Simplifying Legal Access for All Indians",
     description:
       "AI-powered legal assistance, plain-language statutory explanations, and case tracking for Indian citizens.",
   },

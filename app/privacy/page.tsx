@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { ShieldCheck, Lock, EyeOff, Server, FileText } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — BharatLegal",
+  title: "Privacy Policy",
   description:
     "Learn how BharatLegal handles document processing, account history, and privacy controls.",
 };

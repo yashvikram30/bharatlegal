@@ -1,5 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
+export const DEFAULT_CONVERSATION_TITLE = "New consultation";
+
 export interface IConversation extends Document {
   userId: mongoose.Types.ObjectId;
   title: string;
@@ -18,7 +20,7 @@ const ConversationSchema = new Schema<IConversation>(
     title: {
       type: String,
       required: true,
-      default: "New consultation",
+      default: DEFAULT_CONVERSATION_TITLE,
       trim: true,
       maxlength: 120,
     },

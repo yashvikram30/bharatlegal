@@ -2,6 +2,7 @@ import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User";
 import bcrypt from "bcryptjs";
 import { NextRequest } from "next/server";
+import { escapeRegExp } from "@/lib/utils";
 
 
 export async function POST(request: NextRequest){
@@ -17,11 +18,18 @@ export async function POST(request: NextRequest){
             );
         }
 
+        if (typeof password !== "string" || password.length < 8) {
+            return Response.json(
+                { success: false, message: "Password must be at least 8 characters long" },
+                { status: 400 }
+            );
+        }
+
         const cleanEmail = email.trim().toLowerCase();
         const cleanUsername = username.trim();
 
         const existingUserByUsername = await UserModel.findOne({
-            username: { $regex: new RegExp(`^${cleanUsername}$`, "i") },
+            username: { $regex: new RegExp(`^${escapeRegExp(cleanUsername)}$`, "i") },
         });
 
         if (existingUserByUsername) {

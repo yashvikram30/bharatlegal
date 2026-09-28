@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import dbConnect from "@/lib/dbConnect";
-import ConversationModel from "@/model/Conversation";
+import ConversationModel, { DEFAULT_CONVERSATION_TITLE } from "@/model/Conversation";
 
 export const runtime = "nodejs";
 
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json().catch(() => ({}));
-    const title = typeof body.title === "string" && body.title.trim() ? body.title.trim() : "New consultation";
+    const title = typeof body.title === "string" && body.title.trim() ? body.title.trim() : DEFAULT_CONVERSATION_TITLE;
 
     await dbConnect();
     const conversation = await ConversationModel.create({
