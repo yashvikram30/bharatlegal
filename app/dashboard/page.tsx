@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useSession, signIn } from "next-auth/react";
 import {
+  Gavel,
   Calendar,
   Search,
   Plus,
@@ -28,6 +29,7 @@ import {
 import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
+import { EmptyState, PageHeader, PageShell } from "@/components/page";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -191,7 +193,11 @@ export default function DashboardPage() {
     try {
       if (showToast) setIsRefreshing(true);
       const res = await fetch("/api/cases");
-      if (res.ok) {
+      if (!res.ok) {
+        // Don't swap in sample data on a failed request: a signed-in user could mistake it for their own cases.
+        toast.error("Couldn’t load your cases. Check your connection and refresh.");
+        return;
+      } else {
         const data = await res.json();
         if (data.success && Array.isArray(data.cases)) {
           if (data.authenticated && data.cases.length > 0) {
@@ -206,7 +212,7 @@ export default function DashboardPage() {
       if (showToast) toast.success("Refreshed case diary");
     } catch (err) {
       console.error("[Fetch Cases Error]:", err);
-      setCases(DEMO_CASES);
+      toast.error("Couldn’t load your cases. Check your connection and refresh.");
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -419,69 +425,50 @@ export default function DashboardPage() {
   ).length;
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-6 max-w-5xl space-y-6">
-      {/* 1. Slim Guest Notice (Only if guest) */}
+    <PageShell>
+      {/* Guest notice (only if signed out) */}
       {authStatus !== "authenticated" && (
-        <div className="flex items-center justify-between text-xs py-1.5 px-3 rounded-lg bg-muted/40 border border-border/50 text-muted-foreground">
-          <span>
-            Viewing illustrative sample cases only, not live court data. Sign in to save your own case records.
-          </span>
-          <button
-            onClick={() => signIn()}
-            className="font-medium text-foreground hover:underline ml-2 shrink-0"
-          >
-            Sign In →
-          </button>
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+          <span>Viewing illustrative sample cases only, not live court data. Sign in to save your own case records.</span>
+          <Button variant="outline" size="sm" onClick={() => signIn()}>
+            Sign in
+          </Button>
         </div>
       )}
 
-      {/* 2. Clean Header Row */}
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground font-heading tracking-tight flex items-center gap-2">
-            <span>Case Tracker</span>
-            <span className="text-xs font-normal text-muted-foreground font-mono bg-muted px-2 py-0.5 rounded-full">
-              {cases.length}
-            </span>
-          </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Manage hearings, procedural milestones, and certified judgment copies.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => fetchCases(true)}
-            disabled={isRefreshing}
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
-            title="Refresh cases"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
-          </Button>
-
-          <Button
-            onClick={() => setIsAddModalOpen(true)}
-            size="sm"
-            className="h-8 bg-forest-800 hover:bg-forest-700 text-white dark:text-gold-300 text-xs font-semibold rounded-lg px-3 flex items-center gap-1.5 shadow-xs"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add Case</span>
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Case Tracker"
+        description="Track hearings, milestones, and court orders for each of your cases."
+        actions={
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => fetchCases(true)}
+              disabled={isRefreshing}
+              title="Refresh cases"
+              aria-label="Refresh cases"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin motion-reduce:animate-none" : ""}`} />
+            </Button>
+            <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Add case
+            </Button>
+          </>
+        }
+      />
 
       {/* 3. Unified Navigation & Search Bar (Single Clean Strip) */}
       <div className="space-y-2">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-border/60 pb-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           {/* Filter Tabs */}
-          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none text-xs">
+          <div role="group" aria-label="Filter cases" className="flex items-center gap-1 overflow-x-auto scrollbar-none text-sm p-1 rounded-xl bg-muted/60 border border-border self-start">
             <button
               onClick={() => setActiveTab("all")}
-              className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
                 activeTab === "all"
-                  ? "bg-foreground text-background font-semibold"
+                  ? "bg-card text-foreground font-semibold border border-border/70"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -489,66 +476,67 @@ export default function DashboardPage() {
             </button>
             <button
               onClick={() => setActiveTab("active")}
-              className={`px-2.5 py-1 rounded-md font-medium transition-colors flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 ${
                 activeTab === "active"
-                  ? "bg-foreground text-background font-semibold"
+                  ? "bg-card text-foreground font-semibold border border-border/70"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <span>Active</span>
-              <span className="text-[10px] opacity-70">({activeCount})</span>
+              <span className="text-xs opacity-70">({activeCount})</span>
             </button>
             <button
               onClick={() => setActiveTab("upcoming")}
-              className={`px-2.5 py-1 rounded-md font-medium transition-colors flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 ${
                 activeTab === "upcoming"
-                  ? "bg-foreground text-background font-semibold"
+                  ? "bg-card text-foreground font-semibold border border-border/70"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <span>Upcoming</span>
-              <span className="text-[10px] opacity-70">({upcomingCount})</span>
+              <span className="text-xs opacity-70">({upcomingCount})</span>
             </button>
             <button
               onClick={() => setActiveTab("arguments")}
-              className={`px-2.5 py-1 rounded-md font-medium transition-colors flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 ${
                 activeTab === "arguments"
-                  ? "bg-foreground text-background font-semibold"
+                  ? "bg-card text-foreground font-semibold border border-border/70"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <span>Arguments</span>
-              <span className="text-[10px] opacity-70">({argumentsCount})</span>
+              <span className="text-xs opacity-70">({argumentsCount})</span>
             </button>
             <button
               onClick={() => setActiveTab("closed")}
-              className={`px-2.5 py-1 rounded-md font-medium transition-colors flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 ${
                 activeTab === "closed"
-                  ? "bg-foreground text-background font-semibold"
+                  ? "bg-card text-foreground font-semibold border border-border/70"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <span>Closed</span>
-              <span className="text-[10px] opacity-70">({closedCount})</span>
+              <span className="text-xs opacity-70">({closedCount})</span>
             </button>
           </div>
 
           {/* Search + View Toggle */}
           <div className="flex items-center gap-2">
             <div className="relative flex-1 sm:w-64">
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-muted-foreground pointer-events-none" />
+              <Search className="w-4 h-4 absolute left-3 top-3 text-muted-foreground pointer-events-none" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search or enter CNR..."
-                className="h-8 pl-8 pr-7 text-xs bg-card border-border/70 rounded-lg"
+                placeholder="Search cases or paste a CNR number"
+                className="h-10 pl-9 pr-8 text-sm bg-card"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2 top-2.5 text-muted-foreground hover:text-foreground"
+                  className="absolute right-2.5 top-3 text-muted-foreground hover:text-foreground"
+                  aria-label="Clear search"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-4 h-4" />
                 </button>
               )}
             </div>
@@ -628,32 +616,27 @@ export default function DashboardPage() {
           ))}
         </div>
       ) : filteredCases.length === 0 ? (
-        <div className="text-center py-16 px-4 rounded-xl border border-dashed border-border/70 space-y-3">
-          <p className="text-sm font-semibold text-foreground">No cases found</p>
-          <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-            {searchQuery
-              ? `No matters match "${searchQuery}". Clear your search to see all.`
-              : "Add your first case or enter a 16-character CNR number above."}
-          </p>
-          {searchQuery ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSearchQuery("")}
-              className="h-8 text-xs"
-            >
-              Clear Search
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              onClick={() => setIsAddModalOpen(true)}
-              className="h-8 text-xs bg-forest-800 hover:bg-forest-700 text-white dark:text-gold-300"
-            >
-              + Add Case
-            </Button>
-          )}
-        </div>
+        <EmptyState
+          icon={searchQuery ? Search : Gavel}
+          title={searchQuery ? "No cases match your search" : "No cases yet"}
+          description={
+            searchQuery
+              ? `Nothing matches "${searchQuery}". Clear your search to see all your cases.`
+              : "Add your first case, or paste its 16-character CNR number in the search box above."
+          }
+          action={
+            searchQuery ? (
+              <Button variant="outline" onClick={() => setSearchQuery("")}>
+                Clear search
+              </Button>
+            ) : (
+              <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                Add case
+              </Button>
+            )
+          }
+        />
       ) : viewMode === "grid" ? (
         /* MINIMAL GRID VIEW */
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1241,6 +1224,6 @@ export default function DashboardPage() {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageShell>
   );
 }

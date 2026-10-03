@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { AlertTriangle, RefreshCw, Home, Scale } from "lucide-react";
+import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Error({
@@ -24,22 +24,17 @@ export default function Error({
           <AlertTriangle className="w-8 h-8" />
         </div>
 
-        {/* Eyebrow Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-destructive/10 text-destructive border border-destructive/20">
-          <span>Application Exception</span>
-        </div>
-
         {/* Headline */}
         <div className="space-y-2">
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground font-heading">
-            Something Went Wrong
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground font-display">
+            Something went wrong on our end
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            An unexpected error occurred while rendering this legal view. Your session data remains safe.
+            This page failed to load. Try again, and if it keeps happening, go back home and reopen it. Anything you already saved to your account is unaffected.
           </p>
           {error.digest && (
             <p className="text-xs font-mono text-muted-foreground/80 pt-1">
-              Error Digest: {error.digest}
+              Reference for support: {error.digest}
             </p>
           )}
         </div>
@@ -51,13 +46,13 @@ export default function Error({
             className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
           >
             <RefreshCw className="w-4 h-4" />
-            <span>Try Again</span>
+            <span>Try again</span>
           </Button>
 
           <Button asChild variant="outline" className="w-full sm:w-auto border-border">
             <Link href="/" className="flex items-center gap-2">
               <Home className="w-4 h-4" />
-              <span>Return Home</span>
+              <span>Go to the home page</span>
             </Link>
           </Button>
         </div>

@@ -8,6 +8,31 @@
   }
 }
 
+@layer utilities {
+  /* Fade the trailing edge of a horizontal scroller so it reads as scrollable. */
+  .scroll-fade-x {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+  }
+  /* Landing hero: chakra line-art draws itself once on load. */
+  .chakra-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: chakra-draw 2.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  @keyframes chakra-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .chakra-draw {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
+  }
+}
+
 @layer base {
   :root {
     /* Design System v2 - Light Mode (Forest & Gold on Cream) */

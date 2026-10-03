@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import {
+  LogIn,
   FileText,
   FileCheck,
   Scale,
@@ -37,13 +38,14 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import toast from "react-hot-toast";
-import { useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import {
   DRAFT_TEMPLATES,
   DocumentTemplate,
   TemplateField,
 } from "@/lib/drafting/templates";
 import { useQuickConsultation } from "@/context/QuickConsultationContext";
+import { PageHeader, PageShell } from "@/components/page";
 
 export default function LegalDraftPage() {
   const { data: session } = useSession();
@@ -269,49 +271,36 @@ export default function LegalDraftPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-8 max-w-5xl space-y-6">
-      {/* 1. Header & Vault Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
-        <div className="space-y-1 text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-gold-400 border border-forest-500/20">
-            <Scale className="w-3.5 h-3.5 text-gold-500" />
-            <span>Statutory Legal Document Generator</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold font-heading text-foreground tracking-tight">
-            Legal Drafter Studio
-          </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            Generate legally enforceable lease deeds, Section 138 notices, consumer complaints, and RTI petitions grounded in Indian statutory law.
-          </p>
-        </div>
-
-        {/* Vault / History Button */}
-        <div className="flex items-center gap-2">
-          {session ? (
+    <PageShell>
+      <PageHeader
+        title="Draft a legal document"
+        description="Answer a few questions and get a draft lease, cheque-bounce notice, consumer complaint, or RTI application based on Indian law. Have an advocate review it before you sign or send it."
+        actions={
+          session ? (
             <Button
               variant="outline"
-              size="sm"
               onClick={() => {
                 fetchDraftHistory();
                 setHistoryOpen(true);
               }}
-              className="text-xs flex items-center gap-1.5 border-border bg-card hover:border-forest-500/50"
+              className="gap-2"
             >
-              <History className="w-3.5 h-3.5 text-gold-500" />
-              <span>My Draft Vault</span>
+              <History className="h-4 w-4 text-forest-600 dark:text-gold-400" aria-hidden="true" />
+              Saved drafts
               {savedDrafts.length > 0 && (
-                <span className="ml-1 px-1.5 py-0.2 rounded-full bg-forest-800 text-white dark:bg-gold-500 dark:text-forest-950 font-mono text-[10px] font-bold">
+                <span className="rounded-full bg-forest-100 px-1.5 text-xs font-bold text-forest-800 dark:bg-forest-800 dark:text-gold-400">
                   {savedDrafts.length}
                 </span>
               )}
             </Button>
           ) : (
-            <span className="text-[11px] text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-md border border-border/50">
-              Sign in to auto-save drafts
-            </span>
-          )}
-        </div>
-      </div>
+            <Button variant="outline" onClick={() => signIn()} className="gap-2">
+              <LogIn className="h-4 w-4" aria-hidden="true" />
+              Sign in to save drafts
+            </Button>
+          )
+        }
+      />
 
       {/* 2. Step Progress Bar */}
       <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-muted/40 border border-border/60 text-xs print:hidden">
@@ -869,9 +858,9 @@ export default function LegalDraftPage() {
                     <Scale className="w-3.5 h-3.5 text-gold-500" />
                     <span>Statutory Instrument • Indian Jurisdiction</span>
                   </div>
-                  <h1 className="text-xl sm:text-2xl font-bold font-heading text-foreground uppercase tracking-tight">
+                  <h2 className="text-xl sm:text-2xl font-bold font-heading text-foreground uppercase tracking-tight">
                     {selectedTemplate.title}
-                  </h1>
+                  </h2>
                   <p className="text-xs text-muted-foreground font-mono">
                     Constituted under {selectedTemplate.statutoryBasis}
                   </p>
@@ -983,6 +972,6 @@ export default function LegalDraftPage() {
           </div>
         </SheetContent>
       </Sheet>
-    </div>
+    </PageShell>
   );
 }

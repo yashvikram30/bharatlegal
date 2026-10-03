@@ -1,70 +1,54 @@
-'use client'
+"use client";
 
-import { useSession } from 'next-auth/react'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-  CardFooter,
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { useEffect } from 'react'
-import Link from 'next/link'
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { FormCardHeader, PageShell } from "@/components/page";
 
 export default function ProfilePage() {
-  const { data: session, status } = useSession()
+  const { data: session, status } = useSession();
 
-  useEffect(() => {
-    console.log('Session data:', session?.user)
-  }, [session])
-
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
-      <div className="flex justify-center items-center h-[60vh]">
-        <span className="text-muted-foreground">Loading profile...</span>
-      </div>
-    )
+      <PageShell width="form">
+        <div className="h-48 animate-pulse rounded-2xl border border-border bg-card/60 motion-reduce:animate-none" aria-label="Loading your profile" />
+      </PageShell>
+    );
   }
 
   if (!session?.user) {
     return (
-      <div className="my-24 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <Card className="w-full max-w-md flex flex-col gap-6 text-center border-border bg-card">
-          <CardHeader className="flex flex-col items-center">
-            <CardTitle className="text-2xl font-heading font-bold text-foreground">You are not signed in</CardTitle>
-            <CardDescription className="text-muted-foreground">Please sign in to view your profile.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 w-full">
-              <Link href="/auth">Sign In</Link>
+      <PageShell width="form">
+        <Card>
+          <FormCardHeader title="You’re not signed in" description="Sign in to see your profile." />
+          <CardContent>
+            <Button asChild className="h-10 w-full font-medium">
+              <Link href="/auth">Sign in</Link>
             </Button>
           </CardContent>
         </Card>
-      </div>
-    )
+      </PageShell>
+    );
   }
 
   return (
-    <div className="my-24 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md flex flex-col gap-6 border-border bg-card shadow-rest-card">
-        <CardHeader>
-          <CardTitle className="text-2xl font-heading font-bold text-foreground">Your Profile</CardTitle>
-          <CardDescription className="text-muted-foreground">View your account details</CardDescription>
-        </CardHeader>
-
-        <CardContent className="space-y-4 text-sm sm:text-base">
-          <div className="flex gap-2">
-            <span className="font-semibold text-muted-foreground">Username: </span>
-            <span className="text-foreground font-medium">{session.user.username || session.user.name || '-'}</span>
-          </div>
-          <div className="flex gap-2">
-            <span className="font-semibold text-muted-foreground">Email: </span>
-            <span className="text-foreground font-medium">{session.user.email || '-'}</span>
-          </div>
+    <PageShell width="form">
+      <Card>
+        <FormCardHeader title="Your profile" description="The details on your account." />
+        <CardContent>
+          <dl className="divide-y divide-border text-sm">
+            <div className="flex justify-between gap-4 py-3">
+              <dt className="font-semibold text-muted-foreground">Username</dt>
+              <dd className="font-medium text-foreground">{session.user.username || session.user.name || "-"}</dd>
+            </div>
+            <div className="flex justify-between gap-4 py-3">
+              <dt className="font-semibold text-muted-foreground">Email</dt>
+              <dd className="break-all font-medium text-foreground">{session.user.email || "-"}</dd>
+            </div>
+          </dl>
         </CardContent>
       </Card>
-    </div>
-  )
+    </PageShell>
+  );
 }

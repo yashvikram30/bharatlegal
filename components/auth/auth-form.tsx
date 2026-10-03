@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import axios, { AxiosError } from "axios";
 import toast from "react-hot-toast";
+import { FormCardHeader } from "@/components/page";
 import { Eye, EyeOff, Loader2, Scale } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -57,11 +58,12 @@ export function AuthForm() {
       });
 
       if (result?.error) {
-        if (result.error === "CredentialsSignin") {
-          toast.error("Invalid credentials. Please verify your email and password.");
-        } else {
-          toast.error(result.error || "Authentication failed.");
-        }
+        const message =
+          result.error === "CredentialsSignin"
+            ? "That email or password doesn’t match. Check both and try again, or reset your password."
+            : result.error || "We couldn’t sign you in. Please try again.";
+        setError(message);
+        toast.error(message);
       } else if (result?.ok) {
         toast.success("Welcome back to BharatLegal!");
         router.push("/dashboard");
@@ -69,7 +71,9 @@ export function AuthForm() {
       }
     } catch (err) {
       console.error("SignIn error:", err);
-      toast.error("There was a problem signing in. Please try again.");
+      const message = "We couldn’t reach the server. Check your connection and try again.";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -109,35 +113,30 @@ export function AuthForm() {
     } catch (err) {
       const axiosError = err as AxiosError<ApiResponse>;
       const errorMessage = axiosError.response?.data.message;
-      toast.error(errorMessage ?? "There was a problem creating your account.");
+      const message = errorMessage ?? "We couldn’t create your account. Please try again.";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto border-border bg-card shadow-rest-card">
-      <CardHeader className="text-center space-y-2 pb-4">
-        <div className="w-10 h-10 rounded-xl bg-forest-800 dark:bg-forest-950 text-white flex items-center justify-center text-lg font-bold border border-gold-500/50 mx-auto">
-          ⚖
-        </div>
-        <CardTitle className="text-2xl font-extrabold text-foreground font-heading">
-          Welcome to BharatLegal
-        </CardTitle>
-        <CardDescription className="text-xs sm:text-sm text-muted-foreground">
-          Sign in to track court cases, analyze documents, and save legal notes.
-        </CardDescription>
-      </CardHeader>
+    <Card className="w-full">
+      <FormCardHeader title="Welcome to BharatLegal" description="Sign in to track court cases, analyze documents, and save legal notes." />
       <CardContent>
         <Tabs
           value={activeTab}
-          onValueChange={(value) => setActiveTab(value as "signin" | "signup")}
+          onValueChange={(value) => {
+            setError(null);
+            setActiveTab(value as "signin" | "signup");
+          }}
         >
           <TabsList className="grid w-full grid-cols-2 mb-6 bg-forest-100 dark:bg-forest-800">
-            <TabsTrigger value="signin" className="text-xs font-semibold">
+            <TabsTrigger value="signin" className="text-sm font-semibold">
               Sign In
             </TabsTrigger>
-            <TabsTrigger value="signup" className="text-xs font-semibold">
+            <TabsTrigger value="signup" className="text-sm font-semibold">
               Create Account
             </TabsTrigger>
           </TabsList>
@@ -145,12 +144,13 @@ export function AuthForm() {
           <TabsContent value="signin">
             <form onSubmit={handleSignIn} className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="emailOrUsername" className="text-xs font-semibold">
+                <Label htmlFor="emailOrUsername" className="text-sm font-semibold">
                   Email or Username
                 </Label>
                 <Input
                   id="emailOrUsername"
                   type="text"
+                  autoComplete="username"
                   placeholder="your.email@example.com or username"
                   value={emailOrUsername}
                   onChange={(e) => setEmailOrUsername(e.target.value)}
@@ -161,12 +161,12 @@ export function AuthForm() {
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="signin-password" className="text-xs font-semibold">
+                  <Label htmlFor="signin-password" className="text-sm font-semibold">
                     Password
                   </Label>
                   <Link
                     href="/forgot-password"
-                    className="text-xs text-gold-700 dark:text-gold-500 hover:underline font-medium"
+                    className="text-sm text-gold-700 dark:text-gold-500 hover:underline font-medium"
                   >
                     Forgot Password?
                   </Link>
@@ -174,6 +174,7 @@ export function AuthForm() {
                 <div className="relative">
                   <Input
                     id="signin-password"
+                    autoComplete="current-password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={password}
@@ -185,7 +186,8 @@ export function AuthForm() {
                     type="button"
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label="Toggle password visibility"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-pressed={showPassword}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -193,7 +195,7 @@ export function AuthForm() {
               </div>
 
               {error && (
-                <Alert variant="destructive" className="py-2 text-xs">
+                <Alert variant="destructive" role="alert" className="py-2 text-xs">
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
@@ -237,12 +239,13 @@ export function AuthForm() {
           <TabsContent value="signup">
             <form onSubmit={handleSignUp} className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="signup-username" className="text-xs font-semibold">
+                <Label htmlFor="signup-username" className="text-sm font-semibold">
                   Username
                 </Label>
                 <Input
                   id="signup-username"
                   type="text"
+                  autoComplete="username"
                   placeholder="your_username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -252,12 +255,13 @@ export function AuthForm() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="signup-email" className="text-xs font-semibold">
+                <Label htmlFor="signup-email" className="text-sm font-semibold">
                   Email Address
                 </Label>
                 <Input
                   id="signup-email"
                   type="email"
+                  autoComplete="email"
                   placeholder="your.email@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -267,12 +271,15 @@ export function AuthForm() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="signup-password" className="text-xs font-semibold">
+                <Label htmlFor="signup-password" className="text-sm font-semibold">
                   Password
                 </Label>
                 <div className="relative">
                   <Input
                     id="signup-password"
+                    autoComplete="new-password"
+                    minLength={8}
+                    aria-describedby="signup-password-hint"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={password}
@@ -284,15 +291,19 @@ export function AuthForm() {
                     type="button"
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label="Toggle password visibility"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-pressed={showPassword}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                <p id="signup-password-hint" className="text-xs text-muted-foreground">
+                  Use at least 8 characters.
+                </p>
               </div>
 
               {error && (
-                <Alert variant="destructive" className="py-2 text-xs">
+                <Alert variant="destructive" role="alert" className="py-2 text-xs">
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}

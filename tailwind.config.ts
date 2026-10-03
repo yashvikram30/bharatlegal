@@ -22,6 +22,8 @@ const config = {
       fontFamily: {
         sans: ["var(--font-sans)", "Inter", "sans-serif"],
         heading: ["var(--font-heading)", "Outfit", "sans-serif"],
+        display: ["var(--font-display)", "Georgia", "serif"],
+        devanagari: ["var(--font-devanagari)", "serif"],
       },
       colors: {
         forest: {

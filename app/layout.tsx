@@ -8,8 +8,8 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://bharatlegal.in";
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#060A17" },
+    { media: "(prefers-color-scheme: light)", color: "#F7F5EF" },
+    { media: "(prefers-color-scheme: dark)", color: "#0F2B20" },
   ],
   width: "device-width",
   initialScale: 1,

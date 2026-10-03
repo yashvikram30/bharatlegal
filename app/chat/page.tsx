@@ -42,26 +42,26 @@ interface Message {
 const PROMPT_SUGGESTIONS = [
   {
     icon: Scale,
-    title: "BNS §318 vs IPC §420",
-    description: "Compare penalties & legal ingredients for cheating under the new criminal code",
+    title: "Cheating: BNS 318 vs old IPC 420",
+    description: "See what changed under the new criminal code, and the penalty",
     prompt: "What is the penalty for cheating under BNS Section 318 compared to Section 420 IPC?",
   },
   {
     icon: Shield,
-    title: "Arrest Rights (BNSS §35)",
-    description: "Statutory protections when stopped or detained by police officers",
+    title: "Police stopped or arrested me",
+    description: "Your rights at the moment, and what the police must tell you (BNSS 35)",
     prompt: "What are my statutory rights if stopped or arrested by police under BNSS Section 35?",
   },
   {
     icon: FileText,
-    title: "Security Deposit Dispute",
-    description: "Legal recourse when a landlord refuses to refund rental security deposit",
+    title: "My landlord won’t return my deposit",
+    description: "What a landlord can deduct, and how to get it back",
     prompt: "Can a landlord legally deduct rental deposit without written notice under Rent Control & Consumer laws?",
   },
   {
     icon: Gavel,
-    title: "Cheque Bounce (NI Act §138)",
-    description: "Mandatory statutory timeline and ingredients to issue a demand notice",
+    title: "A cheque I received bounced",
+    description: "The notice and timeline that apply under Section 138",
     prompt: "What is the mandatory procedure and timeline to issue a statutory notice under Section 138 of the Negotiable Instruments Act?",
   },
 ];
@@ -844,18 +844,20 @@ function ChatPageContent() {
         }
       } catch (err: any) {
         if (err.name === "AbortError") {
-          toast("Generation stopped", { icon: "⏹️" });
+          toast("Stopped");
           endStream(true);
         } else {
           console.error("[Chat Stream Error]:", err);
-          toast.error("Failed to generate response. Please retry.");
+          toast.error("Couldn’t get an answer. Check your connection and try again.");
+          // Put the question back so retrying is one keypress.
+          setInput((current) => current || messageContent);
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantId
                 ? {
                     ...m,
                     content:
-                      "⚠️ An error occurred while synthesizing statutory data. Please verify your connection or click retry below.",
+                      "I couldn’t finish this answer. Check your connection, then press Enter to send your question again. It’s back in the box below.",
                   }
                 : m
             )
@@ -910,6 +912,7 @@ function ChatPageContent() {
             onClick={() => setIsSidebarOpen(true)}
             className="absolute top-3 left-3 z-20 p-2 rounded-xl border border-border/70 bg-background/80 hover:bg-muted text-muted-foreground hover:text-foreground shadow-xs backdrop-blur-md transition-colors"
             title="Open history sidebar"
+            aria-label="Open history sidebar"
           >
             <PanelLeft className="w-4 h-4 text-forest-700 dark:text-gold-400" />
           </button>
@@ -934,11 +937,11 @@ function ChatPageContent() {
                 <Scale className="w-6 h-6" />
               </div>
               <div className="space-y-1.5 max-w-lg mx-auto">
-                <h1 className="text-xl sm:text-2xl font-heading font-bold text-foreground">
-                  Where would you like to begin?
+                <h1 className="text-2xl sm:text-3xl font-display font-semibold text-foreground">
+                  What do you need help with?
                 </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Search across 2,246 Acts, resolve BNS ↔ IPC criminal laws, or verify Supreme Court ratio decidendi.
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Ask in your own words, or start with one of these. Every answer names the Act and section it relies on.
                 </p>
               </div>
 
@@ -949,7 +952,7 @@ function ChatPageContent() {
                     key={idx}
                     type="button"
                     onClick={() => handleSend(item.prompt)}
-                    className="p-3.5 rounded-xl border border-border/80 dark:border-border bg-card dark:bg-forest-900/50 hover:border-gold-500/50 hover:bg-forest-50/50 dark:hover:bg-forest-900/90 transition-all text-left group shadow-2xs"
+                    className="flex h-full flex-col items-stretch justify-start p-4 rounded-xl border border-border/80 dark:border-border bg-card dark:bg-forest-900/50 hover:border-gold-500/50 hover:bg-forest-50/50 dark:hover:bg-forest-900/90 transition-all text-left group shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="p-1.5 rounded-lg bg-forest-100 dark:bg-forest-900 text-forest-800 dark:text-gold-400 border border-forest-500/20 dark:border-gold-500/30">
@@ -957,10 +960,10 @@ function ChatPageContent() {
                       </div>
                       <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
-                    <p className="font-semibold text-xs sm:text-sm text-foreground dark:text-forest-50 mt-2 font-heading">
+                    <p className="font-semibold text-sm text-foreground dark:text-forest-50 mt-3 font-heading">
                       {item.title}
                     </p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
                       {item.description}
                     </p>
                   </button>
@@ -1002,6 +1005,7 @@ function ChatPageContent() {
           onClick={() => scrollToBottom("smooth")}
           className="absolute bottom-28 right-6 z-20 p-2 rounded-full bg-card border border-border shadow-md hover:bg-muted text-foreground transition-all animate-fade-in"
           title="Scroll to bottom"
+          aria-label="Scroll to latest message"
         >
           <ChevronDown className="w-4 h-4" />
         </button>
@@ -1032,8 +1036,9 @@ function ChatPageContent() {
                 }
               }}
               rows={1}
-              placeholder="Ask any legal question... (e.g. BNS 318 cheating, rent deposit, police arrest rights)"
-              className="w-full resize-none bg-transparent px-4 sm:px-5 pt-3.5 pb-2 text-xs sm:text-sm placeholder:text-muted-foreground/70 focus:outline-none max-h-40 leading-relaxed"
+              placeholder="Describe your situation or ask a legal question…"
+              aria-label="Your legal question"
+              className="w-full resize-none bg-transparent px-4 sm:px-5 pt-3.5 pb-2 text-base sm:text-sm placeholder:text-muted-foreground/70 focus:outline-none max-h-40 leading-relaxed"
               disabled={isLoading || isDripping}
             />
 
@@ -1042,7 +1047,7 @@ function ChatPageContent() {
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] text-muted-foreground hidden sm:inline-flex items-center gap-1">
                   <BookOpen className="w-3 h-3 text-gold-500" />
-                  <span>2,246 Acts Grounded</span>
+                  <span>Answers grounded in 2,246 Acts</span>
                 </span>
               </div>
 
@@ -1052,8 +1057,9 @@ function ChatPageContent() {
                     type="button"
                     size="sm"
                     onClick={handleStop}
-                    className="h-7 w-7 rounded-full bg-red-600 hover:bg-red-700 text-white p-0 flex items-center justify-center transition-transform hover:scale-105"
+                    className="h-9 w-9 rounded-full bg-red-600 hover:bg-red-700 text-white p-0 flex items-center justify-center transition-transform hover:scale-105"
                     title="Stop generating"
+                    aria-label="Stop generating"
                   >
                     <Square className="w-3 h-3 fill-current" />
                   </Button>
@@ -1062,8 +1068,9 @@ function ChatPageContent() {
                     type="submit"
                     disabled={!input.trim()}
                     size="sm"
-                    className="h-7 w-7 rounded-full bg-forest-800 text-white hover:bg-forest-900 dark:bg-gold-500 dark:text-forest-950 dark:hover:bg-gold-400 p-0 flex items-center justify-center disabled:opacity-30 transition-transform hover:scale-105"
+                    className="h-9 w-9 rounded-full bg-forest-800 text-white hover:bg-forest-900 dark:bg-gold-500 dark:text-forest-950 dark:hover:bg-gold-400 p-0 flex items-center justify-center disabled:opacity-30 transition-transform hover:scale-105"
                     title="Send message"
+                    aria-label="Send message"
                   >
                     <ArrowUp className="w-3.5 h-3.5" />
                   </Button>
@@ -1095,7 +1102,7 @@ export default function ChatPage() {
     <Suspense
       fallback={
         <div className="h-screen bg-background flex items-center justify-center text-xs text-muted-foreground">
-          Loading BharatLegal AI...
+          Loading the chat…
         </div>
       }
     >

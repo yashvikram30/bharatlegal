@@ -7,7 +7,6 @@ import {
   Phone,
   Mail,
   Search,
-  Building2,
   ShieldCheck,
   Globe,
   ExternalLink,
@@ -16,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { EmptyState, PageHeader, PageShell } from "@/components/page";
 import {
   Card,
   CardContent,
@@ -46,6 +46,37 @@ type LegalHelpProvider = {
   hours: string;
   address: string;
 };
+
+/** Turns "1516 (24/7 Toll-Free) / 011-23384775" into separate tap-to-call links. */
+function PhoneLinks({ value }: { value: string }) {
+  const parts = value.split(" / ");
+  return (
+    <span className="font-medium text-foreground">
+      {parts.map((part, i) => {
+        const match = part.match(/^([\d][\d\s-]*)(.*)$/);
+        const digits = match ? match[1].replace(/[^\d]/g, "") : "";
+        return (
+          <span key={part}>
+            {i > 0 && <span className="text-muted-foreground"> / </span>}
+            {digits ? (
+              <>
+                <a
+                  href={`tel:${digits}`}
+                  className="underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 rounded-sm"
+                >
+                  {match![1].trim()}
+                </a>
+                {match![2] && ` ${match![2].trimStart()}`}
+              </>
+            ) : (
+              part
+            )}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
 
 export default function HelpPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -155,58 +186,57 @@ export default function HelpPage() {
   });
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 max-w-5xl space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-3 max-w-3xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 border border-forest-500/20">
-          <Building2 className="w-3.5 h-3.5" />
-          <span>Government & Free Legal Aid Directory</span>
-        </div>
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground font-heading tracking-tight">
-          Find Legal Aid in India
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-          Connect with official District & State Legal Services Authorities (DLSA / SLSA) offering free legal counsel, court representation, and mediation across India.
-        </p>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="Find free legal aid near you"
+        description="Reach the official District and State Legal Services Authorities, which offer free legal advice, court representation, and mediation. Not sure where to start? Call the national helpline."
+        actions={
+          <Button asChild size="lg">
+            <a href="tel:15100" className="flex items-center gap-2">
+              <Phone className="h-4 w-4" aria-hidden="true" />
+              Call 15100
+            </a>
+          </Button>
+        }
+      />
 
       {/* Statutory Section 12 Criteria Banner */}
-      <div className="bg-card border border-border rounded-2xl p-6 sm:p-7 space-y-4 shadow-rest-card">
+      <div className="bg-card border border-border rounded-2xl p-6 sm:p-7 space-y-4">
         <div className="flex items-start gap-3.5">
           <div className="w-9 h-9 rounded-lg bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 flex items-center justify-center shrink-0 mt-0.5">
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-base sm:text-lg font-bold text-foreground font-heading">
-              Who is Entitled to 100% Free Legal Aid in India?
+            <h2 className="font-display text-xl font-semibold text-foreground">
+              Who can get free legal aid?
             </h2>
-            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Under Section 12 of the <em>Legal Services Authorities Act, 1987</em>, free legal aid (including advocate fees and court fee exemption) is guaranteed by the Constitution of India for:
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pt-1 text-xs text-foreground font-medium">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pt-1 text-sm text-foreground font-medium">
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-forest-800 dark:text-gold-500 shrink-0" />
-                Women and Children
+                Women and children
               </span>
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-forest-800 dark:text-gold-500 shrink-0" />
-                Members of SC / ST Communities
+                Members of SC / ST communities
               </span>
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-forest-800 dark:text-gold-500 shrink-0" />
-                Persons in Custody / Undertrials
+                People in custody or awaiting trial
               </span>
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-forest-800 dark:text-gold-500 shrink-0" />
-                Industrial Workmen / Labourers
+                Industrial workers and labourers
               </span>
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-forest-800 dark:text-gold-500 shrink-0" />
-                Victims of Trafficking or Disaster
+                Victims of trafficking or disaster
               </span>
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-forest-800 dark:text-gold-500 shrink-0" />
-                Annual Income below State Thresholds
+                Income below your state’s limit
               </span>
             </div>
           </div>
@@ -214,7 +244,7 @@ export default function HelpPage() {
       </div>
 
       {/* Search & Filters */}
-      <div className="bg-card border border-border rounded-xl p-4 sm:p-5 shadow-rest-card space-y-4">
+      <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           <div className="md:col-span-6 relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -263,14 +293,14 @@ export default function HelpPage() {
           filteredProviders.map((provider) => (
             <div
               key={provider.id}
-              className="bg-card border border-border rounded-xl p-5 sm:p-6 hover:border-forest-500 hover:shadow-hover-card transition-all duration-200 space-y-4"
+              className="bg-card border border-border rounded-2xl p-5 sm:p-6 hover:border-forest-500 hover:shadow-hover-card transition-all duration-200 space-y-4"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
                 <div>
-                  <span className="text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 border border-forest-500/20 mb-1.5 inline-block">
+                  <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 border border-forest-500/20 mb-1.5 inline-block">
                     {provider.type}
                   </span>
-                  <h3 className="text-lg sm:text-xl font-bold text-foreground font-heading">
+                  <h3 className="font-display text-xl font-semibold text-foreground">
                     {provider.name}
                   </h3>
                 </div>
@@ -296,19 +326,24 @@ export default function HelpPage() {
 
                   <div className="flex items-start gap-2">
                     <Phone className="w-4 h-4 text-forest-800 dark:text-gold-500 shrink-0 mt-0.5" />
-                    <span className="font-medium text-foreground">{provider.phone}</span>
+                    <PhoneLinks value={provider.phone} />
                   </div>
 
                   <div className="flex items-start gap-2">
                     <Mail className="w-4 h-4 text-forest-800 dark:text-gold-500 shrink-0 mt-0.5" />
-                    <span>{provider.email}</span>
+                    <a
+                      href={`mailto:${provider.email}`}
+                      className="break-all underline-offset-2 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 rounded-sm"
+                    >
+                      {provider.email}
+                    </a>
                   </div>
                 </div>
 
                 <div className="space-y-2.5">
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                      Key Services
+                    <p className="text-xs font-semibold text-muted-foreground mb-1">
+                      Key services
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {provider.specialization.map((spec) => (
@@ -323,8 +358,8 @@ export default function HelpPage() {
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">
-                      Operational Hours & Helpline
+                    <p className="text-xs font-semibold text-muted-foreground mb-0.5">
+                      Hours and helpline
                     </p>
                     <p className="text-xs text-muted-foreground">{provider.hours}</p>
                   </div>
@@ -333,40 +368,49 @@ export default function HelpPage() {
             </div>
           ))
         ) : (
-          <div className="text-center py-12 bg-card border border-border rounded-xl space-y-2">
-            <p className="text-base font-semibold text-foreground">
-              No legal aid authorities found matching criteria
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Call the national toll-free helpline at <strong>1516</strong> for immediate direction.
-            </p>
-          </div>
+          <EmptyState
+            icon={Search}
+            title="No offices match your search"
+            description="Clear a filter, or call the national legal-aid helpline on 15100 and they will point you to the right office."
+            action={
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchQuery("");
+                  setStateFilter("all");
+                  setTypeFilter("all");
+                }}
+              >
+                Clear search and filters
+              </Button>
+            }
+          />
         )}
       </div>
 
       {/* Emergency Helpline Box */}
       <div className="bg-forest-950 text-forest-50 border border-forest-900 rounded-2xl p-6 sm:p-8 space-y-3">
-        <h3 className="text-lg font-bold text-white font-heading">
-          National Emergency Legal Aid Contact Numbers
-        </h3>
+        <h2 className="font-display text-xl font-semibold text-white">
+          National helplines
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm pt-1">
           <div className="p-3.5 rounded-xl bg-forest-800/80 border border-forest-500/30 space-y-0.5">
-            <p className="text-forest-100/70 text-xs">NALSA National Helpline</p>
-            <p className="text-base font-bold text-gold-500 font-mono">1516</p>
-            <p className="text-[11px] text-forest-100/60">24/7 Toll-Free Legal Aid</p>
+            <p className="text-forest-100/70 text-xs">NALSA national helpline</p>
+            <p className="text-base font-bold text-gold-500 font-mono"><a href="tel:15100" className="hover:underline">15100</a></p>
+            <p className="text-[11px] text-forest-100/60">Free legal aid, toll-free</p>
           </div>
           <div className="p-3.5 rounded-xl bg-forest-800/80 border border-forest-500/30 space-y-0.5">
-            <p className="text-forest-100/70 text-xs">Women in Distress</p>
-            <p className="text-base font-bold text-white font-mono">1091 / 181</p>
+            <p className="text-forest-100/70 text-xs">Women in distress</p>
+            <p className="text-base font-bold text-white font-mono"><a href="tel:1091" className="hover:underline">1091</a> / <a href="tel:181" className="hover:underline">181</a></p>
             <p className="text-[11px] text-forest-100/60">National Commission for Women</p>
           </div>
           <div className="p-3.5 rounded-xl bg-forest-800/80 border border-forest-500/30 space-y-0.5">
-            <p className="text-forest-100/70 text-xs">National Consumer Helpline</p>
-            <p className="text-base font-bold text-white font-mono">1915</p>
+            <p className="text-forest-100/70 text-xs">National consumer helpline</p>
+            <p className="text-base font-bold text-white font-mono"><a href="tel:1915" className="hover:underline">1915</a></p>
             <p className="text-[11px] text-forest-100/60">Ministry of Consumer Affairs</p>
           </div>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }

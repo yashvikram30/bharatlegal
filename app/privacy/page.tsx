@@ -1,5 +1,7 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import { ShieldCheck, Lock, EyeOff, Server, FileText } from "lucide-react";
+import { PageHeader, PageShell } from "@/components/page";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -37,27 +39,16 @@ export default function PrivacyPage() {
       icon: FileText,
       title: "5. Data Retention & Deletion",
       content:
-        "You can request complete account and data deletion at any time by contacting us through our Contact page or via your user profile settings. Once requested, all associated case records and account details are permanently purged from our database.",
+        "You can request complete account and data deletion at any time by contacting us through our Contact page. Once requested, all associated case records and account details are permanently purged from our database.",
     },
   ];
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto space-y-10">
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 border border-forest-500/20">
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>Your Privacy Matters</span>
-        </div>
-        <h1 className="text-4xl font-extrabold tracking-tight text-foreground font-heading">
-          Privacy Policy
-        </h1>
-        <p className="text-xs text-muted-foreground">
-          Last Updated: September 2026 • Effective Immediately
-        </p>
-        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-          At BharatLegal, we understand that legal matters and documents involve sensitive personal and commercial information. We are committed to maintaining the highest standards of data security, transparency, and user privacy.
-        </p>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="Privacy policy"
+        description="Last updated September 2026. Legal matters and documents are sensitive, so this page explains plainly what we do with your data."
+      />
 
       <div className="space-y-6">
         {sections.map((section) => {
@@ -65,13 +56,13 @@ export default function PrivacyPage() {
           return (
             <div
               key={section.title}
-              className="bg-card border border-border rounded-xl p-6 sm:p-7 shadow-rest-card space-y-2.5"
+              className="bg-card border border-border rounded-2xl p-6 sm:p-7 space-y-2.5"
             >
-              <h2 className="text-lg font-bold text-foreground font-heading flex items-center gap-3">
+              <h2 className="font-display text-xl font-semibold text-foreground flex items-center gap-3">
                 <Icon className="w-5 h-5 text-forest-800 dark:text-gold-500 shrink-0" />
                 {section.title}
               </h2>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              <p className="max-w-3xl text-sm sm:text-base text-muted-foreground leading-relaxed">
                 {section.content}
               </p>
             </div>
@@ -79,12 +70,16 @@ export default function PrivacyPage() {
         })}
       </div>
 
-      <div className="p-6 bg-forest-100 dark:bg-forest-900/60 border border-forest-500/20 rounded-xl text-xs text-muted-foreground space-y-1.5">
-        <p className="font-semibold text-foreground">Questions or Concerns?</p>
+      <div className="p-6 bg-forest-100 dark:bg-forest-900/60 border border-forest-500/20 rounded-2xl text-sm text-muted-foreground space-y-1.5">
+        <h2 className="font-display text-xl font-semibold text-foreground">Questions about your data?</h2>
         <p>
-          If you have any questions regarding this Privacy Policy or how your data is handled, please reach out via our contact page.
+          Write to us through the{" "}
+          <Link href="/contact" className="font-semibold text-forest-800 underline underline-offset-2 dark:text-gold-400">
+            contact page
+          </Link>
+          .
         </p>
       </div>
-    </div>
+    </PageShell>
   );
 }

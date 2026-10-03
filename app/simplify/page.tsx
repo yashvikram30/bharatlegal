@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { PageHeader, PageShell } from "@/components/page";
 import { useQuickConsultation } from "@/context/QuickConsultationContext";
 import {
   Card,
@@ -538,44 +539,27 @@ export default function SimplifyPage() {
   });
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 max-w-5xl space-y-8">
-      {/* 1. Page Header */}
-      <div className="text-center space-y-3 max-w-3xl mx-auto">
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          {/* User History Button */}
-          {authStatus === "authenticated" ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsHistorySheetOpen(true)}
-              className="h-7 px-3 text-xs gap-1.5 border-border rounded-full hover:border-forest-500 bg-background/80 shadow-xs"
-            >
-              <History className="w-3.5 h-3.5 text-forest-600 dark:text-gold-400" />
-              <span>Saved Audits</span>
-              <span className="ml-0.5 px-1.5 py-0.2 rounded-full bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-gold-400 text-[10px] font-mono font-bold">
+    <PageShell>
+      <PageHeader
+        title="Understand any contract before you sign it"
+        description="Upload a lease, employment contract, NDA, or court notice. You’ll get a plain-language summary and the risky clauses flagged, with the Indian law that applies."
+        actions={
+          authStatus === "authenticated" ? (
+            <Button variant="outline" onClick={() => setIsHistorySheetOpen(true)} className="gap-2">
+              <History className="h-4 w-4 text-forest-600 dark:text-gold-400" aria-hidden="true" />
+              Saved audits
+              <span className="rounded-full bg-forest-100 px-1.5 text-xs font-bold text-forest-800 dark:bg-forest-800 dark:text-gold-400">
                 {history.length}
               </span>
             </Button>
           ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => signIn()}
-              className="h-7 px-2.5 text-xs gap-1 text-muted-foreground hover:text-foreground"
-            >
-              <LogIn className="w-3.5 h-3.5" />
-              <span>Sign in to save audits</span>
+            <Button variant="outline" onClick={() => signIn()} className="gap-2">
+              <LogIn className="h-4 w-4" aria-hidden="true" />
+              Sign in to save audits
             </Button>
-          )}
-        </div>
-
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground font-heading tracking-tight">
-          Legal Document Simplifier
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-          Upload residential leases, employment contracts, commercial NDAs, or court notices. Extract plain-language summaries, flag high-risk clauses under Indian law, and verify statutory protections.
-        </p>
-      </div>
+          )
+        }
+      />
 
       {/* 2. Upload Zone & Sample Contract Cards */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
@@ -835,49 +819,53 @@ export default function SimplifyPage() {
         </div>
 
         {/* Right Column: Upload Box & Analysis Actions */}
-        <div className="md:col-span-7">
+        <div className="order-first md:order-none md:col-span-7">
           <Card className="border-border bg-card shadow-xs">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-heading">Document Upload</CardTitle>
+              <CardTitle className="text-base font-heading">Upload your document</CardTitle>
               <CardDescription className="text-xs">
-                Accepts PDF (.pdf), Microsoft Word (.docx), or Plain Text (.txt) up to 12MB.
+                PDF, Word (.docx), or text files up to 12MB.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {!file ? (
-                <div
-                  className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer ${
-                    isDragging
-                      ? "border-forest-500 bg-forest-50 dark:bg-forest-900/30"
-                      : "border-border hover:border-forest-500/70 hover:bg-muted/20"
-                  }`}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                >
-                  <div className="flex flex-col items-center justify-center space-y-3">
-                    <div className="w-12 h-12 rounded-full bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-gold-400 flex items-center justify-center shadow-xs">
-                      <Upload className="h-6 w-6" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-semibold text-foreground">
-                        Drag and drop your contract, or{" "}
-                        <label className="text-forest-700 dark:text-gold-400 hover:underline cursor-pointer font-bold">
-                          browse files
-                          <input
-                            type="file"
-                            className="hidden"
-                            accept=".pdf,.docx,.doc,.txt"
-                            onChange={handleFileChange}
-                          />
-                        </label>
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        PDF, DOCX, or TXT (Max 12MB)
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <>
+                  <label
+                    className={`block border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer focus-within:ring-2 focus-within:ring-gold-500 focus-within:ring-offset-2 focus-within:ring-offset-background ${
+                      isDragging
+                        ? "border-forest-500 bg-forest-50 dark:bg-forest-900/30"
+                        : "border-border hover:border-forest-500/70 hover:bg-muted/20"
+                    }`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
+                    <input
+                      type="file"
+                      className="sr-only"
+                      accept=".pdf,.docx,.doc,.txt"
+                      onChange={handleFileChange}
+                    />
+                    <span className="flex flex-col items-center justify-center space-y-3">
+                      <span className="w-12 h-12 rounded-full bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-gold-400 flex items-center justify-center shadow-xs">
+                        <Upload className="h-6 w-6" aria-hidden="true" />
+                      </span>
+                      <span className="block space-y-1">
+                        <span className="block text-sm font-semibold text-foreground">
+                          Drop your file here, or{" "}
+                          <span className="text-forest-700 dark:text-gold-400 underline underline-offset-2 font-bold">
+                            choose a file
+                          </span>
+                        </span>
+                        <span className="block text-xs text-muted-foreground">PDF, DOCX, or TXT, up to 12MB</span>
+                      </span>
+                    </span>
+                  </label>
+                  <p className="flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
+                    <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-forest-600 dark:text-gold-400" aria-hidden="true" />
+                    Your document is processed to create the analysis. It’s saved to your history only if you’re signed in.
+                  </p>
+                </>
               ) : (
                 <div className="space-y-4">
                   {/* File Info Strip */}
@@ -891,7 +879,7 @@ export default function SimplifyPage() {
                           {file.name}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {(file.size / 1024).toFixed(1)} KB • {originalContent ? "Text Ready" : "Reading..."}
+                          {(file.size / 1024).toFixed(1)} KB · {originalContent ? "Ready to check" : "Reading…"}
                         </p>
                       </div>
                     </div>
@@ -934,17 +922,17 @@ export default function SimplifyPage() {
                     {isAnalyzing ? (
                       <span className="flex items-center gap-2">
                         <RefreshCw className="w-4 h-4 animate-spin" />
-                        Auditing Contract Provisions...
+                        Checking your document…
                       </span>
                     ) : isExtracting ? (
                       <span className="flex items-center gap-2">
                         <RefreshCw className="w-4 h-4 animate-spin" />
-                        Extracting Document Text...
+                        Reading your document…
                       </span>
                     ) : (
                       <span className="flex items-center gap-2">
                         <Scale className="w-4 h-4" />
-                        Analyze Contract & Flag Risks
+                        Check this document for risks
                       </span>
                     )}
                   </Button>
@@ -1018,7 +1006,7 @@ export default function SimplifyPage() {
                       {file?.name || "Contract"}
                     </span>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-foreground font-heading">
+                  <h2 className="font-display text-xl sm:text-2xl font-semibold text-foreground">
                     Document Risk Audit & Executive Summary
                   </h2>
                 </div>
@@ -1159,7 +1147,7 @@ export default function SimplifyPage() {
                     {/* Key Obligations */}
                     {analysis.keyObligations && analysis.keyObligations.length > 0 && (
                       <div className="space-y-3 p-5 rounded-xl border border-border bg-card">
-                        <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+                        <h3 className="text-sm font-semibold text-foreground">
                           Key Obligations & Timelines
                         </h3>
                         <div className="grid grid-cols-1 gap-2.5">
@@ -1558,6 +1546,6 @@ export default function SimplifyPage() {
           )}
         </SheetContent>
       </Sheet>
-    </div>
+    </PageShell>
   );
 }
