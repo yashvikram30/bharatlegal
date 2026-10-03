@@ -10,23 +10,26 @@ export function FloatingChatTrigger() {
   const { isOpen, openConsultation } = useQuickConsultation();
   const [isHovered, setIsHovered] = useState(false);
 
-  // Never show floating icon on the dedicated full-screen /chat page or when the drawer is already active
-  if (pathname === "/chat" || isOpen) {
+  // Hide on the full-screen chat, on sign-in/reset forms (it covers the submit button on small screens), and when the drawer is open
+  const hiddenOn = ["/chat", "/auth", "/forgot-password", "/reset-password"];
+  if (hiddenOn.includes(pathname) || isOpen) {
     return null;
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-40">
+    <div className="fixed bottom-4 right-4 z-40 sm:bottom-6 sm:right-6">
       <button
         onClick={() => openConsultation()}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="group relative flex items-center gap-2.5 px-4 py-3 rounded-full bg-forest-900 text-gold-400 border border-gold-500/40 shadow-2xl hover:shadow-gold-500/10 hover:border-gold-400 active:scale-95 transition-all duration-200"
+        onFocus={() => setIsHovered(true)}
+        onBlur={() => setIsHovered(false)}
+        className="group relative flex items-center gap-2.5 px-4 py-3 rounded-full bg-forest-900 text-gold-400 border border-gold-500/40 shadow-2xl hover:shadow-gold-500/10 hover:border-gold-400 active:scale-95 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         aria-label="Open BharatLegal AI Assistant"
       >
         {/* Pulsing beacon indicator */}
         <span className="relative flex h-2.5 w-2.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-75" />
+          <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-75" />
           <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-gold-500" />
         </span>
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Scale } from "lucide-react";
 
 export function Footer() {
   return (
@@ -14,7 +14,7 @@ export function Footer() {
               className="inline-flex items-center gap-2.5 font-heading font-extrabold text-xl text-forest-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 rounded"
             >
               <span className="w-8 h-8 rounded-lg bg-forest-800 text-white flex items-center justify-center text-sm font-bold border border-gold-500/60 shadow-sm">
-                ⚖
+                <Scale className="h-4 w-4 text-gold-400" aria-hidden="true" />
               </span>
               <span className="tracking-tight">
                 Bharat<span className="text-gold-500">Legal</span>

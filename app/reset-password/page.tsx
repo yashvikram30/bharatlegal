@@ -1,136 +1,123 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import axios from 'axios'
-import toast from 'react-hot-toast'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Loader2 } from 'lucide-react'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import Link from 'next/link'
+import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { FormCardHeader, PageShell } from "@/components/page";
 
 export default function ResetPasswordPage() {
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [tokenValid, setTokenValid] = useState(true)
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const params = useSearchParams()
-  const router = useRouter()
-  const token = params.get('token')
-
-  useEffect(() => {
-    if (!token) {
-      setTokenValid(false)
-    }
-  }, [token])
+  const params = useSearchParams();
+  const router = useRouter();
+  const token = params.get("token");
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match')
-      return
+      toast.error("The two passwords don’t match. Type them again.");
+      return;
     }
 
     try {
-      setLoading(true)
+      setLoading(true);
       await axios.post(
-        '/api/auth/reset-password',
-        {
-          token,
-          newPassword: password,
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      )
+        "/api/auth/reset-password",
+        { token, newPassword: password },
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-      toast.success('Password reset successfully!')
-      router.push('/auth')
+      toast.success("Password updated. Sign in with your new password.");
+      router.push("/auth");
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Reset failed')
+      toast.error(err.response?.data?.message || "We couldn’t reset your password. The link may have expired.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  if (!tokenValid) {
+  if (!token) {
     return (
-      <p className="text-center mt-10 text-red-500">
-        Invalid or missing reset token.
-      </p>
-    )
+      <PageShell width="form">
+        <Card>
+          <FormCardHeader
+            title="This reset link isn’t valid"
+            description="The link is missing or has expired. Request a new one and we’ll email it to you."
+          />
+          <CardContent>
+            <Button asChild className="h-10 w-full font-medium">
+              <Link href="/forgot-password">Request a new link</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </PageShell>
+    );
   }
 
   return (
-    <div className="my-24 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md flex flex-col gap-6">
-        <CardHeader className="flex flex-col items-center">
-          <CardTitle className="text-2xl">Reset your password</CardTitle>
-          <CardDescription>
-            Enter a new password to reset your account.
-          </CardDescription>
-        </CardHeader>
-
+    <PageShell width="form">
+      <Card>
+        <FormCardHeader title="Reset your password" description="Choose a new password for your account." />
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-10">
-            <div className="space-y-2">
-              <Label htmlFor="password">New Password</Label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="password" className="text-sm font-semibold">
+                New password
+              </Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                autoComplete="new-password"
+                minLength={8}
+                aria-describedby="password-hint"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="bg-background"
                 required
               />
+              <p id="password-hint" className="text-xs text-muted-foreground">
+                Use at least 8 characters.
+              </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="confirmPassword" className="text-sm font-semibold">
+                Confirm new password
+              </Label>
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder="••••••••"
+                autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                className="bg-background"
                 required
               />
             </div>
 
-            <div className="flex flex-col gap-3">
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Resetting...
-                  </>
-                ) : (
-                  'Reset Password'
-                )}
-              </Button>
-
-              
-            </div>
+            <Button type="submit" disabled={loading} className="h-10 w-full font-medium">
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" />
+                  Resetting…
+                </>
+              ) : (
+                "Reset password"
+              )}
+            </Button>
           </form>
         </CardContent>
       </Card>
-    </div>
-  )
+    </PageShell>
+  );
 }

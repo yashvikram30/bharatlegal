@@ -1,57 +1,132 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
-import { ArrowRight, FolderOpen, Plus, Sparkles } from "lucide-react";
+import toast from "react-hot-toast";
+import { ArrowRight, FolderOpen, Plus, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { EmptyState, PageHeader, PageShell } from "@/components/page";
 
 type Matter = { id: string; title: string; category: string; status: string; summary: string; nextAction: string; nextActionDue: string | null; updatedAt: string };
 
 export default function MattersPage() {
+  const router = useRouter();
   const { status } = useSession();
   const [matters, setMatters] = useState<Matter[]>([]);
+  const [isLoadingMatters, setIsLoadingMatters] = useState(true);
   const [title, setTitle] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (status !== "authenticated") return;
-    fetch("/api/matters").then((res) => res.json()).then((data) => data.success && setMatters(data.matters)).catch(() => {});
+    fetch("/api/matters")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setMatters(data.matters);
+        else toast.error("Couldn’t load your matters. Refresh to try again.");
+      })
+      .catch(() => toast.error("Couldn’t load your matters. Check your connection and refresh."))
+      .finally(() => setIsLoadingMatters(false));
   }, [status]);
 
   const createMatter = async (event: FormEvent) => {
     event.preventDefault();
     if (!title.trim() || isSaving) return;
     setIsSaving(true);
-    const res = await fetch("/api/matters", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title }) });
-    const data = await res.json();
-    if (data.success) window.location.assign(`/matters/${data.matter.id}`);
+    try {
+      const res = await fetch("/api/matters", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title }) });
+      const data = await res.json();
+      if (data.success) {
+        router.push(`/matters/${data.matter.id}`);
+        return;
+      }
+      toast.error(data.error || "Couldn’t create the matter. Please try again.");
+    } catch {
+      toast.error("Couldn’t create the matter. Check your connection and try again.");
+    }
     setIsSaving(false);
   };
 
   return (
-    <main className="container mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
-      <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-        <div className="max-w-2xl space-y-3">
-          <div className="inline-flex items-center gap-2 rounded-full border border-forest-500/20 bg-forest-100 px-3 py-1 text-xs font-semibold text-forest-800 dark:bg-forest-800 dark:text-forest-100"><FolderOpen className="h-3.5 w-3.5" /> My Matters</div>
-          <h1 className="font-heading text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">Keep every legal issue in one place.</h1>
-          <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">A Matter holds the next action and notes. Related chats, documents, and case activity are coming soon.</p>
-        </div>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="Keep every legal issue in one place"
+        description="A matter holds the next action and your notes for one issue. Related chats, documents, and case activity are coming soon."
+      />
 
-      {status === "unauthenticated" ? (
-        <div className="mt-10 rounded-2xl border border-border bg-card p-7 text-center shadow-sm"><Sparkles className="mx-auto h-6 w-6 text-gold-500" /><h2 className="mt-3 font-heading text-lg font-bold">Save your legal work privately</h2><p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">Sign in to create Matters and return to your plans, notes, and next steps later.</p><Button onClick={() => signIn()} className="mt-5">Sign in to create a Matter</Button></div>
+      {status === "loading" ? (
+        <div className="h-40 animate-pulse rounded-2xl border border-border bg-card/60 motion-reduce:animate-none" aria-label="Loading" />
+      ) : status === "unauthenticated" ? (
+        <EmptyState
+          icon={Scale}
+          title="Save your legal work privately"
+          description="Sign in to create matters and come back to your plans, notes, and next steps later."
+          action={<Button onClick={() => signIn()}>Sign in to create a matter</Button>}
+        />
       ) : (
         <>
-          <form onSubmit={createMatter} className="mt-10 flex flex-col gap-2 rounded-2xl border border-forest-500/25 bg-forest-50/70 p-4 dark:bg-forest-900/40 sm:flex-row">
-            <Input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={140} placeholder="Name a legal issue, e.g. Security-deposit refund" className="h-11 bg-background" />
-            <Button type="submit" disabled={!title.trim() || isSaving} className="h-11 shrink-0 gap-2"><Plus className="h-4 w-4" /> Create Matter</Button>
+          <form onSubmit={createMatter} className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-4 sm:flex-row">
+            <label htmlFor="matter-title" className="sr-only">
+              Name of the legal issue
+            </label>
+            <Input
+              id="matter-title"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              maxLength={140}
+              placeholder="Name a legal issue, e.g. Security-deposit refund"
+              className="h-11 bg-background"
+            />
+            <Button type="submit" size="lg" disabled={!title.trim() || isSaving} className="shrink-0 gap-2">
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              {isSaving ? "Creating…" : "Create matter"}
+            </Button>
           </form>
 
-          {matters.length === 0 ? <div className="mt-6 rounded-2xl border border-dashed border-border p-10 text-center"><FolderOpen className="mx-auto h-7 w-7 text-muted-foreground" /><h2 className="mt-3 font-heading font-bold">Start with one real issue</h2><p className="mt-1 text-sm text-muted-foreground">Create a Matter for a contract, dispute, hearing, or any legal question you want to organize.</p></div> : <div className="mt-6 grid gap-3 sm:grid-cols-2">{matters.map((matter) => <Link key={matter.id} href={`/matters/${matter.id}`} className="group rounded-2xl border border-border bg-card p-5 transition-colors hover:border-gold-500/60 hover:bg-forest-50/50 dark:hover:bg-forest-900/50"><div className="flex items-start justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-wide text-forest-700 dark:text-gold-400">{matter.category} · {matter.status}</p><h2 className="mt-1 font-heading text-lg font-bold text-foreground">{matter.title}</h2></div><ArrowRight className="mt-1 h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" /></div><p className="mt-4 text-xs font-semibold text-foreground">Next: {matter.nextAction}</p>{matter.nextActionDue && <p className="mt-1 text-xs text-muted-foreground">Due {new Date(matter.nextActionDue).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</p>}</Link>)}</div>}
+          {isLoadingMatters ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-32 animate-pulse rounded-2xl border border-border bg-card/60 motion-reduce:animate-none" />
+              ))}
+            </div>
+          ) : matters.length === 0 ? (
+            <EmptyState
+              icon={FolderOpen}
+              title="Start with one real issue"
+              description="Create a matter for a contract, dispute, hearing, or any legal question you want to keep organized."
+            />
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {matters.map((matter) => (
+                <Link
+                  key={matter.id}
+                  href={`/matters/${matter.id}`}
+                  className="group rounded-2xl border border-border bg-card p-5 transition-colors hover:border-gold-500/60 hover:bg-forest-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 dark:hover:bg-forest-900/50"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-muted-foreground">
+                        {matter.category} · {matter.status}
+                      </p>
+                      <h2 className="mt-1 font-display text-lg font-semibold text-foreground">{matter.title}</h2>
+                    </div>
+                    <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                  </div>
+                  <p className="mt-4 text-sm font-medium text-foreground">Next: {matter.nextAction}</p>
+                  {matter.nextActionDue && (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Due {new Date(matter.nextActionDue).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                    </p>
+                  )}
+                </Link>
+              ))}
+            </div>
+          )}
         </>
       )}
-    </main>
+    </PageShell>
   );
 }

@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import { useQuickConsultation } from "@/context/QuickConsultationContext";
 import { CitationSheet } from "@/components/chat/citation-sheet";
+import { PageHeader, PageShell } from "@/components/page";
 
 interface VisualStep {
   number: number;
@@ -507,50 +508,41 @@ export default function RightsVisualizerPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-8 max-w-4xl space-y-6">
-      {/* 1. Header with Language Toggle */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1 text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-gold-400 border border-forest-500/20">
-            <Sparkles className="w-3.5 h-3.5 text-gold-500" />
-            <span>Interactive Citizen Legal Roadmaps</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold font-heading text-foreground tracking-tight">
-            Rights Visualizer
-          </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            Step-by-step citizen roadmaps, exact spoken dialogue, and authority limits under Indian statutory law.
-          </p>
-        </div>
-
-        {/* Global Script Language Switcher */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/60 border border-border self-start sm:self-center">
+    <PageShell>
+      <PageHeader
+        title="Know your rights"
+        description="Pick your situation to see what to say, what you’re entitled to, and what the authorities can’t do, step by step."
+        actions={
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/60 border border-border">
           <Languages className="w-3.5 h-3.5 text-muted-foreground ml-1.5" />
           <button
+            aria-pressed={scriptLanguage === "en"}
             onClick={() => setScriptLanguage("en")}
             className={`px-2.5 py-1 text-xs rounded-lg font-medium transition-all ${
               scriptLanguage === "en"
-                ? "bg-card text-foreground font-bold shadow-xs border border-border/70"
+                ? "bg-card text-foreground font-bold border border-border/70"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            English Scripts
+            English
           </button>
           <button
+            aria-pressed={scriptLanguage === "hi"}
             onClick={() => setScriptLanguage("hi")}
             className={`px-2.5 py-1 text-xs rounded-lg font-medium transition-all ${
               scriptLanguage === "hi"
-                ? "bg-card text-foreground font-bold shadow-xs border border-border/70"
+                ? "bg-card text-foreground font-bold border border-border/70"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
             हिंदी संवाद
           </button>
         </div>
-      </div>
+        }
+      />
 
       {/* 2. Emergency Citizen Hotline Bar */}
-      <div className="flex flex-wrap items-center gap-2 text-[11px] p-2.5 rounded-xl bg-muted/30 border border-border/60">
+      <div className="flex flex-wrap items-center gap-2 text-xs p-3 rounded-2xl bg-muted/30 border border-border/60">
         <span className="font-semibold text-foreground/80 flex items-center gap-1 mr-1">
           <PhoneCall className="w-3 h-3 text-gold-500" />
           <span>Emergency Hotlines:</span>
@@ -588,7 +580,7 @@ export default function RightsVisualizerPage() {
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search rights & statutory procedures across all domains (e.g. 'phone search', 'bail', 'deposit refund', 'non compete')..."
+            placeholder="Search a situation, e.g. bail, phone search, deposit refund"
             className="h-10 pl-9 pr-8 text-xs sm:text-sm bg-card border-border rounded-xl shadow-xs"
           />
           {searchQuery && (
@@ -602,7 +594,7 @@ export default function RightsVisualizerPage() {
         </div>
 
         {/* Quick Suggestion Chips */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] scrollbar-none">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs scrollbar-none scroll-fade-x">
           <span className="text-muted-foreground font-medium shrink-0">Common situations:</span>
           {SUGGESTED_CHIPS.map((chip) => (
             <button
@@ -621,7 +613,7 @@ export default function RightsVisualizerPage() {
       </div>
 
       {/* 4. Topic Selector Strip */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs border-b border-border/60">
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none scroll-fade-x text-sm border-b border-border/60">
         {searchResults !== null && (
           <button
             onClick={() => setSearchQuery("")}
@@ -977,6 +969,6 @@ export default function RightsVisualizerPage() {
         isOpen={!!selectedCitation}
         onClose={() => setSelectedCitation(null)}
       />
-    </div>
+    </PageShell>
   );
 }

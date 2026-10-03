@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, MessageSquare, Send, CheckCircle2, MapPin, Sparkles } from "lucide-react";
+import { Mail, Send, CheckCircle2, MapPin, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import Link from "next/link";
 import { toast } from "react-hot-toast";
+import { PageHeader, PageShell } from "@/components/page";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -51,40 +53,39 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-10">
-      {/* Header */}
-      <div className="text-center space-y-3 max-w-2xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 border border-forest-500/20">
-          <MessageSquare className="w-3.5 h-3.5" />
-          <span>Feedback & Support</span>
-        </div>
-        <h1 className="text-4xl font-extrabold tracking-tight text-foreground font-heading">
-          Contact & Legal Research Feedback
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-          Found an error in statutory section citations, or want to suggest additional Indian acts to index? We value your input.
-        </p>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="Tell us what we got wrong, or what to add"
+        description={
+          <>
+            Found a wrong section citation, a bug, or an Act we should cover? Write to us below. This form is for feedback about BharatLegal. For help with a legal problem, see{" "}
+            <Link href="/help" className="font-semibold text-forest-800 underline underline-offset-2 dark:text-gold-400">
+              free legal aid
+            </Link>
+            .
+          </>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
         {/* Info Column */}
         <div className="md:col-span-5 space-y-5">
-          <div className="bg-card border border-border rounded-2xl p-6 sm:p-7 space-y-5 shadow-rest-card">
-            <h2 className="text-lg font-bold text-foreground font-heading">
-              Support Channels
+          <div className="bg-card border border-border rounded-2xl p-6 sm:p-7 space-y-5">
+            <h2 className="font-display text-xl font-semibold text-foreground">
+              Other ways to reach us
             </h2>
-            <div className="space-y-4 text-xs sm:text-sm">
+            <div className="space-y-4 text-sm">
               <div className="flex items-start gap-3">
                 <div className="w-9 h-9 rounded-lg bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 flex items-center justify-center shrink-0">
                   <Mail className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                    General Inquiries
+                  <p className="text-xs font-semibold text-muted-foreground">
+                    General inquiries
                   </p>
-                  <p className="font-medium text-foreground">
+                  <a href="mailto:support@bharatlegal.in" className="font-medium text-foreground underline-offset-2 hover:underline">
                     support@bharatlegal.in
-                  </p>
+                  </a>
                 </div>
               </div>
 
@@ -93,7 +94,7 @@ export default function ContactPage() {
                   <MapPin className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  <p className="text-xs font-semibold text-muted-foreground">
                     Location
                   </p>
                   <p className="font-medium text-foreground">
@@ -103,10 +104,10 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-forest-100/60 dark:bg-forest-800/40 border border-forest-500/20 text-xs text-muted-foreground space-y-1">
+            <div className="p-4 rounded-2xl bg-forest-100/60 dark:bg-forest-800/40 border border-forest-500/20 text-sm text-muted-foreground space-y-1">
               <p className="font-semibold text-foreground flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-gold-700 dark:text-gold-500" />
-                Open Source & Legal Research
+                Open to contributors
               </p>
               <p>
                 BharatLegal welcomes law students, advocates, and developers interested in improving public legal literacy.
@@ -117,17 +118,17 @@ export default function ContactPage() {
 
         {/* Form Column */}
         <div className="md:col-span-7">
-          <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-rest-card">
+          <div className="bg-card border border-border rounded-2xl p-6 sm:p-8">
             {submitted ? (
               <div className="text-center py-10 space-y-3">
                 <div className="w-14 h-14 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
                   <CheckCircle2 className="w-7 h-7" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground font-heading">
-                  Message Received
-                </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto">
-                  Thank you for contributing to Indian legal awareness. We review submissions regularly.
+                <h2 className="font-display text-xl font-semibold text-foreground">
+                  Message sent
+                </h2>
+                <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                  Thank you. We review every submission and fix citation errors first.
                 </p>
                 <Button
                   onClick={() => {
@@ -138,18 +139,20 @@ export default function ContactPage() {
                   size="sm"
                   className="mt-2"
                 >
-                  Send Another Message
+                  Send another message
                 </Button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">
-                    Your Name <span className="text-destructive">*</span>
+                  <label htmlFor="contact-name" className="text-sm font-semibold text-foreground">
+                    Your name <span className="text-destructive">*</span>
                   </label>
                   <Input
+                    id="contact-name"
                     required
-                    placeholder="e.g. Adv. Rajesh Verma"
+                    autoComplete="name"
+                    placeholder="Your full name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="bg-background border-border focus-visible:ring-2 focus-visible:ring-gold-700"
@@ -157,11 +160,13 @@ export default function ContactPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">
-                    Email Address <span className="text-destructive">*</span>
+                  <label htmlFor="contact-email" className="text-sm font-semibold text-foreground">
+                    Email address <span className="text-destructive">*</span>
                   </label>
                   <Input
+                    id="contact-email"
                     required
+                    autoComplete="email"
                     type="email"
                     placeholder="name@example.com"
                     value={formData.email}
@@ -171,11 +176,12 @@ export default function ContactPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">
+                  <label htmlFor="contact-category" className="text-sm font-semibold text-foreground">
                     Category
                   </label>
                   <select
-                    className="w-full h-10 px-3 rounded-md border border-border bg-background text-foreground text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-gold-700"
+                    id="contact-category"
+                    className="w-full h-10 px-3 rounded-md border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-gold-700"
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                   >
@@ -188,16 +194,17 @@ export default function ContactPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">
+                  <label htmlFor="contact-message" className="text-sm font-semibold text-foreground">
                     Message <span className="text-destructive">*</span>
                   </label>
                   <Textarea
+                    id="contact-message"
                     required
                     rows={4}
-                    placeholder="Describe your feedback, statutory citation note, or suggestion..."
+                    placeholder="What should we know? Include the page and the section if it’s a citation."
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="bg-background border-border focus-visible:ring-2 focus-visible:ring-gold-700 text-xs sm:text-sm"
+                    className="bg-background border-border focus-visible:ring-2 focus-visible:ring-gold-700 text-sm"
                   />
                 </div>
 
@@ -207,10 +214,10 @@ export default function ContactPage() {
                   className="w-full bg-forest-800 text-white hover:bg-forest-950 dark:bg-gold-500 dark:text-forest-950 dark:hover:bg-gold-500/90 font-medium h-10 focus-visible:ring-2 focus-visible:ring-gold-700 mt-2"
                 >
                   {isSubmitting ? (
-                    "Sending..."
+                    "Sending…"
                   ) : (
                     <span className="flex items-center gap-2">
-                      <Send className="w-4 h-4" /> Submit Feedback
+                      <Send className="w-4 h-4" /> Send feedback
                     </span>
                   )}
                 </Button>
@@ -219,6 +226,6 @@ export default function ContactPage() {
           </div>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }
