@@ -5,6 +5,7 @@ import dbConnect from "@/lib/dbConnect";
 import ConversationModel from "@/model/Conversation";
 import MessageModel from "@/model/Message";
 import mongoose from "mongoose";
+import { MatterLinkError, resolveOwnedMatterId } from "@/lib/matter-links";
 
 export const runtime = "nodejs";
 
@@ -55,6 +56,7 @@ export async function GET(
       conversation: {
         id: (conversation._id as any).toString(),
         title: (conversation as any).title,
+        matterId: (conversation as any).matterId ? (conversation as any).matterId.toString() : null,
         createdAt: (conversation as any).createdAt,
         updatedAt: (conversation as any).updatedAt,
       },
@@ -87,15 +89,22 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    const { title } = await req.json().catch(() => ({}));
-    if (!title || typeof title !== "string" || !title.trim()) {
-      return NextResponse.json({ success: false, error: "Title is required" }, { status: 400 });
+    const body = await req.json().catch(() => ({}));
+    const update: Record<string, any> = {};
+    if (typeof body.title === "string" && body.title.trim()) update.title = body.title.trim();
+    // `matterId: null` detaches the chat from its matter.
+    if ("matterId" in body) {
+      await dbConnect();
+      update.matterId = await resolveOwnedMatterId(userId, body.matterId);
+    }
+    if (Object.keys(update).length === 0) {
+      return NextResponse.json({ success: false, error: "Nothing to update" }, { status: 400 });
     }
 
     await dbConnect();
     const updated = await ConversationModel.findOneAndUpdate(
       { _id: id, userId },
-      { title: title.trim() },
+      update,
       { new: true }
     );
 
@@ -108,10 +117,14 @@ export async function PATCH(
       conversation: {
         id: updated._id.toString(),
         title: updated.title,
+        matterId: updated.matterId ? updated.matterId.toString() : null,
         updatedAt: updated.updatedAt,
       },
     });
   } catch (error: any) {
+    if (error instanceof MatterLinkError) {
+      return NextResponse.json({ success: false, error: error.message }, { status: error.status });
+    }
     console.error("[Conversation PATCH Error]:", error);
     return NextResponse.json(
       { success: false, error: error.message || "Failed to update conversation" },

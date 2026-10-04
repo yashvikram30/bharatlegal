@@ -29,8 +29,8 @@ import { CitationSheet } from "@/components/chat/citation-sheet";
 import { ChatSidebar, ConversationItem } from "@/components/chat/chat-sidebar";
 import { useStreamDripper } from "@/hooks/useStreamDripper";
 import { useThrottledValue } from "@/hooks/useThrottledValue";
-import { extractLegalActionPlan } from "@/lib/legal-action-plan";
-import { ActionPlanCard } from "@/components/chat/action-plan-card";
+import { parseAnswer, hasStructure } from "@/lib/legal-action-plan";
+import { AnswerView } from "@/components/chat/answer-view";
 
 interface Message {
   id: string;
@@ -102,10 +102,11 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
     return clean;
   }, [message.content]);
 
-  const actionPlan = useMemo(
-    () => (isUser || isStreaming ? null : extractLegalActionPlan(sanitizedContent)),
+  const parsedAnswer = useMemo(
+    () => (isUser ? null : parseAnswer(sanitizedContent, isStreaming)),
     [isUser, isStreaming, sanitizedContent]
   );
+  const isStructured = Boolean(parsedAnswer && hasStructure(parsedAnswer));
 
   const markdownComponents = useMemo(
     () => ({
@@ -135,37 +136,37 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
         );
       },
       h2: ({ children }: any) => (
-        <h2 className="text-sm sm:text-base font-heading font-bold text-foreground dark:text-forest-50 mt-6 mb-2.5 pb-1 border-b border-border/50 flex items-center gap-2 tracking-tight">
+        <h2 className="font-display text-lg font-semibold text-foreground dark:text-forest-50 mt-6 mb-2.5 flex items-center gap-2 tracking-tight">
           {children}
         </h2>
       ),
       h3: ({ children }: any) => (
-        <h3 className="text-xs sm:text-sm font-heading font-semibold text-foreground dark:text-forest-50 mt-4 mb-1.5 flex items-center gap-1.5">
+        <h3 className="text-sm sm:text-base font-heading font-semibold text-foreground dark:text-forest-50 mt-4 mb-1.5 flex items-center gap-1.5">
           {children}
         </h3>
       ),
       h4: ({ children }: any) => (
-        <h4 className="text-xs font-heading font-semibold text-foreground dark:text-forest-50 mt-3 mb-1">
+        <h4 className="text-sm font-heading font-semibold text-foreground dark:text-forest-50 mt-3 mb-1">
           {children}
         </h4>
       ),
       p: ({ children }: any) => (
-        <p className="text-xs sm:text-sm leading-relaxed text-foreground dark:text-forest-50 mb-3 last:mb-0">
+        <p className="text-sm sm:text-base leading-relaxed text-foreground dark:text-forest-50 mb-3 last:mb-0">
           {children}
         </p>
       ),
       ul: ({ children }: any) => (
-        <ul className="my-3 space-y-1.5 list-disc list-outside pl-5 text-xs sm:text-sm text-foreground dark:text-forest-50 marker:text-gold-600 dark:marker:text-gold-400">
+        <ul className="my-3 space-y-1.5 list-disc list-outside pl-5 text-sm sm:text-base text-foreground dark:text-forest-50 marker:text-gold-600 dark:marker:text-gold-400">
           {children}
         </ul>
       ),
       ol: ({ children }: any) => (
-        <ol className="my-3 space-y-1.5 list-decimal list-outside pl-5 text-xs sm:text-sm text-foreground dark:text-forest-50 marker:text-gold-600 dark:marker:text-gold-400 marker:font-semibold">
+        <ol className="my-3 space-y-1.5 list-decimal list-outside pl-5 text-sm sm:text-base text-foreground dark:text-forest-50 marker:text-gold-600 dark:marker:text-gold-400 marker:font-semibold">
           {children}
         </ol>
       ),
       li: ({ children }: any) => (
-        <li className="leading-relaxed pl-1 text-xs sm:text-sm text-foreground dark:text-forest-50">
+        <li className="leading-relaxed pl-1 text-sm sm:text-base text-foreground dark:text-forest-50">
           {children}
         </li>
       ),
@@ -177,7 +178,7 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
         <em className="italic text-foreground/90 dark:text-forest-100">{children}</em>
       ),
       blockquote: ({ children }: any) => (
-        <blockquote className="my-3 border-l-4 border-gold-500 dark:border-gold-400 bg-muted/60 dark:bg-forest-900/60 px-4 py-3 rounded-r-xl text-foreground dark:text-forest-50 text-xs sm:text-sm shadow-2xs font-sans not-italic border border-border/40">
+        <blockquote className="my-3 border-l-4 border-gold-500 dark:border-gold-400 bg-muted/60 dark:bg-forest-900/60 px-4 py-3 rounded-r-xl text-foreground dark:text-forest-50 text-sm sm:text-base shadow-2xs font-sans not-italic border border-border/40">
           {children}
         </blockquote>
       ),
@@ -210,7 +211,7 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
       pre: ({ children }: any) => <>{children}</>,
       table: ({ children }: any) => (
         <div className="my-4 overflow-x-auto rounded-xl border border-border/80 dark:border-border shadow-2xs bg-card dark:bg-forest-950/80 backdrop-blur-xs">
-          <table className="w-full text-left text-xs sm:text-sm border-collapse min-w-[500px]">
+          <table className="w-full text-left text-sm border-collapse min-w-[500px]">
             {children}
           </table>
         </div>
@@ -221,7 +222,7 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
         </thead>
       ),
       th: ({ children }: any) => (
-        <th className="px-3.5 py-2.5 font-bold text-[11px] sm:text-xs tracking-wider uppercase text-foreground dark:text-gold-300 border-r border-border/40 last:border-r-0 whitespace-nowrap">
+        <th className="px-3.5 py-2.5 font-semibold text-sm text-foreground dark:text-gold-300 border-r border-border/40 last:border-r-0 whitespace-nowrap">
           {children}
         </th>
       ),
@@ -232,7 +233,7 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
         <tr className="hover:bg-muted/30 dark:hover:bg-forest-900/40 transition-colors">{children}</tr>
       ),
       td: ({ children }: any) => (
-        <td className="px-3.5 py-2.5 border-b border-border/30 text-foreground dark:text-forest-50 leading-relaxed align-top border-r border-border/30 last:border-r-0 text-xs sm:text-sm">
+        <td className="px-3.5 py-2.5 border-b border-border/30 text-foreground dark:text-forest-50 leading-relaxed align-top border-r border-border/30 last:border-r-0 text-sm">
           {children}
         </td>
       ),
@@ -283,7 +284,7 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
       <div
         className={`${
           isUser
-            ? "bg-forest-900 text-forest-50 dark:bg-forest-800 dark:text-forest-50 rounded-2xl rounded-br-xs px-4 py-2.5 max-w-[85%] sm:max-w-[75%] text-xs sm:text-sm leading-relaxed shadow-xs"
+            ? "bg-forest-900 text-forest-50 dark:bg-forest-800 dark:text-forest-50 rounded-2xl rounded-br-xs px-4 py-2.5 max-w-[85%] sm:max-w-[75%] text-sm sm:text-base leading-relaxed shadow-xs"
             : "flex-1 space-y-3 min-w-0 pr-1"
         }`}
       >
@@ -298,17 +299,34 @@ const ChatMessageItem = React.memo(function ChatMessageItem({
               </div>
             )}
 
-            {actionPlan && <ActionPlanCard plan={actionPlan} />}
+            {isStructured && parsedAnswer ? (
+              <AnswerView
+                parsed={parsedAnswer}
+                renderBlock={(md) => (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                    {md}
+                  </ReactMarkdown>
+                )}
+                renderInline={(md) => (
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{ ...markdownComponents, p: ({ children }: any) => <>{children}</> }}
+                  >
+                    {md}
+                  </ReactMarkdown>
+                )}
+              />
+            ) : (
+              <div className="text-foreground dark:text-forest-50 leading-relaxed">
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                  {sanitizedContent}
+                </ReactMarkdown>
+              </div>
+            )}
 
-            <div className="text-foreground dark:text-forest-50 leading-relaxed">
-              <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-                {sanitizedContent}
-              </ReactMarkdown>
-
-              {isStreaming && message.content.length > 0 && (
-                <span className="inline-block w-1.5 h-3.5 ml-1 bg-gold-500 animate-pulse align-middle" />
-              )}
-            </div>
+            {isStreaming && message.content.length > 0 && (
+              <span className="inline-block h-4 w-1.5 animate-pulse bg-gold-500 align-middle motion-reduce:animate-none" />
+            )}
 
             {!isStreaming && message.content.length > 0 && (
               <div className="flex items-center gap-1 pt-1.5 text-muted-foreground text-xs border-t border-border/30">
@@ -374,6 +392,7 @@ function ChatPageContent() {
   const queryParam = searchParams.get("q");
   const autoStartParam = searchParams.get("autostart") === "1";
   const convoIdParam = searchParams.get("conversationId") || searchParams.get("id");
+  const matterParam = searchParams.get("matterId") || "";
   const initialHandled = useRef(false);
   const autoStarted = useRef(false);
 
@@ -381,6 +400,9 @@ function ChatPageContent() {
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isConversationsLoading, setIsConversationsLoading] = useState(false);
+
+  // Chats are filed under a matter from the matter's own page. Arriving with ?matterId= starts one inside it.
+  const [chatMatterId, setChatMatterId] = useState(matterParam);
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -527,6 +549,7 @@ function ChatPageContent() {
         const res = await fetch(`/api/conversations/${id}`);
         if (!res.ok) throw new Error("Failed to load conversation");
         const data = await res.json();
+        setChatMatterId(data.conversation?.matterId || "");
         if (data.success && Array.isArray(data.messages)) {
           if (data.messages.length === 0) {
             setMessages([
@@ -625,6 +648,7 @@ function ChatPageContent() {
   const handleNewChat = useCallback(() => {
     if (isLoading || isDripping) return;
     setActiveConversationId(null);
+    setChatMatterId(matterParam);
     reset();
     setStreamingMessageId(null);
     setMessages([
@@ -636,7 +660,7 @@ function ChatPageContent() {
         timestamp: new Date(),
       },
     ]);
-  }, [isLoading, isDripping, reset]);
+  }, [isLoading, isDripping, reset, matterParam]);
 
   const handleRenameConversation = useCallback(async (id: string, newTitle: string) => {
     try {
@@ -689,7 +713,7 @@ function ChatPageContent() {
           const createRes = await fetch("/api/conversations", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title: "New consultation" }),
+            body: JSON.stringify({ title: "New consultation", matterId: chatMatterId || undefined }),
           });
           if (createRes.ok) {
             const createData = await createRes.json();
@@ -869,7 +893,7 @@ function ChatPageContent() {
         abortControllerRef.current = null;
       }
     },
-    [input, isLoading, isDripping, messages, activeConversationId, session, reset, appendChunk, endStream]
+    [input, isLoading, isDripping, messages, activeConversationId, chatMatterId, session, reset, appendChunk, endStream]
   );
 
   const handleStop = () => {

@@ -2,6 +2,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface ILegalDraft extends Document {
   userId: mongoose.Types.ObjectId;
+  matterId?: mongoose.Types.ObjectId | null;
   draftType: string;
   title: string;
   formData: Record<string, any>;
@@ -16,6 +17,12 @@ const LegalDraftSchema = new Schema<ILegalDraft>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: [true, "User ID is required"],
+      index: true,
+    },
+    matterId: {
+      type: Schema.Types.ObjectId,
+      ref: "Matter",
+      default: null,
       index: true,
     },
     draftType: {

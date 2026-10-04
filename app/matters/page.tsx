@@ -10,7 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmptyState, PageHeader, PageShell } from "@/components/page";
 
-type Matter = { id: string; title: string; category: string; status: string; summary: string; nextAction: string; nextActionDue: string | null; updatedAt: string };
+type Matter = { id: string; title: string; category: string; status: string; summary: string; nextAction: string; nextActionDue: string | null; updatedAt: string; counts?: { chat: number; document: number; draft: number; case: number } };
+
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+const contents = (c?: Matter["counts"]) =>
+  c
+    ? [c.chat && plural(c.chat, "chat", "chats"), c.document && plural(c.document, "document checked", "documents checked"), c.draft && plural(c.draft, "draft", "drafts"), c.case && plural(c.case, "case", "cases")].filter(Boolean).join(" · ")
+    : "";
 
 export default function MattersPage() {
   const router = useRouter();
@@ -54,7 +60,7 @@ export default function MattersPage() {
     <PageShell>
       <PageHeader
         title="Keep every legal issue in one place"
-        description="A matter holds the next action and your notes for one issue. Related chats, documents, and case activity are coming soon."
+        description="A matter keeps everything for one issue together: your AI chats, document checks, drafts, and court cases, plus the next step and a checklist."
       />
 
       {status === "loading" ? (
@@ -115,7 +121,8 @@ export default function MattersPage() {
                     </div>
                     <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" aria-hidden="true" />
                   </div>
-                  <p className="mt-4 text-sm font-medium text-foreground">Next: {matter.nextAction}</p>
+                  <p className="mt-3 text-sm text-muted-foreground">{contents(matter.counts) || "Nothing saved here yet"}</p>
+                  <p className="mt-2 text-sm font-medium text-foreground">Next: {matter.nextAction}</p>
                   {matter.nextActionDue && (
                     <p className="mt-1 text-sm text-muted-foreground">
                       Due {new Date(matter.nextActionDue).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}

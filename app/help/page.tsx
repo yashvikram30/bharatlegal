@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import {
   MapPin,
   Phone,
@@ -11,18 +10,11 @@ import {
   Globe,
   ExternalLink,
   CheckCircle2,
-  Info,
+  Clock,
+  Languages,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { EmptyState, PageHeader, PageShell } from "@/components/page";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -31,6 +23,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { EmptyState, PageHeader, PageShell } from "@/components/page";
 
 type LegalHelpProvider = {
   id: string;
@@ -47,35 +46,13 @@ type LegalHelpProvider = {
   address: string;
 };
 
-/** Turns "1516 (24/7 Toll-Free) / 011-23384775" into separate tap-to-call links. */
-function PhoneLinks({ value }: { value: string }) {
-  const parts = value.split(" / ");
-  return (
-    <span className="font-medium text-foreground">
-      {parts.map((part, i) => {
-        const match = part.match(/^([\d][\d\s-]*)(.*)$/);
-        const digits = match ? match[1].replace(/[^\d]/g, "") : "";
-        return (
-          <span key={part}>
-            {i > 0 && <span className="text-muted-foreground"> / </span>}
-            {digits ? (
-              <>
-                <a
-                  href={`tel:${digits}`}
-                  className="underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 rounded-sm"
-                >
-                  {match![1].trim()}
-                </a>
-                {match![2] && ` ${match![2].trimStart()}`}
-              </>
-            ) : (
-              part
-            )}
-          </span>
-        );
-      })}
-    </span>
-  );
+/** "1516 (24/7 Toll-Free) / 011-23384775" -> [{ number: "1516", note: "24/7 Toll-Free", tel: "1516" }, ...] */
+function parsePhones(value: string) {
+  return value.split(" / ").flatMap((part) => {
+    const m = part.match(/^([\d][\d\s-]*)(?:\((.*)\))?\s*$/);
+    if (!m) return [];
+    return [{ number: m[1].trim(), note: m[2]?.trim() ?? "", tel: m[1].replace(/[^\d]/g, "") }];
+  });
 }
 
 export default function HelpPage() {
@@ -185,6 +162,13 @@ export default function HelpPage() {
     return matchesSearch && matchesState && matchesType;
   });
 
+  const isFiltered = searchQuery !== "" || stateFilter !== "all" || typeFilter !== "all";
+  const clearFilters = () => {
+    setSearchQuery("");
+    setStateFilter("all");
+    setTypeFilter("all");
+  };
+
   return (
     <PageShell>
       <PageHeader
@@ -200,69 +184,77 @@ export default function HelpPage() {
         }
       />
 
-      {/* Statutory Section 12 Criteria Banner */}
-      <div className="bg-card border border-border rounded-2xl p-6 sm:p-7 space-y-4">
-        <div className="flex items-start gap-3.5">
-          <div className="w-9 h-9 rounded-lg bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 flex items-center justify-center shrink-0 mt-0.5">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <div className="space-y-2">
-            <h2 className="font-display text-xl font-semibold text-foreground">
-              Who can get free legal aid?
-            </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+      {/* Eligibility: useful, but not what most people come here to do first */}
+      <Accordion type="single" collapsible>
+        <AccordionItem value="eligibility" className="rounded-2xl border border-border bg-card px-5 sm:px-6">
+          <AccordionTrigger className="gap-3 py-4 text-left hover:no-underline">
+            <span className="flex items-center gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-forest-100 text-forest-800 dark:bg-forest-800 dark:text-forest-100">
+                <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <span className="font-display text-lg font-semibold text-foreground">Who can get free legal aid?</span>
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-4 pb-5 pt-1">
+            <p className="text-sm leading-relaxed text-muted-foreground">
               Under Section 12 of the <em>Legal Services Authorities Act, 1987</em>, free legal aid (including advocate fees and court fee exemption) is guaranteed by the Constitution of India for:
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pt-1 text-sm text-foreground font-medium">
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-forest-800 dark:text-gold-500 shrink-0" />
-                Women and children
-              </span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-forest-800 dark:text-gold-500 shrink-0" />
-                Members of SC / ST communities
-              </span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-forest-800 dark:text-gold-500 shrink-0" />
-                People in custody or awaiting trial
-              </span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-forest-800 dark:text-gold-500 shrink-0" />
-                Industrial workers and labourers
-              </span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-forest-800 dark:text-gold-500 shrink-0" />
-                Victims of trafficking or disaster
-              </span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-forest-800 dark:text-gold-500 shrink-0" />
-                Income below your state’s limit
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+            <ul className="grid grid-cols-1 gap-3 text-sm font-medium text-foreground sm:grid-cols-2 md:grid-cols-3">
+              {[
+                "Women and children",
+                "Members of SC / ST communities",
+                "People in custody or awaiting trial",
+                "Industrial workers and labourers",
+                "Victims of trafficking or disaster",
+                "Income below your state’s limit",
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-forest-800 dark:text-gold-500" aria-hidden="true" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
-      {/* Search & Filters */}
-      <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-          <div className="md:col-span-6 relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+      {/* Find an office */}
+      <section aria-labelledby="offices-heading" className="space-y-4">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <h2 id="offices-heading" className="font-display text-xl font-semibold text-foreground sm:text-2xl">
+            Legal aid offices
+          </h2>
+          <p className="text-sm text-muted-foreground" aria-live="polite">
+            Showing {filteredProviders.length} of {providers.length}
+            {isFiltered && (
+              <>
+                {" "}
+                <button type="button" onClick={clearFilters} className="font-semibold text-foreground underline underline-offset-2">
+                  Clear filters
+                </button>
+              </>
+            )}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
+          <div className="relative md:col-span-6">
+            <Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
             <Input
-              placeholder="Search by state, city, or service..."
-              className="pl-9 bg-background border-border focus-visible:ring-2 focus-visible:ring-gold-700"
+              aria-label="Search legal aid offices"
+              placeholder="Search by state, city, or service"
+              className="h-11 bg-card pl-9 text-base sm:text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-
           <div className="md:col-span-3">
             <Select value={stateFilter} onValueChange={setStateFilter}>
-              <SelectTrigger className="bg-background border-border">
-                <SelectValue placeholder="Select State" />
+              <SelectTrigger aria-label="Filter by state" className="h-11 bg-card">
+                <SelectValue placeholder="State" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All States</SelectItem>
+                <SelectItem value="all">All states</SelectItem>
                 {states.map((state) => (
                   <SelectItem key={state} value={state}>
                     {state}
@@ -271,146 +263,134 @@ export default function HelpPage() {
               </SelectContent>
             </Select>
           </div>
-
           <div className="md:col-span-3">
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="bg-background border-border">
-                <SelectValue placeholder="Service Type" />
+              <SelectTrigger aria-label="Filter by type of office" className="h-11 bg-card">
+                <SelectValue placeholder="Type of office" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Service Types</SelectItem>
+                <SelectItem value="all">All types</SelectItem>
                 <SelectItem value="DLSA / Government">DLSA / Government</SelectItem>
                 <SelectItem value="State Legal Aid">State Legal Aid Authorities</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
-      </div>
 
-      {/* Providers Directory List */}
-      <div className="space-y-4">
-        {filteredProviders.length > 0 ? (
-          filteredProviders.map((provider) => (
-            <div
-              key={provider.id}
-              className="bg-card border border-border rounded-2xl p-5 sm:p-6 hover:border-forest-500 hover:shadow-hover-card transition-all duration-200 space-y-4"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
-                <div>
-                  <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-100 border border-forest-500/20 mb-1.5 inline-block">
-                    {provider.type}
-                  </span>
-                  <h3 className="font-display text-xl font-semibold text-foreground">
-                    {provider.name}
-                  </h3>
-                </div>
-
-                <Button
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  className="h-8 text-xs shrink-0 border-border self-start sm:self-center"
-                >
-                  <a href={provider.website} target="_blank" rel="noreferrer" className="flex items-center gap-1.5">
-                    <Globe className="w-3.5 h-3.5" /> Official Portal <ExternalLink className="w-3 h-3" />
-                  </a>
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
-                <div className="space-y-2 text-muted-foreground">
-                  <div className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 text-forest-800 dark:text-gold-500 shrink-0 mt-0.5" />
-                    <span>{provider.address}</span>
-                  </div>
-
-                  <div className="flex items-start gap-2">
-                    <Phone className="w-4 h-4 text-forest-800 dark:text-gold-500 shrink-0 mt-0.5" />
-                    <PhoneLinks value={provider.phone} />
-                  </div>
-
-                  <div className="flex items-start gap-2">
-                    <Mail className="w-4 h-4 text-forest-800 dark:text-gold-500 shrink-0 mt-0.5" />
-                    <a
-                      href={`mailto:${provider.email}`}
-                      className="break-all underline-offset-2 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 rounded-sm"
-                    >
-                      {provider.email}
-                    </a>
-                  </div>
-                </div>
-
-                <div className="space-y-2.5">
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground mb-1">
-                      Key services
+        <div className="space-y-4">
+          {filteredProviders.length > 0 ? (
+            filteredProviders.map((provider) => {
+              const phones = parsePhones(provider.phone);
+              return (
+                <article key={provider.id} className="space-y-4 rounded-2xl border border-border bg-card p-5 sm:p-6">
+                  <header>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {provider.type} · {provider.city}, {provider.state}
                     </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {provider.specialization.map((spec) => (
-                        <span
-                          key={spec}
-                          className="text-[11px] px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border"
-                        >
-                          {spec}
-                        </span>
-                      ))}
+                    <h3 className="mt-1 font-display text-xl font-semibold text-foreground">{provider.name}</h3>
+                    <p className="mt-2 flex items-start gap-2 text-sm text-muted-foreground">
+                      <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-forest-800 dark:text-gold-500" aria-hidden="true" />
+                      {provider.address}
+                    </p>
+                  </header>
+
+                  <div className="flex flex-wrap gap-2">
+                    {phones.map((ph, i) => (
+                      <Button key={ph.tel} asChild size="sm" variant={i === 0 ? "default" : "outline"} className="gap-1.5">
+                        <a href={`tel:${ph.tel}`}>
+                          <Phone className="h-4 w-4" aria-hidden="true" />
+                          Call {ph.number}
+                          {ph.note && <span className="font-normal opacity-80">({ph.note})</span>}
+                        </a>
+                      </Button>
+                    ))}
+                    <Button asChild size="sm" variant="outline" className="gap-1.5">
+                      <a href={`mailto:${provider.email}`}>
+                        <Mail className="h-4 w-4" aria-hidden="true" />
+                        Email
+                      </a>
+                    </Button>
+                    <Button asChild size="sm" variant="outline" className="gap-1.5">
+                      <a href={provider.website} target="_blank" rel="noopener noreferrer">
+                        <Globe className="h-4 w-4" aria-hidden="true" />
+                        Official website
+                        <ExternalLink className="h-3.5 w-3.5 opacity-70" aria-hidden="true" />
+                      </a>
+                    </Button>
+                  </div>
+
+                  <dl className="grid gap-3 border-t border-border pt-4 text-sm sm:grid-cols-2">
+                    <div className="sm:col-span-2">
+                      <dt className="font-semibold text-foreground">Help available</dt>
+                      <dd className="mt-1.5 flex flex-wrap gap-1.5">
+                        {provider.specialization.map((spec) => (
+                          <span key={spec} className="rounded-full bg-secondary px-2.5 py-1 text-sm text-secondary-foreground">
+                            {spec}
+                          </span>
+                        ))}
+                      </dd>
                     </div>
-                  </div>
+                    <div>
+                      <dt className="flex items-center gap-1.5 font-semibold text-foreground">
+                        <Languages className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                        Languages
+                      </dt>
+                      <dd className="mt-1 text-muted-foreground">{provider.languages.join(", ")}</dd>
+                    </div>
+                    <div>
+                      <dt className="flex items-center gap-1.5 font-semibold text-foreground">
+                        <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                        Hours
+                      </dt>
+                      <dd className="mt-1 text-muted-foreground">{provider.hours}</dd>
+                    </div>
+                  </dl>
+                </article>
+              );
+            })
+          ) : (
+            <EmptyState
+              icon={Search}
+              title="No offices match your search"
+              description="Clear a filter, or call the national legal-aid helpline on 15100 and they will point you to the right office."
+              action={
+                <Button variant="outline" onClick={clearFilters}>
+                  Clear search and filters
+                </Button>
+              }
+            />
+          )}
+        </div>
+      </section>
 
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground mb-0.5">
-                      Hours and helpline
-                    </p>
-                    <p className="text-xs text-muted-foreground">{provider.hours}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <EmptyState
-            icon={Search}
-            title="No offices match your search"
-            description="Clear a filter, or call the national legal-aid helpline on 15100 and they will point you to the right office."
-            action={
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSearchQuery("");
-                  setStateFilter("all");
-                  setTypeFilter("all");
-                }}
-              >
-                Clear search and filters
-              </Button>
-            }
-          />
-        )}
-      </div>
-
-      {/* Emergency Helpline Box */}
-      <div className="bg-forest-950 text-forest-50 border border-forest-900 rounded-2xl p-6 sm:p-8 space-y-3">
-        <h2 className="font-display text-xl font-semibold text-white">
+      {/* National helplines */}
+      <section aria-labelledby="helplines-heading" className="space-y-3 rounded-2xl bg-forest-950 p-6 text-forest-50 sm:p-8">
+        <h2 id="helplines-heading" className="font-display text-xl font-semibold text-white">
           National helplines
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm pt-1">
-          <div className="p-3.5 rounded-xl bg-forest-800/80 border border-forest-500/30 space-y-0.5">
-            <p className="text-forest-100/70 text-xs">NALSA national helpline</p>
-            <p className="text-base font-bold text-gold-500 font-mono"><a href="tel:15100" className="hover:underline">15100</a></p>
-            <p className="text-[11px] text-forest-100/60">Free legal aid, toll-free</p>
-          </div>
-          <div className="p-3.5 rounded-xl bg-forest-800/80 border border-forest-500/30 space-y-0.5">
-            <p className="text-forest-100/70 text-xs">Women in distress</p>
-            <p className="text-base font-bold text-white font-mono"><a href="tel:1091" className="hover:underline">1091</a> / <a href="tel:181" className="hover:underline">181</a></p>
-            <p className="text-[11px] text-forest-100/60">National Commission for Women</p>
-          </div>
-          <div className="p-3.5 rounded-xl bg-forest-800/80 border border-forest-500/30 space-y-0.5">
-            <p className="text-forest-100/70 text-xs">National consumer helpline</p>
-            <p className="text-base font-bold text-white font-mono"><a href="tel:1915" className="hover:underline">1915</a></p>
-            <p className="text-[11px] text-forest-100/60">Ministry of Consumer Affairs</p>
-          </div>
-        </div>
-      </div>
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {[
+            { label: "NALSA national helpline", numbers: ["15100"], note: "Free legal aid, toll-free", accent: true },
+            { label: "Women in distress", numbers: ["1091", "181"], note: "National Commission for Women", accent: false },
+            { label: "National consumer helpline", numbers: ["1915"], note: "Ministry of Consumer Affairs", accent: false },
+          ].map((h) => (
+            <li key={h.label} className="rounded-xl border border-forest-500/30 bg-forest-800/80 p-4">
+              <p className="text-sm text-forest-100/80">{h.label}</p>
+              <p className={`mt-1 font-mono text-xl font-bold ${h.accent ? "text-gold-400" : "text-white"}`}>
+                {h.numbers.map((n, i) => (
+                  <span key={n}>
+                    {i > 0 && " / "}
+                    <a href={`tel:${n}`} className="hover:underline">
+                      {n}
+                    </a>
+                  </span>
+                ))}
+              </p>
+              <p className="mt-1 text-sm text-forest-100/70">{h.note}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
     </PageShell>
   );
 }

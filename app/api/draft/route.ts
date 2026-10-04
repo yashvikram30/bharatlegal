@@ -5,6 +5,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import dbConnect from "@/lib/dbConnect";
 import LegalDraftModel from "@/model/LegalDraft";
 import UserModel from "@/model/User";
+import { MatterLinkError, resolveOwnedMatterId } from "@/lib/matter-links";
 import { generateDeterministicDraft, DRAFT_TEMPLATES } from "@/lib/drafting/templates";
 
 export const runtime = "nodejs";
@@ -27,7 +28,7 @@ Output ONLY the finalized legal document text. Do NOT wrap it in JSON. Do NOT in
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { draftType, formData, customInstructions, saveToDb = true, existingDraftId } = body;
+    const { draftType, formData, customInstructions, saveToDb = true, existingDraftId, matterId } = body;
 
     if (!draftType || !formData) {
       return NextResponse.json(
@@ -123,6 +124,7 @@ Draft the complete instrument with exact names, addresses, dates, figures in num
         await dbConnect();
         const user = await UserModel.findOne({ email: session.user.email }).select("_id");
         if (user) {
+          const ownedMatterId = await resolveOwnedMatterId(user._id.toString(), matterId);
           if (existingDraftId) {
             const updated = await LegalDraftModel.findOneAndUpdate(
               { _id: existingDraftId, userId: user._id },
@@ -131,6 +133,8 @@ Draft the complete instrument with exact names, addresses, dates, figures in num
                 draftType,
                 formData,
                 generatedContent,
+                // Only touch the link when the client sent one; otherwise keep what's there.
+                ...(matterId !== undefined ? { matterId: ownedMatterId } : {}),
               },
               { new: true }
             );
@@ -147,6 +151,7 @@ Draft the complete instrument with exact names, addresses, dates, figures in num
               draftType,
               formData,
               generatedContent,
+              matterId: ownedMatterId,
             });
             savedDraftId = created._id.toString();
             isSaved = true;
@@ -154,6 +159,9 @@ Draft the complete instrument with exact names, addresses, dates, figures in num
         }
       }
     } catch (dbErr) {
+      if (dbErr instanceof MatterLinkError) {
+        return NextResponse.json({ success: false, error: dbErr.message }, { status: dbErr.status });
+      }
       console.error("[Drafting API] Database persistence error:", dbErr);
     }
 

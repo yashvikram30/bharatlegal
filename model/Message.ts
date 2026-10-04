@@ -6,11 +6,19 @@ export interface IMessageSource {
   title?: string;
 }
 
+/** A record in the user's matter that an assistant answer drew on. */
+export interface IMatterSource {
+  kind: "matter" | "chat" | "document" | "draft" | "case";
+  itemId: string;
+  title: string;
+}
+
 export interface IMessage extends Document {
   conversationId: mongoose.Types.ObjectId;
   role: "user" | "assistant";
   content: string;
   sources?: IMessageSource[];
+  matterSources?: IMatterSource[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,6 +27,15 @@ const MessageSourceSchema = new Schema<IMessageSource>(
   {
     act: { type: String, required: true },
     section: { type: String, required: true },
+    title: { type: String, default: "" },
+  },
+  { _id: false }
+);
+
+const MatterSourceSchema = new Schema<IMatterSource>(
+  {
+    kind: { type: String, required: true },
+    itemId: { type: String, required: true },
     title: { type: String, default: "" },
   },
   { _id: false }
@@ -43,6 +60,10 @@ const MessageSchema = new Schema<IMessage>(
     },
     sources: {
       type: [MessageSourceSchema],
+      default: [],
+    },
+    matterSources: {
+      type: [MatterSourceSchema],
       default: [],
     },
   },
