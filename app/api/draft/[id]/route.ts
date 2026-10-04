@@ -5,6 +5,7 @@ import dbConnect from "@/lib/dbConnect";
 import LegalDraftModel from "@/model/LegalDraft";
 import UserModel from "@/model/User";
 import mongoose from "mongoose";
+import { MatterLinkError, resolveOwnedMatterId } from "@/lib/matter-links";
 
 export const runtime = "nodejs";
 
@@ -68,6 +69,8 @@ export async function PATCH(
     const updateFields: Record<string, any> = {};
     if (typeof title === "string" && title.trim()) updateFields.title = title.trim();
     if (typeof generatedContent === "string") updateFields.generatedContent = generatedContent;
+    // `matterId: null` detaches the draft from its matter.
+    if ("matterId" in body) updateFields.matterId = await resolveOwnedMatterId(user._id.toString(), body.matterId);
 
     const updated = await LegalDraftModel.findOneAndUpdate(
       { _id: id, userId: user._id },
@@ -81,6 +84,9 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, draft: updated });
   } catch (error: any) {
+    if (error instanceof MatterLinkError) {
+      return NextResponse.json({ success: false, error: error.message }, { status: error.status });
+    }
     console.error("[Draft Single API] PATCH error:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }

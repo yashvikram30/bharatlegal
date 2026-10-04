@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { Suspense, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ShieldAlert,
   Building,
@@ -10,22 +11,25 @@ import {
   Search,
   Copy,
   Check,
-  ArrowUpRight,
-  PhoneCall,
   X,
   Sparkles,
   Scale,
-  ExternalLink,
-  Languages,
+  Phone,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import toast from "react-hot-toast";
 import { useQuickConsultation } from "@/context/QuickConsultationContext";
 import { CitationSheet } from "@/components/chat/citation-sheet";
-import { PageHeader, PageShell } from "@/components/page";
+import { BackLink, EmptyState, PageHeader, PageShell } from "@/components/page";
 
 interface VisualStep {
   number: number;
@@ -46,6 +50,7 @@ interface VisualStep {
 interface Scenario {
   id: string;
   name: string;
+  blurb: string;
   icon: React.ElementType;
   helpline: string;
   steps: VisualStep[];
@@ -54,13 +59,14 @@ interface Scenario {
 const SCENARIOS: Scenario[] = [
   {
     id: "police",
-    name: "Police Stop & Custody",
+    name: "Police stopped or arrested me",
+    blurb: "Stopped on the street, called to the station, or arrested.",
     icon: ShieldAlert,
     helpline: "NALSA Legal Aid: 15100 • Emergency: 112",
     steps: [
       {
         number: 1,
-        title: "Street Stop & Questioning",
+        title: "You’re stopped or questioned on the street",
         section: "Sec 179 BNSS (CrPC §160)",
         lawName: "Bharatiya Nagarik Suraksha Sanhita, 2023",
         citation: {
@@ -84,7 +90,7 @@ const SCENARIOS: Scenario[] = [
       },
       {
         number: 2,
-        title: "The Moment of Formal Arrest",
+        title: "You’re being arrested",
         section: "Sec 47 & 43(5) BNSS (CrPC §50 & §46)",
         lawName: "Section 47 & 43(5) BNSS, 2023",
         citation: {
@@ -108,7 +114,7 @@ const SCENARIOS: Scenario[] = [
       },
       {
         number: 3,
-        title: "Interrogation & Medical Examination",
+        title: "You’re questioned in custody",
         section: "Sec 38 & 53 BNSS (CrPC §41D & §54)",
         lawName: "Section 38 & 53 BNSS & Art 22(1)",
         citation: {
@@ -132,7 +138,7 @@ const SCENARIOS: Scenario[] = [
       },
       {
         number: 4,
-        title: "24-Hour Production Before Magistrate",
+        title: "Within 24 hours, you must see a magistrate",
         section: "Sec 58 BNSS & Art 22(2)",
         lawName: "Constitution of India Article 22(2)",
         citation: {
@@ -158,13 +164,14 @@ const SCENARIOS: Scenario[] = [
   },
   {
     id: "tenancy",
-    name: "Tenancy & Security Deposit",
+    name: "A landlord or rental problem",
+    blurb: "Deposit not returned, surprise visits, or being locked out.",
     icon: Building,
     helpline: "National Consumer Helpline: 1915",
     steps: [
       {
         number: 1,
-        title: "Privacy & Essential Utilities During Lease",
+        title: "Your landlord wants to enter, or cuts water or power",
         section: "Sec 15 Model Tenancy Act",
         lawName: "Model Tenancy Act & State Rent Laws",
         citation: {
@@ -188,7 +195,7 @@ const SCENARIOS: Scenario[] = [
       },
       {
         number: 2,
-        title: "Vacating & 30-Day Deposit Refund Clock",
+        title: "You’re moving out and want your deposit back",
         section: "Sec 13 Model Tenancy Act",
         lawName: "Section 13 Model Tenancy Act",
         citation: {
@@ -212,7 +219,7 @@ const SCENARIOS: Scenario[] = [
       },
       {
         number: 3,
-        title: "Unlawful Lockout & Legal Recovery",
+        title: "You’ve been locked out",
         section: "Sec 21 & 22 Model Tenancy Act",
         lawName: "Model Tenancy Act & Consumer Protection Act",
         citation: {
@@ -238,13 +245,14 @@ const SCENARIOS: Scenario[] = [
   },
   {
     id: "workplace",
-    name: "Workplace & Employment",
+    name: "A problem at work",
+    blurb: "A non-compete clause, unpaid gratuity, or harassment.",
     icon: Briefcase,
     helpline: "Labour Helpline: 1800-180-1111",
     steps: [
       {
         number: 1,
-        title: "Post-Employment Non-Compete Clauses",
+        title: "Your old employer cites a non-compete clause",
         section: "Sec 27 Indian Contract Act, 1872",
         lawName: "Section 27 Indian Contract Act & Supreme Court Precedents",
         citation: {
@@ -268,7 +276,7 @@ const SCENARIOS: Scenario[] = [
       },
       {
         number: 2,
-        title: "Gratuity Entitlement & Final Settlement",
+        title: "Getting your gratuity and final pay",
         section: "Payment of Gratuity Act, 1972",
         lawName: "Payment of Gratuity Act (Formula: 15 * Basic * Years / 26)",
         citation: {
@@ -292,7 +300,7 @@ const SCENARIOS: Scenario[] = [
       },
       {
         number: 3,
-        title: "Workplace Harassment (POSH Act)",
+        title: "You’re facing harassment at work",
         section: "POSH Act, 2013",
         lawName: "Sexual Harassment of Women at Workplace Act, 2013",
         citation: {
@@ -318,13 +326,14 @@ const SCENARIOS: Scenario[] = [
   },
   {
     id: "consumer",
-    name: "Consumer & E-Commerce",
+    name: "A faulty product or online order",
+    blurb: "A faulty item, hidden fees, or a seller who won’t respond.",
     icon: ShoppingBag,
     helpline: "National Consumer Helpline: 1915",
     steps: [
       {
         number: 1,
-        title: "Defective Delivery & Cancellation Fees",
+        title: "You got a faulty product or a surprise fee",
         section: "E-Commerce Rules, 2020",
         lawName: "Consumer Protection (E-Commerce) Rules, 2020",
         citation: {
@@ -348,7 +357,7 @@ const SCENARIOS: Scenario[] = [
       },
       {
         number: 2,
-        title: "Grievance Officer Escalation",
+        title: "The seller isn’t responding",
         section: "Rule 4(4) E-Commerce Rules",
         lawName: "Consumer Protection Act, 2019",
         citation: {
@@ -372,7 +381,7 @@ const SCENARIOS: Scenario[] = [
       },
       {
         number: 3,
-        title: "e-Daakhil Online Consumer Court",
+        title: "Filing a consumer complaint online",
         section: "Sec 34 & 35 CPA 2019",
         lawName: "Consumer Protection Act, 2019 (District Commission)",
         citation: {
@@ -398,13 +407,14 @@ const SCENARIOS: Scenario[] = [
   },
   {
     id: "family",
-    name: "Family & Maintenance",
+    name: "Family, maintenance, or violence at home",
+    blurb: "Asking for maintenance, or staying safe at home.",
     icon: HeartHandshake,
     helpline: "Women Helpline: 1091 • Childline: 1098",
     steps: [
       {
         number: 1,
-        title: "Interim Monthly Maintenance",
+        title: "Asking for monthly maintenance",
         section: "Sec 144 BNSS (CrPC §125)",
         lawName: "Section 144 BNSS, 2023",
         citation: {
@@ -428,7 +438,7 @@ const SCENARIOS: Scenario[] = [
       },
       {
         number: 2,
-        title: "Domestic Violence & Shared Household",
+        title: "Violence at home, and your right to stay",
         section: "Sec 17 & 19 PWDVA, 2005",
         lawName: "Protection of Women from Domestic Violence Act, 2005",
         citation: {
@@ -454,36 +464,35 @@ const SCENARIOS: Scenario[] = [
   },
 ];
 
-const SUGGESTED_CHIPS = [
-  { label: "Police asking for phone", query: "phone" },
-  { label: "Arrested without warrant", query: "arrest" },
-  { label: "Landlord keeping deposit", query: "deposit" },
-  { label: "Surprise landlord visits", query: "notice" },
-  { label: "2-Year Non-compete clause", query: "non-compete" },
-  { label: "Defective online delivery", query: "cancellation" },
-  { label: "Child maintenance claim", query: "maintenance" },
-];
+/** "NALSA Legal Aid: 15100 • Emergency: 112" -> [{ label, number }] */
+function parseHelplines(value: string) {
+  return value
+    .split(" • ")
+    .map((part) => part.match(/^(.*):\s*([\d-]+)$/))
+    .filter((m): m is RegExpMatchArray => Boolean(m))
+    .map((m) => ({ label: m[1].trim(), number: m[2] }));
+}
 
-export default function RightsVisualizerPage() {
+function RightsPageContent() {
+  const router = useRouter();
+  const params = useSearchParams();
   const { openConsultation } = useQuickConsultation();
-  const [activeScenarioId, setActiveScenarioId] = useState<string>("police");
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [copiedScript, setCopiedScript] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [scriptLanguage, setScriptLanguage] = useState<"en" | "hi">("en");
   const [selectedCitation, setSelectedCitation] = useState<{ act: string; section: string } | null>(null);
 
-  const currentScenario = useMemo(() => {
-    return SCENARIOS.find((s) => s.id === activeScenarioId) || SCENARIOS[0];
-  }, [activeScenarioId]);
+  // The chosen situation lives in the URL so the back button and shared links work.
+  const situationId = params.get("situation");
+  const scenario = SCENARIOS.find((s) => s.id === situationId) ?? null;
+  const openStep = params.get("step") ?? "1";
 
-  // Cross-scenario search calculation
   const searchResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return null;
-
     const results: { scenario: Scenario; step: VisualStep }[] = [];
-    for (const scenario of SCENARIOS) {
-      for (const step of scenario.steps) {
+    for (const sc of SCENARIOS) {
+      for (const step of sc.steps) {
         if (
           step.title.toLowerCase().includes(q) ||
           step.section.toLowerCase().includes(q) ||
@@ -493,275 +502,243 @@ export default function RightsVisualizerPage() {
           step.rights.some((r) => r.toLowerCase().includes(q)) ||
           step.limits.some((l) => l.toLowerCase().includes(q))
         ) {
-          results.push({ scenario, step });
+          results.push({ scenario: sc, step });
         }
       }
     }
     return results;
   }, [searchQuery]);
 
-  const handleCopy = (text: string, label: string) => {
+  const handleCopy = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
-    setCopiedScript(label);
-    toast.success("Copied legal script to clipboard");
-    setTimeout(() => setCopiedScript(null), 2000);
+    setCopiedKey(key);
+    toast.success("Copied. You can paste it into a message.");
+    setTimeout(() => setCopiedKey(null), 2000);
   };
+
+  const footer = (
+    <div className="flex flex-col justify-between gap-2 border-t border-border pt-5 text-sm text-muted-foreground sm:flex-row sm:items-center">
+      <span>
+        This is general information, not legal advice. Women, people awaiting trial, and low-income citizens can get free legal representation.
+      </span>
+      <Link href="/help" className="inline-flex shrink-0 items-center gap-1 font-semibold text-foreground hover:underline">
+        Find free legal aid <ArrowRight className="h-4 w-4" aria-hidden="true" />
+      </Link>
+    </div>
+  );
+
+  // ---------------------------------------------------------------- Level 1: pick a situation
+  if (!scenario) {
+    return (
+      <PageShell>
+        <PageHeader
+          title="Know your rights"
+          description="Tell us what’s happening. You’ll see what to say, what you’re entitled to, and what the authorities can’t do."
+        />
+
+        <p className="rounded-2xl border border-border bg-muted/40 p-4 text-sm text-foreground">
+          In danger right now? Call{" "}
+          <a href="tel:112" className="font-bold underline underline-offset-2">112</a>. For free legal advice, call{" "}
+          <a href="tel:15100" className="font-bold underline underline-offset-2">15100</a>.
+        </p>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          {SCENARIOS.map((sc, i) => {
+            const Icon = sc.icon;
+            return (
+              <button
+                key={sc.id}
+                type="button"
+                onClick={() => router.push(`/rights?situation=${sc.id}`)}
+                className={`group flex items-start gap-4 rounded-2xl border border-border bg-card p-5 text-left transition-all hover:-translate-y-px hover:border-gold-500/60 hover:shadow-hover-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 motion-reduce:transition-colors motion-reduce:hover:translate-y-0 ${
+                  i === SCENARIOS.length - 1 ? "sm:col-span-2" : ""
+                }`}
+              >
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-forest-100 text-forest-800 transition-colors group-hover:bg-forest-800 group-hover:text-gold-300 dark:bg-forest-800 dark:text-gold-400 dark:group-hover:bg-gold-500 dark:group-hover:text-forest-950">
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-display text-lg font-semibold text-foreground">{sc.name}</span>
+                  <span className="mt-1 block text-sm leading-relaxed text-muted-foreground">{sc.blurb}</span>
+                </span>
+                <ArrowRight className="mt-1 h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" aria-hidden="true" />
+              </button>
+            );
+          })}
+        </div>
+
+        <section aria-labelledby="rights-search" className="space-y-3">
+          <h2 id="rights-search" className="font-display text-xl font-semibold text-foreground">
+            Looking for something specific?
+          </h2>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Try “bail”, “phone”, “deposit” or “gratuity”"
+              aria-label="Search rights"
+              className="h-11 bg-card pl-9 pr-10 text-base sm:text-sm"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                aria-label="Clear search"
+                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
+          </div>
+
+          {searchResults !== null &&
+            (searchResults.length === 0 ? (
+              <EmptyState
+                icon={Search}
+                title="Nothing matched your search"
+                description="Try a simpler word, or pick one of the situations above."
+              />
+            ) : (
+              <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+                {searchResults.map(({ scenario: sc, step }) => (
+                  <li key={`${sc.id}-${step.number}`}>
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/rights?situation=${sc.id}&step=${step.number}`)}
+                      className="group flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold-500"
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-semibold text-foreground">{step.title}</span>
+                        <span className="block text-sm text-muted-foreground">{sc.name}</span>
+                      </span>
+                      <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ))}
+        </section>
+
+        {footer}
+      </PageShell>
+    );
+  }
+
+  // ---------------------------------------------------------------- Level 2: the steps for one situation
+  const helplines = parseHelplines(scenario.helpline);
 
   return (
     <PageShell>
-      <PageHeader
-        title="Know your rights"
-        description="Pick your situation to see what to say, what you’re entitled to, and what the authorities can’t do, step by step."
-        actions={
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/60 border border-border">
-          <Languages className="w-3.5 h-3.5 text-muted-foreground ml-1.5" />
-          <button
-            aria-pressed={scriptLanguage === "en"}
-            onClick={() => setScriptLanguage("en")}
-            className={`px-2.5 py-1 text-xs rounded-lg font-medium transition-all ${
-              scriptLanguage === "en"
-                ? "bg-card text-foreground font-bold border border-border/70"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            English
-          </button>
-          <button
-            aria-pressed={scriptLanguage === "hi"}
-            onClick={() => setScriptLanguage("hi")}
-            className={`px-2.5 py-1 text-xs rounded-lg font-medium transition-all ${
-              scriptLanguage === "hi"
-                ? "bg-card text-foreground font-bold border border-border/70"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            हिंदी संवाद
-          </button>
-        </div>
-        }
-      />
-
-      {/* 2. Emergency Citizen Hotline Bar */}
-      <div className="flex flex-wrap items-center gap-2 text-xs p-3 rounded-2xl bg-muted/30 border border-border/60">
-        <span className="font-semibold text-foreground/80 flex items-center gap-1 mr-1">
-          <PhoneCall className="w-3 h-3 text-gold-500" />
-          <span>Emergency Hotlines:</span>
-        </span>
-        <a
-          href="tel:15100"
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-forest-100/70 dark:bg-forest-900/40 text-forest-800 dark:text-gold-400 hover:underline font-medium border border-forest-500/20"
-        >
-          NALSA Free Legal Aid: <strong>15100</strong>
-        </a>
-        <a
-          href="tel:112"
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-100/70 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 hover:underline font-medium border border-rose-500/20"
-        >
-          Police Emergency: <strong>112</strong>
-        </a>
-        <a
-          href="tel:1915"
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted text-foreground/80 hover:underline font-medium border border-border/60"
-        >
-          Consumer: <strong>1915</strong>
-        </a>
-        <a
-          href="tel:1091"
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted text-foreground/80 hover:underline font-medium border border-border/60"
-        >
-          Women: <strong>1091</strong>
-        </a>
+      <div className="space-y-4">
+        <BackLink href="/rights">All situations</BackLink>
+        <PageHeader title={scenario.name} description={scenario.blurb} />
       </div>
 
-      {/* 3. Global Scenario Search & Quick Question Chips */}
-      <div className="space-y-2.5">
-        <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-3 text-muted-foreground pointer-events-none" />
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search a situation, e.g. bail, phone search, deposit refund"
-            className="h-10 pl-9 pr-8 text-xs sm:text-sm bg-card border-border rounded-xl shadow-xs"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-3 text-muted-foreground hover:text-foreground text-xs"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-
-        {/* Quick Suggestion Chips */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs scrollbar-none scroll-fade-x">
-          <span className="text-muted-foreground font-medium shrink-0">Common situations:</span>
-          {SUGGESTED_CHIPS.map((chip) => (
-            <button
-              key={chip.query}
-              onClick={() => setSearchQuery(chip.query)}
-              className={`px-2.5 py-0.5 rounded-full border transition-colors shrink-0 ${
-                searchQuery.toLowerCase() === chip.query.toLowerCase()
-                  ? "bg-forest-800 text-white dark:bg-gold-500 dark:text-forest-950 font-bold border-transparent"
-                  : "bg-muted/50 border-border text-muted-foreground hover:text-foreground hover:border-forest-500/50"
-              }`}
-            >
-              {chip.label}
-            </button>
+      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-muted/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm font-medium text-foreground">Need help now?</span>
+          {helplines.map((h) => (
+            <Button key={h.number} asChild variant="outline" size="sm" className="gap-1.5 bg-background">
+              <a href={`tel:${h.number.replace(/-/g, "")}`}>
+                <Phone className="h-3.5 w-3.5" aria-hidden="true" />
+                {h.label} {h.number}
+              </a>
+            </Button>
           ))}
         </div>
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-muted-foreground">Show scripts in</span>
+          <div role="group" aria-label="Script language" className="flex items-center gap-1 rounded-xl border border-border bg-background p-1">
+            {(["en", "hi"] as const).map((lang) => (
+              <button
+                key={lang}
+                type="button"
+                aria-pressed={scriptLanguage === lang}
+                onClick={() => setScriptLanguage(lang)}
+                className={`rounded-lg px-3 py-1 font-medium transition-colors ${
+                  scriptLanguage === lang
+                    ? "bg-forest-800 text-white dark:bg-gold-500 dark:text-forest-950"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {lang === "en" ? "English" : "हिंदी"}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* 4. Topic Selector Strip */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none scroll-fade-x text-sm border-b border-border/60">
-        {searchResults !== null && (
-          <button
-            onClick={() => setSearchQuery("")}
-            className="px-3 py-2 rounded-t-lg font-bold text-forest-700 dark:text-gold-400 bg-forest-50 dark:bg-forest-900/30 border-b-2 border-forest-600 dark:border-gold-400 flex items-center gap-1.5 shrink-0"
-          >
-            <Search className="w-3.5 h-3.5" />
-            <span>Search Results ({searchResults.length})</span>
-            <X className="w-3 h-3 ml-1 opacity-70" />
-          </button>
-        )}
-
-        {SCENARIOS.map((scenario) => {
-          const Icon = scenario.icon;
-          const isActive = searchResults === null && activeScenarioId === scenario.id;
+      <Accordion key={scenario.id} type="single" collapsible defaultValue={openStep} className="space-y-3">
+        {scenario.steps.map((step) => {
+          const script = scriptLanguage === "hi" ? step.hindiScript : step.script;
+          const copyKey = `${scenario.id}-${step.number}`;
           return (
-            <button
-              key={scenario.id}
-              onClick={() => {
-                setActiveScenarioId(scenario.id);
-                setSearchQuery("");
-              }}
-              className={`px-3 py-2 rounded-t-lg font-medium transition-colors flex items-center gap-1.5 shrink-0 border-b-2 ${
-                isActive
-                  ? "border-forest-800 text-foreground font-semibold dark:border-gold-400"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
+            <AccordionItem
+              key={step.number}
+              value={String(step.number)}
+              className="rounded-2xl border border-border bg-card px-4 transition-colors data-[state=open]:border-forest-500/40 sm:px-6"
             >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{scenario.name}</span>
-            </button>
-          );
-        })}
-      </div>
+              <AccordionTrigger className="gap-4 py-5 text-left hover:no-underline">
+                <span className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-forest-700 text-sm font-bold text-foreground dark:border-gold-400">
+                    {step.number}
+                  </span>
+                  <span className="font-display text-lg font-semibold leading-snug text-foreground">{step.title}</span>
+                </span>
+              </AccordionTrigger>
 
-      {/* 5. The Clean Vertical Step Timeline */}
-      <div className="relative pl-6 sm:pl-8 space-y-6 pt-2 before:absolute before:left-3 before:top-4 before:bottom-4 before:w-0.5 before:bg-border/60">
-        {searchResults !== null ? (
-          // Global Search Results View
-          searchResults.length === 0 ? (
-            <div className="py-12 text-center space-y-2 border border-dashed rounded-2xl p-6">
-              <ShieldAlert className="w-8 h-8 text-muted-foreground/40 mx-auto" />
-              <p className="text-xs sm:text-sm font-semibold text-foreground">
-                No statutory steps matched "{searchQuery}"
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Try searching for a different keyword or tap one of the common situation chips above.
-              </p>
-            </div>
-          ) : (
-            searchResults.map(({ scenario, step }, idx) => (
-              <div key={`${scenario.id}-${step.number}`} className="relative space-y-3">
-                {/* Node Circle */}
-                <div className="absolute -left-6 sm:-left-8 top-0.5 w-6 h-6 rounded-full bg-card border-2 border-forest-700 dark:border-gold-400 flex items-center justify-center text-[11px] font-bold text-foreground font-mono shadow-xs">
-                  {idx + 1}
-                </div>
-
-                {/* Heading & Badges */}
-                <div className="space-y-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border">
-                      {scenario.name}
-                    </span>
-                    <h3 className="font-bold text-base text-foreground font-heading">
-                      {step.title}
-                    </h3>
-                    {step.citation ? (
-                      <button
-                        onClick={() =>
-                          setSelectedCitation({
-                            act: step.citation!.act,
-                            section: step.citation!.section,
-                          })
-                        }
-                        className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-forest-100 dark:bg-forest-900/60 text-forest-800 dark:text-gold-400 font-semibold border border-forest-500/30 hover:border-forest-500 hover:bg-forest-200/60 dark:hover:bg-forest-800/80 transition-all flex items-center gap-1 cursor-pointer group"
-                        title="Click to view full Bare Act text & Supreme Court precedents"
-                      >
-                        <Scale className="w-3 h-3 text-gold-500 group-hover:scale-110 transition-transform" />
-                        <span>{step.section}</span>
-                        <ExternalLink className="w-2.5 h-2.5 opacity-60" />
-                      </button>
-                    ) : (
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground font-medium border border-border/50">
-                        {step.section}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-muted-foreground">{step.lawName}</p>
-                </div>
-
-                {/* Spoken Citizen Script */}
-                <div className="p-3.5 rounded-xl bg-muted/40 border border-border/60 space-y-1.5">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="font-semibold text-foreground/80 uppercase tracking-wide text-[10px]">
-                      {scriptLanguage === "hi" ? "आपको क्या बोलना चाहिए:" : "What You Should Say:"}
-                    </span>
-                    <button
-                      onClick={() =>
-                        handleCopy(
-                          scriptLanguage === "hi" ? step.hindiScript : step.script,
-                          `search-${idx}`
-                        )
-                      }
-                      className="text-[11px] text-forest-800 dark:text-gold-400 hover:underline flex items-center gap-1 font-medium"
+              <AccordionContent className="space-y-6 pb-6 pt-1">
+                {/* 1. What to say */}
+                <div className="space-y-3 rounded-2xl bg-forest-100/70 p-4 dark:bg-forest-800/50 sm:p-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-foreground">
+                      {scriptLanguage === "hi" ? "यह कहें" : "Say this"}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCopy(script, copyKey)}
+                      className="gap-1.5 bg-background"
                     >
-                      {copiedScript === `search-${idx}` ? (
+                      {copiedKey === copyKey ? (
                         <>
-                          <Check className="w-3 h-3 text-emerald-500" />
-                          <span>Copied</span>
+                          <Check className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+                          Copied
                         </>
                       ) : (
                         <>
-                          <Copy className="w-3 h-3" />
-                          <span>Copy</span>
+                          <Copy className="h-4 w-4" aria-hidden="true" />
+                          Copy
                         </>
                       )}
-                    </button>
+                    </Button>
                   </div>
-                  <p className="text-xs text-foreground italic leading-relaxed">
-                    "{scriptLanguage === "hi" ? step.hindiScript : step.script}"
+                  <p lang={scriptLanguage === "hi" ? "hi" : "en"} className="text-base leading-relaxed text-foreground">
+                    “{script}”
                   </p>
                 </div>
 
-                {/* Rights and Limitations */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-1">
-                  <div className="space-y-1.5">
-                    <p className="font-semibold text-emerald-700 dark:text-emerald-400 text-[11px] uppercase tracking-wider">
-                      Your Rights:
-                    </p>
-                    <ul className="space-y-1.5 text-muted-foreground leading-relaxed">
+                {/* 2. Can / can't */}
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-2.5">
+                    <h3 className="font-display text-base font-semibold text-emerald-800 dark:text-emerald-400">You can</h3>
+                    <ul className="space-y-2.5 text-sm leading-relaxed text-foreground/85">
                       {step.rights.map((r, i) => (
-                        <li key={i} className="flex items-start gap-1.5">
-                          <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0">
-                            ✓
-                          </span>
+                        <li key={i} className="flex items-start gap-2.5">
+                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
                           <span>{r}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
-
-                  <div className="space-y-1.5">
-                    <p className="font-semibold text-rose-600 dark:text-rose-400 text-[11px] uppercase tracking-wider">
-                      Authority Prohibitions:
-                    </p>
-                    <ul className="space-y-1.5 text-muted-foreground leading-relaxed">
+                  <div className="space-y-2.5">
+                    <h3 className="font-display text-base font-semibold text-rose-800 dark:text-rose-400">They can’t</h3>
+                    <ul className="space-y-2.5 text-sm leading-relaxed text-foreground/85">
                       {step.limits.map((l, i) => (
-                        <li key={i} className="flex items-start gap-1.5">
-                          <span className="text-rose-500 font-bold shrink-0">✕</span>
+                        <li key={i} className="flex items-start gap-2.5">
+                          <X className="mt-0.5 h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" aria-hidden="true" />
                           <span>{l}</span>
                         </li>
                       ))}
@@ -769,206 +746,67 @@ export default function RightsVisualizerPage() {
                   </div>
                 </div>
 
-                {/* Ask AI & Bare Act Inspector Triggers */}
-                <div className="pt-1 flex items-center justify-between">
-                  <button
-                    onClick={() =>
-                      openConsultation({
-                        title: `${scenario.name} • ${step.title}`,
-                        subtitle: step.section,
-                        prompt: `Under ${step.section} (${step.lawName}), what are my legal rights and authority limits during "${step.title}"? What concrete safeguards protect me if an officer or authority breaches this statutory procedure?`,
-                        act: step.section,
-                        section: step.section,
-                      })
-                    }
-                    className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-forest-700 dark:text-gold-400 hover:underline cursor-pointer group"
-                  >
-                    <Sparkles className="w-3 h-3 text-gold-500 group-hover:rotate-12 transition-transform" />
-                    <span>Ask AI about this step</span>
-                    <ArrowUpRight className="w-3 h-3" />
-                  </button>
-
-                  {step.citation && (
-                    <button
-                      onClick={() =>
-                        setSelectedCitation({
-                          act: step.citation!.act,
-                          section: step.citation!.section,
-                        })
-                      }
-                      className="text-[11px] text-muted-foreground hover:text-foreground flex items-center gap-1"
-                    >
-                      <Scale className="w-3 h-3 text-gold-500" />
-                      <span>Read Full Bare Act Text</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))
-          )
-        ) : (
-          // Active Scenario Steps View
-          currentScenario.steps.map((step) => (
-            <div key={step.number} className="relative space-y-3">
-              {/* Node Circle */}
-              <div className="absolute -left-6 sm:-left-8 top-0.5 w-6 h-6 rounded-full bg-card border-2 border-forest-700 dark:border-gold-400 flex items-center justify-center text-[11px] font-bold text-foreground font-mono shadow-xs">
-                {step.number}
-              </div>
-
-              {/* Step Heading & Statutory Section */}
-              <div className="space-y-0.5">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-bold text-base text-foreground font-heading">
-                    {step.title}
-                  </h3>
-                  {step.citation ? (
-                    <button
-                      onClick={() =>
-                        setSelectedCitation({
-                          act: step.citation!.act,
-                          section: step.citation!.section,
-                        })
-                      }
-                      className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-forest-100 dark:bg-forest-900/60 text-forest-800 dark:text-gold-400 font-semibold border border-forest-500/30 hover:border-forest-500 hover:bg-forest-200/60 dark:hover:bg-forest-800/80 transition-all flex items-center gap-1 cursor-pointer group"
-                      title="Click to view full Bare Act text & Supreme Court precedents"
-                    >
-                      <Scale className="w-3 h-3 text-gold-500 group-hover:scale-110 transition-transform" />
-                      <span>{step.section}</span>
-                      <ExternalLink className="w-2.5 h-2.5 opacity-60" />
-                    </button>
-                  ) : (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground font-medium border border-border/50">
-                      {step.section}
-                    </span>
-                  )}
-                </div>
-                <p className="text-[11px] text-muted-foreground">{step.lawName}</p>
-              </div>
-
-              {/* Spoken Citizen Script */}
-              <div className="p-3.5 rounded-xl bg-muted/40 border border-border/60 space-y-1.5">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="font-semibold text-foreground/80 uppercase tracking-wide text-[10px]">
-                    {scriptLanguage === "hi" ? "आपको क्या बोलना चाहिए:" : "What You Should Say:"}
-                  </span>
-                  <button
-                    onClick={() =>
-                      handleCopy(
-                        scriptLanguage === "hi" ? step.hindiScript : step.script,
-                        `step-${step.number}`
-                      )
-                    }
-                    className="text-[11px] text-forest-800 dark:text-gold-400 hover:underline flex items-center gap-1 font-medium"
-                  >
-                    {copiedScript === `step-${step.number}` ? (
-                      <>
-                        <Check className="w-3 h-3 text-emerald-500" />
-                        <span>Copied</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3 h-3" />
-                        <span>Copy</span>
-                      </>
+                {/* 3. The law (kept out of the way) */}
+                <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-medium text-foreground">The law:</span> {step.section}, {step.lawName}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {step.citation && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5"
+                        onClick={() =>
+                          setSelectedCitation({ act: step.citation!.act, section: step.citation!.section })
+                        }
+                      >
+                        <Scale className="h-4 w-4 text-gold-600" aria-hidden="true" />
+                        Read the law
+                      </Button>
                     )}
-                  </button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() =>
+                        openConsultation({
+                          title: `${scenario.name} • ${step.title}`,
+                          subtitle: step.section,
+                          prompt: `Under ${step.section} (${step.lawName}), what are my legal rights and authority limits during "${step.title}"? What concrete safeguards protect me if an officer or authority breaches this statutory procedure?`,
+                          act: step.section,
+                          section: step.section,
+                        })
+                      }
+                    >
+                      <Sparkles className="h-4 w-4 text-gold-600" aria-hidden="true" />
+                      Ask AI about this
+                    </Button>
+                  </div>
                 </div>
-                <p className="text-xs text-foreground italic leading-relaxed">
-                  "{scriptLanguage === "hi" ? step.hindiScript : step.script}"
-                </p>
-              </div>
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
 
-              {/* Rights and Limitations */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-1">
-                <div className="space-y-1.5">
-                  <p className="font-semibold text-emerald-700 dark:text-emerald-400 text-[11px] uppercase tracking-wider">
-                    Your Rights:
-                  </p>
-                  <ul className="space-y-1.5 text-muted-foreground leading-relaxed">
-                    {step.rights.map((r, i) => (
-                      <li key={i} className="flex items-start gap-1.5">
-                        <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0">
-                          ✓
-                        </span>
-                        <span>{r}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+      {footer}
 
-                <div className="space-y-1.5">
-                  <p className="font-semibold text-rose-600 dark:text-rose-400 text-[11px] uppercase tracking-wider">
-                    Authority Prohibitions:
-                  </p>
-                  <ul className="space-y-1.5 text-muted-foreground leading-relaxed">
-                    {step.limits.map((l, i) => (
-                      <li key={i} className="flex items-start gap-1.5">
-                        <span className="text-rose-500 font-bold shrink-0">✕</span>
-                        <span>{l}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Ask AI & Bare Act Inspector Triggers */}
-              <div className="pt-1 flex items-center justify-between">
-                <button
-                  onClick={() =>
-                    openConsultation({
-                      title: `${currentScenario.name} • ${step.title}`,
-                      subtitle: step.section,
-                      prompt: `Under ${step.section} (${step.lawName}), what are my legal rights and authority limits during "${step.title}"? What concrete safeguards protect me if an officer or authority breaches this statutory procedure?`,
-                      act: step.section,
-                      section: step.section,
-                    })
-                  }
-                  className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-forest-700 dark:text-gold-400 hover:underline cursor-pointer group"
-                >
-                  <Sparkles className="w-3 h-3 text-gold-500 group-hover:rotate-12 transition-transform" />
-                  <span>Ask AI about this step</span>
-                  <ArrowUpRight className="w-3 h-3" />
-                </button>
-
-                {step.citation && (
-                  <button
-                    onClick={() =>
-                      setSelectedCitation({
-                        act: step.citation!.act,
-                        section: step.citation!.section,
-                      })
-                    }
-                    className="text-[11px] text-muted-foreground hover:text-foreground flex items-center gap-1"
-                  >
-                    <Scale className="w-3 h-3 text-gold-500" />
-                    <span>Read Bare Act Text</span>
-                  </button>
-                )}
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* 6. Minimal DLSA Help Footer Note */}
-      <div className="border-t border-border/60 pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-muted-foreground">
-        <span>
-          Entitled to free legal aid? Women, undertrials, and low-income citizens receive 100% free legal representation under Sec 12 LSAA.
-        </span>
-        <Link
-          href="/help"
-          className="font-semibold text-foreground hover:underline shrink-0 flex items-center gap-1"
-        >
-          <span>Find DLSA Clinics →</span>
-        </Link>
-      </div>
-
-      {/* 7. Mounted Interactive IndiaCode Bare Act Citation Sheet */}
       <CitationSheet
         citation={selectedCitation}
         isOpen={!!selectedCitation}
         onClose={() => setSelectedCitation(null)}
       />
     </PageShell>
+  );
+}
+
+export default function RightsVisualizerPage() {
+  return (
+    <Suspense fallback={<PageShell><div className="h-64 animate-pulse rounded-2xl border border-border bg-card/60 motion-reduce:animate-none" aria-label="Loading" /></PageShell>}>
+      <RightsPageContent />
+    </Suspense>
   );
 }

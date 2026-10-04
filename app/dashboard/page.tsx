@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { Suspense, useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
 import {
   Gavel,
@@ -125,8 +126,12 @@ const DEMO_CASES: TrackedCaseDTO[] = [
 
 type FilterTab = "all" | "active" | "upcoming" | "arguments" | "closed";
 
-export default function DashboardPage() {
+function DashboardPageContent() {
   const { data: session, status: authStatus } = useSession();
+  const searchParams = useSearchParams();
+  const matterParam = searchParams.get("matterId") || "";
+  const addFromUrl = searchParams.get("add") === "1";
+  const openedAddFromUrl = useRef(false);
 
   const [cases, setCases] = useState<TrackedCaseDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -163,7 +168,7 @@ export default function DashboardPage() {
   const [judgeInput, setJudgeInput] = useState("");
   const [notesInput, setNotesInput] = useState("");
   const [matters, setMatters] = useState<Array<{ id: string; title: string; status: string }>>([]);
-  const [matterIdInput, setMatterIdInput] = useState("");
+  const [matterIdInput, setMatterIdInput] = useState(matterParam);
 
   // Live CNR detection from search input
   const detectedCnrInSearch = useMemo(() => {
@@ -233,6 +238,13 @@ export default function DashboardPage() {
       .then((data) => data.success && setMatters(data.matters || []))
       .catch(() => {});
   }, [authStatus]);
+
+  // Arriving from a matter with ?add=1 opens the "Add case" form with that matter already chosen.
+  useEffect(() => {
+    if (!addFromUrl || openedAddFromUrl.current || authStatus !== "authenticated") return;
+    openedAddFromUrl.current = true;
+    setIsAddModalOpen(true);
+  }, [addFromUrl, authStatus]);
 
   // Quick Action: Fetch Court Order
   const handleQuickFetchOrder = async (targetCnr?: string) => {
@@ -1225,5 +1237,19 @@ export default function DashboardPage() {
         </DialogContent>
       </Dialog>
     </PageShell>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <PageShell>
+          <div className="h-64 animate-pulse rounded-2xl border border-border bg-card/60 motion-reduce:animate-none" aria-label="Loading" />
+        </PageShell>
+      }
+    >
+      <DashboardPageContent />
+    </Suspense>
   );
 }

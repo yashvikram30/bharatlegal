@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import dbConnect from "@/lib/dbConnect";
-import ConversationModel, { DEFAULT_CONVERSATION_TITLE } from "@/model/Conversation";
+import ConversationModel, { DEFAULT_CONVERSATION_TITLE, REGULAR_CHATS } from "@/model/Conversation";
+import { MatterLinkError, resolveOwnedMatterId } from "@/lib/matter-links";
 
 export const runtime = "nodejs";
 
@@ -20,13 +21,14 @@ export async function GET() {
     }
 
     await dbConnect();
-    const conversations = await ConversationModel.find({ userId })
+    const conversations = await ConversationModel.find({ userId, ...REGULAR_CHATS })
       .sort({ updatedAt: -1 })
       .lean();
 
     const formatted = conversations.map((c: any) => ({
       id: c._id.toString(),
       title: c.title,
+      matterId: c.matterId ? c.matterId.toString() : null,
       createdAt: c.createdAt,
       updatedAt: c.updatedAt,
     }));
@@ -62,9 +64,11 @@ export async function POST(req: NextRequest) {
     const title = typeof body.title === "string" && body.title.trim() ? body.title.trim() : DEFAULT_CONVERSATION_TITLE;
 
     await dbConnect();
+    const matterId = await resolveOwnedMatterId(userId, body.matterId);
     const conversation = await ConversationModel.create({
       userId,
       title,
+      matterId,
     });
 
     return NextResponse.json({
@@ -72,11 +76,15 @@ export async function POST(req: NextRequest) {
       conversation: {
         id: conversation._id.toString(),
         title: conversation.title,
+        matterId: conversation.matterId ? conversation.matterId.toString() : null,
         createdAt: conversation.createdAt,
         updatedAt: conversation.updatedAt,
       },
     });
   } catch (error: any) {
+    if (error instanceof MatterLinkError) {
+      return NextResponse.json({ success: false, error: error.message }, { status: error.status });
+    }
     console.error("[Conversations POST Error]:", error);
     return NextResponse.json(
       { success: false, error: error.message || "Failed to create conversation" },

@@ -29,6 +29,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 export interface ConversationItem {
   id: string;
   title: string;
+  matterId?: string | null;
   createdAt: string | Date;
   updatedAt: string | Date;
 }

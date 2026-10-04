@@ -6,6 +6,10 @@ import dbConnect from "@/lib/dbConnect";
 import MatterModel from "@/model/Matter";
 import DocumentAnalysisModel from "@/model/DocumentAnalysis";
 import CaseModel from "@/model/Case";
+import ConversationModel, { REGULAR_CHATS } from "@/model/Conversation";
+import LegalDraftModel from "@/model/LegalDraft";
+import MessageModel from "@/model/Message";
+import { LINK_MODELS, LINK_TYPES } from "@/lib/matter-links";
 import { formatMatter } from "@/lib/matters";
 
 export const runtime = "nodejs";
@@ -28,11 +32,30 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
     .lean();
   const cases = await CaseModel.find({ userId: matter.userId, matterId: matter._id })
     .sort({ nextHearingDate: 1, updatedAt: -1 })
-    .select("caseNumber title court stage status nextHearingDate")
+    .select("caseNumber title court stage status nextHearingDate updatedAt")
+    .lean();
+  const chats = await ConversationModel.find({ userId: matter.userId, matterId: matter._id, ...REGULAR_CHATS })
+    .sort({ updatedAt: -1 })
+    .select("title updatedAt")
+    .lean();
+  const drafts = await LegalDraftModel.find({ userId: matter.userId, matterId: matter._id })
+    .sort({ updatedAt: -1 })
+    .select("title draftType updatedAt")
     .lean();
   return NextResponse.json({
     success: true,
     matter: formatMatter(matter),
+    chats: chats.map((chat: any) => ({
+      id: chat._id.toString(),
+      title: chat.title,
+      updatedAt: chat.updatedAt,
+    })),
+    drafts: drafts.map((draft: any) => ({
+      id: draft._id.toString(),
+      title: draft.title,
+      draftType: draft.draftType,
+      updatedAt: draft.updatedAt,
+    })),
     documents: documents.map((document: any) => ({
       id: document._id.toString(),
       fileName: document.fileName,
@@ -49,6 +72,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
       stage: caseItem.stage,
       status: caseItem.status,
       nextHearing: caseItem.nextHearingDate ? new Date(caseItem.nextHearingDate).toISOString() : null,
+      updatedAt: caseItem.updatedAt,
     })),
   });
 }
@@ -75,5 +99,29 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ success: true, matter: formatMatter(matter) });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message || "Could not update Matter" }, { status: 500 });
+  }
+}
+
+/** Deleting a matter never deletes what's inside it: chats, documents, drafts and cases are just detached. */
+export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params;
+    const matter = await findOwnedMatter(id);
+    if (!matter) return NextResponse.json({ success: false, error: "Matter not found" }, { status: 404 });
+    // The assistant's private thread only makes sense inside its matter, so it goes with it.
+    const threads = await ConversationModel.find({ userId: matter.userId, matterId: matter._id, kind: "matter-assistant" }).select("_id").lean();
+    if (threads.length) {
+      await MessageModel.deleteMany({ conversationId: { $in: threads.map((t: any) => t._id) } });
+      await ConversationModel.deleteMany({ _id: { $in: threads.map((t: any) => t._id) } });
+    }
+    await Promise.all(
+      LINK_TYPES.map((type) =>
+        LINK_MODELS[type].updateMany({ userId: matter.userId, matterId: matter._id }, { $set: { matterId: null } })
+      )
+    );
+    await matter.deleteOne();
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message || "Could not delete Matter" }, { status: 500 });
   }
 }
